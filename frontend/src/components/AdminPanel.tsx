@@ -283,10 +283,12 @@ export function AdminPanel() {
     try {
       setTurnosLoading(true);
       // Get Monday of the week containing the selected date
-      const fecha = new Date(asignacionFecha);
+      const fecha = new Date(asignacionFecha + 'T00:00:00');
       const dia = fecha.getDay();
-      const diff = fecha.getDate() - dia + (dia === 0 ? -6 : 1);
-      const lunes = new Date(fecha.setDate(diff));
+      // Calculate days to subtract to get to Monday (1 = Monday, 0 = Sunday)
+      const diasAlunes = dia === 0 ? 6 : dia - 1;
+      const lunes = new Date(fecha);
+      lunes.setDate(lunes.getDate() - diasAlunes);
       const lunesStr = lunes.toISOString().split('T')[0];
 
       await client.post(`/admin/turnos/generar-semana?semana=${lunesStr}`);
