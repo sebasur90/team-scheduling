@@ -1,0 +1,15 @@
+{
+  "projects": {
+    "default": "almuerzos-dev"
+  },
+  "emulators": {
+    "firestore": {
+      "port": 8080,
+      "host": "0.0.0.0"
+    },
+    "ui": {
+      "enabled": true,
+      "port": 4000
+    }
+  }
+}

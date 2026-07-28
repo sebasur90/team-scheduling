@@ -1,0 +1,106 @@
+<h2>Vista del calendario del día — ¿qué layout preferís?</h2>
+<p class="subtitle">Datos de ejemplo: 13 colaboradores, miércoles (hay tarea de Municipalidad), un Orientador del día.</p>
+
+<style>
+  .badge { display:inline-block; padding:2px 8px; border-radius:10px; font-size:11px; font-weight:600; margin-right:4px; }
+  .badge-comercial { background:#dbeafe; color:#1e40af; }
+  .badge-operativo { background:#dcfce7; color:#166534; }
+  .badge-desafectado { background:#e5e7eb; color:#6b7280; }
+  .badge-especial { background:#fef3c7; color:#92400e; }
+  .persona-chip { display:flex; align-items:center; gap:6px; padding:6px 8px; border:1px solid var(--border,#333); border-radius:8px; margin-bottom:6px; font-size:13px; }
+  .franja-col { flex:1; min-width:150px; border:1px solid var(--border,#333); border-radius:10px; padding:10px; }
+  .franja-head { font-weight:700; font-size:13px; margin-bottom:8px; padding-bottom:6px; border-bottom:1px solid var(--border,#333); }
+  .cobertura-ok { color:#16a34a; font-size:11px; }
+  table.grid-table { width:100%; border-collapse:collapse; font-size:13px; }
+  table.grid-table th, table.grid-table td { border:1px solid var(--border,#333); padding:6px 8px; text-align:center; }
+  table.grid-table td.on { background:#dbeafe; }
+  .timeline-wrap { position:relative; height:170px; border:1px solid var(--border,#333); border-radius:10px; padding:10px; }
+  .timeline-ruler { position:relative; height:20px; border-bottom:1px solid var(--border,#333); margin-bottom:10px; font-size:11px; }
+  .timeline-tick { position:absolute; top:0; }
+  .timeline-bar { position:absolute; height:18px; border-radius:4px; font-size:10px; color:#1e293b; display:flex; align-items:center; padding-left:4px; overflow:hidden; white-space:nowrap; }
+  .banner { background:#fef3c7; color:#92400e; padding:8px 12px; border-radius:8px; font-size:13px; margin-bottom:10px; }
+</style>
+
+<div class="cards">
+
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="padding:12px;">
+        <div class="banner">🧭 Orientador: <b>Marcos</b> (10-15) &nbsp;|&nbsp; 🏛️ Municipalidad: <b>Lucía</b> (11-13, almuerzo después de 13:00)</div>
+        <div style="display:flex; gap:8px; overflow-x:auto;">
+          <div class="franja-col">
+            <div class="franja-head">12:00–12:45</div>
+            <div class="persona-chip">Juan <span class="badge badge-comercial">COM</span></div>
+            <div class="persona-chip">Ana <span class="badge badge-operativo">OPE</span></div>
+            <div class="cobertura-ok">✓ cobertura OK</div>
+          </div>
+          <div class="franja-col">
+            <div class="franja-head">12:30–13:15</div>
+            <div class="persona-chip">Pedro <span class="badge badge-operativo">OPE</span></div>
+            <div class="persona-chip">Sol <span class="badge badge-desafectado">BAJA</span></div>
+            <div class="cobertura-ok">✓ cobertura OK</div>
+          </div>
+          <div class="franja-col">
+            <div class="franja-head">13:00–13:45</div>
+            <div class="persona-chip">Diego <span class="badge badge-comercial">COM</span></div>
+            <div class="cobertura-ok">✓ cobertura OK</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — Columnas por franja</h3>
+      <p>Cada franja horaria es una columna con la lista de quién sale. Rápido para ver "quién falta ahora".</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="padding:12px;">
+        <div class="banner">🧭 Orientador: <b>Marcos</b> &nbsp;|&nbsp; 🏛️ Municipalidad: <b>Lucía</b></div>
+        <div style="overflow-x:auto;">
+        <table class="grid-table">
+          <tr><th>Colaborador</th><th>Sector</th><th>12:00</th><th>12:30</th><th>13:00</th><th>13:30</th><th>14:00</th></tr>
+          <tr><td>Juan</td><td><span class="badge badge-comercial">COM</span></td><td class="on">●</td><td></td><td></td><td></td><td></td></tr>
+          <tr><td>Ana</td><td><span class="badge badge-operativo">OPE</span></td><td class="on">●</td><td></td><td></td><td></td><td></td></tr>
+          <tr><td>Pedro</td><td><span class="badge badge-operativo">OPE</span></td><td></td><td class="on">●</td><td></td><td></td><td></td></tr>
+          <tr><td>Lucía</td><td><span class="badge badge-comercial">COM</span></td><td></td><td></td><td class="on">●</td><td></td><td></td></tr>
+          <tr><td>Marcos</td><td><span class="badge badge-especial">ORIENT.</span></td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+        </table>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Grilla persona × franja</h3>
+      <p>Filas = personas, columnas = franjas. Bueno para chequear de un vistazo el turno de una persona puntual.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="padding:12px;">
+        <div class="banner">🧭 Orientador: <b>Marcos</b> &nbsp;|&nbsp; 🏛️ Municipalidad: <b>Lucía</b></div>
+        <div class="timeline-wrap">
+          <div class="timeline-ruler">
+            <span class="timeline-tick" style="left:0%">12:00</span>
+            <span class="timeline-tick" style="left:33%">13:00</span>
+            <span class="timeline-tick" style="left:66%">14:00</span>
+            <span class="timeline-tick" style="left:97%">14:45</span>
+          </div>
+          <div class="timeline-bar" style="left:0%; width:16%; top:30px; background:#bfdbfe;">Juan</div>
+          <div class="timeline-bar" style="left:0%; width:16%; top:52px; background:#bbf7d0;">Ana</div>
+          <div class="timeline-bar" style="left:10%; width:16%; top:74px; background:#bbf7d0;">Pedro</div>
+          <div class="timeline-bar" style="left:33%; width:16%; top:30px; background:#fde68a;">Lucía (Muni)</div>
+          <div class="timeline-bar" style="left:20%; width:16%; top:96px; background:#e5e7eb;">Sol (baja)</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Línea de tiempo horizontal</h3>
+      <p>Barras posicionadas según su horario real, se ve el solapamiento de 15 min entre grupos. Más visual, requiere más espacio.</p>
+    </div>
+  </div>
+
+</div>
+
+<p class="subtitle">Podés combinar ideas de más de una opción — contámelo en la terminal.</p>

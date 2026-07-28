@@ -1,0 +1,131 @@
+.barometro {
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  background: #f5f5f5;
+  border-left: 4px solid #999;
+}
+
+.barometro--verde {
+  border-left-color: #4caf50;
+  background: #e8f5e9;
+}
+
+.barometro--amarillo {
+  border-left-color: #ff9800;
+  background: #fff3e0;
+}
+
+.barometro--rojo {
+  border-left-color: #f44336;
+  background: #ffebee;
+}
+
+.barometro--loading,
+.barometro--error,
+.barometro--empty {
+  color: #666;
+  padding: 1rem;
+}
+
+.barometro__circle {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.barometro__indicator {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #999;
+  position: relative;
+}
+
+.barometro--verde .barometro__indicator {
+  background: #4caf50;
+  box-shadow: 0 0 8px rgba(76, 175, 80, 0.6);
+}
+
+.barometro--amarillo .barometro__indicator {
+  background: #ff9800;
+  box-shadow: 0 0 8px rgba(255, 152, 0, 0.6);
+}
+
+.barometro--rojo .barometro__indicator {
+  background: #f44336;
+  box-shadow: 0 0 8px rgba(244, 67, 54, 0.6);
+}
+
+.barometro__label {
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+.barometro__count {
+  margin-left: auto;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.barometro__franjas {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.5rem;
+}
+
+.franja {
+  padding: 0.75rem;
+  border-radius: 4px;
+  background: white;
+  border: 1px solid #ddd;
+  text-align: center;
+  font-size: 0.85rem;
+}
+
+.franja--ok {
+  border-color: #4caf50;
+  background: #f1f8f4;
+}
+
+.franja--riesgo {
+  border-color: #ff9800;
+  background: #fff9f2;
+}
+
+.franja--critico {
+  border-color: #f44336;
+  background: #ffedeb;
+}
+
+.franja__time {
+  font-weight: bold;
+  font-size: 0.8rem;
+  margin-bottom: 0.25rem;
+}
+
+.franja__status {
+  font-size: 1.2rem;
+  margin-bottom: 0.25rem;
+}
+
+.franja__coverage {
+  font-size: 0.75rem;
+  color: #666;
+}
+
+@media (max-width: 768px) {
+  .barometro__franjas {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .barometro__circle {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .barometro__count {
+    margin-left: 0;
+  }
+}

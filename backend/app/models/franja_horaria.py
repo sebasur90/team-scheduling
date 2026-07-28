@@ -1,0 +1,18 @@
+from datetime import time
+from sqlalchemy import Column, Time, Integer
+from sqlalchemy.orm import relationship
+from app.models.base import BaseModel
+
+
+class FranjaHoraria(BaseModel):
+    __tablename__ = "franja_horaria"
+
+    hora_inicio = Column(Time, nullable=False)
+    hora_fin = Column(Time, nullable=False)
+    orden = Column(Integer, nullable=False, unique=True)
+
+    turnos = relationship("TurnoAlmuerzo", back_populates="franja_horaria")
+    preferencias = relationship("PreferenciaDiaria", back_populates="franja_horaria_deseada")
+
+    def __repr__(self):
+        return f"<FranjaHoraria(orden={self.orden}, {self.hora_inicio}-{self.hora_fin})>"

@@ -1,0 +1,73 @@
+<h2>Tab "Colaboradores" — ¿Cómo mostrar la lista?</h2>
+<p class="subtitle">Dentro del tab Colaboradores del Panel Admin. ⭐ = mi recomendación</p>
+
+<div class="cards">
+
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="font-family:monospace;font-size:11px;background:#1a1a2e;color:#e0e0e0;border-radius:8px;padding:10px;text-align:left;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <span style="color:#a8b2d8;font-size:10px;">👥 Colaboradores (13)</span>
+          <span style="background:#e94560;color:white;padding:2px 8px;border-radius:3px;font-size:9px;">+ Nuevo</span>
+        </div>
+        <div style="background:#0f3460;border-radius:4px;overflow:hidden;">
+          <div style="display:grid;grid-template-columns:1fr 80px 60px 60px 50px;gap:4px;padding:4px 6px;background:#16213e;font-size:9px;color:#888;">
+            <span>Nombre</span><span>Sector</span><span>Rol</span><span>Estado</span><span></span>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 80px 60px 60px 50px;gap:4px;padding:4px 6px;font-size:9px;border-bottom:1px solid #16213e;">
+            <span>Ana García</span><span style="color:#64b5f6;">Comercial</span><span style="color:#e94560;">Admin</span><span style="color:#81c784;">Activo</span><span style="color:#888;">✏ 🗑</span>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 80px 60px 60px 50px;gap:4px;padding:4px 6px;font-size:9px;border-bottom:1px solid #16213e;">
+            <span>Luis Martínez</span><span style="color:#ffb74d;">Operativo</span><span style="color:#888;">Usuario</span><span style="color:#81c784;">Activo</span><span style="color:#888;">✏ 🗑</span>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 80px 60px 60px 50px;gap:4px;padding:4px 6px;font-size:9px;">
+            <span>María López</span><span style="color:#64b5f6;">Comercial</span><span style="color:#888;">Usuario</span><span style="color:#ef9a9a;">Desaf.</span><span style="color:#888;">✏ 🗑</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>⭐ A — Tabla con acciones inline (Recomendada)</h3>
+      <p>Lista compacta tipo tabla con columnas. Botones de editar/eliminar en cada fila. El botón "+ Nuevo" abre un modal o panel lateral. Mejor para 13 personas — se ve todo junto sin scroll.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="font-family:monospace;font-size:11px;background:#1a1a2e;color:#e0e0e0;border-radius:8px;padding:10px;text-align:left;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <span style="color:#a8b2d8;font-size:10px;">👥 Colaboradores</span>
+          <span style="background:#e94560;color:white;padding:2px 8px;border-radius:3px;font-size:9px;">+ Nuevo</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:5px;">
+          <div style="background:#0f3460;border-radius:4px;padding:6px 8px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div>
+                <div style="font-size:10px;font-weight:bold;">Ana García</div>
+                <div style="font-size:9px;color:#888;">ana@banco.com · Comercial · Admin</div>
+                <div style="font-size:9px;margin-top:2px;"><span style="background:#1b5e20;color:#81c784;padding:1px 4px;border-radius:2px;">Activo</span> <span style="background:#0d47a1;color:#64b5f6;padding:1px 4px;border-radius:2px;">Orientador</span></div>
+              </div>
+              <div style="color:#888;font-size:11px;">▼</div>
+            </div>
+          </div>
+          <div style="background:#16213e;border-radius:4px;padding:6px 8px;">
+            <div style="display:flex;justify-content:space-between;">
+              <div>
+                <div style="font-size:10px;font-weight:bold;">Luis Martínez</div>
+                <div style="font-size:9px;color:#888;">luis@banco.com · Operativo · Usuario</div>
+              </div>
+              <div style="color:#888;font-size:11px;">▼</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Cards expandibles</h3>
+      <p>Cada colaborador es una card que se expande al hacer click, mostrando todos los detalles y acciones. Más espacio por persona, útil para ver habilitaciones (orientador, gestión externa) de un vistazo.</p>
+    </div>
+  </div>
+
+</div>
+
+<p class="subtitle" style="margin-top:16px;">Recomiendo A — con 13 personas, la tabla compacta es más eficiente para el admin. Hacé click en tu elección.</p>
