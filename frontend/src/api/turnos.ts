@@ -30,4 +30,10 @@ export const turnosApi = {
     client.get<TurnoListResponse>(`/turnos?fecha=${fecha}`),
   updateAsignacion: (asignacionId: number, colaboradorId: number) =>
     client.patch(`/admin/turnos/asignaciones/${asignacionId}?colaborador_id=${colaboradorId}`),
+  createAsignacion: (turnoId: number, colaboradorId: number) =>
+    client.post<AsignacionResponse>(`/admin/turnos/${turnoId}/asignaciones`, { colaborador_id: colaboradorId }),
+  deleteAsignacion: (asignacionId: number) =>
+    client.delete(`/admin/turnos/asignaciones/${asignacionId}`),
+  deleteTurno: (turnoId: number) =>
+    client.delete(`/admin/turnos/${turnoId}`),
 }

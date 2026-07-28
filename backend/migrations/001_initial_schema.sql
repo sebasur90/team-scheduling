@@ -3,10 +3,10 @@ CREATE TABLE colaborador (
     id SERIAL PRIMARY KEY,
     nombre VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL UNIQUE,
-    sector VARCHAR(50) NOT NULL CHECK (sector IN ('comercial', 'operativo')),
+    sector VARCHAR(50) NOT NULL CHECK (sector IN ('tipo_a', 'tipo_b')),
     estado_atencion VARCHAR(50) NOT NULL DEFAULT 'activo' CHECK (estado_atencion IN ('activo', 'desafectado')),
-    habilitado_orientador BOOLEAN DEFAULT FALSE,
-    habilitado_gestion_externa BOOLEAN DEFAULT FALSE,
+    habilitado_tarea_especial_1 BOOLEAN DEFAULT FALSE,
+    habilitado_tarea_especial_2 BOOLEAN DEFAULT FALSE,
     rol VARCHAR(50) NOT NULL DEFAULT 'usuario' CHECK (rol IN ('admin', 'usuario')),
     puntaje_prioridad INTEGER DEFAULT 0,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
@@ -88,9 +88,9 @@ CREATE TABLE tarea_especial_tipo (
 );
 
 INSERT INTO tarea_especial_tipo (nombre, dia_semana_aplicable, hora_inicio, hora_fin) VALUES
-    ('orientador', ARRAY[0,1,2,3,4], '10:00', '15:00'),
-    ('municipalidad', ARRAY[2], '11:00', '13:00'),
-    ('gandulfo', ARRAY[3], '10:00', '13:00');
+    ('tarea_especial_1', ARRAY[0,1,2,3,4], '10:00', '15:00'),
+    ('tarea_especial_2', ARRAY[2], '11:00', '13:00'),
+    ('tarea_especial_3', ARRAY[3], '10:00', '13:00');
 
 -- Tarea especial asignacion table (daily instance)
 CREATE TABLE tarea_especial_asignacion (

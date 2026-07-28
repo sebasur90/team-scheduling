@@ -2,8 +2,8 @@ from enum import Enum
 
 
 class Sector(str, Enum):
-    COMERCIAL = "comercial"
-    OPERATIVO = "operativo"
+    TIPO_A = "tipo_a"
+    TIPO_B = "tipo_b"
 
 
 class EstadoAtencion(str, Enum):
@@ -43,9 +43,9 @@ class MotivosAusencia(str, Enum):
 
 
 class TipoConcesion(str, Enum):
-    ORIENTADOR = "orientador"
-    MUNICIPALIDAD = "municipalidad"
-    GANDULFO = "gandulfo"
+    TAREA_ESPECIAL_1 = "tarea_especial_1"
+    TAREA_ESPECIAL_2 = "tarea_especial_2"
+    TAREA_ESPECIAL_3 = "tarea_especial_3"
 
 
 class CanalNotificacion(str, Enum):

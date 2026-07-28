@@ -50,16 +50,16 @@ def test_franjas(db_session):
 
 @pytest.fixture
 def test_colaboradores(db_session):
-    """Create 13 test colaboradores (7 Comercial, 6 Operativo)"""
-    nombres_comercial = ["Juan", "Maria", "Carlos", "Ana", "Luis", "Sofia", "Pedro"]
-    nombres_operativo = ["Elena", "Jorge", "Rita", "Gabriel", "Martina", "Patricia"]
+    """Create 13 test colaboradores (7 Tipo-A, 6 Tipo-B)"""
+    nombres_tipo_a = ["Juan", "Maria", "Carlos", "Ana", "Luis", "Sofia", "Pedro"]
+    nombres_tipo_b = ["Elena", "Jorge", "Rita", "Gabriel", "Martina", "Patricia"]
 
     colabs = []
-    for i, nombre in enumerate(nombres_comercial):
+    for i, nombre in enumerate(nombres_tipo_a):
         colab = Colaborador(
             nombre=nombre,
-            email=f"{nombre.lower()}@bank.com",
-            sector="comercial",
+            email=f"{nombre.lower()}@example.com",
+            sector="tipo_a",
             estado_atencion="activo",
             rol="usuario",
             puntaje_prioridad=0,
@@ -67,11 +67,11 @@ def test_colaboradores(db_session):
         db_session.add(colab)
         colabs.append(colab)
 
-    for i, nombre in enumerate(nombres_operativo):
+    for i, nombre in enumerate(nombres_tipo_b):
         colab = Colaborador(
             nombre=nombre,
-            email=f"{nombre.lower()}@bank.com",
-            sector="operativo",
+            email=f"{nombre.lower()}@example.com",
+            sector="tipo_b",
             estado_atencion="activo",
             rol="usuario",
             puntaje_prioridad=0,
@@ -87,11 +87,11 @@ def test_colaboradores(db_session):
 def test_special_tasks(db_session):
     """Create the 3 special task types"""
     tasks = [
-        TareaEspecialTipo(nombre="orientador", dia_semana_aplicable=[0, 1, 2, 3, 4],
+        TareaEspecialTipo(nombre="tarea_especial_1", dia_semana_aplicable=[0, 1, 2, 3, 4],
                           hora_inicio=time(10, 0), hora_fin=time(15, 0)),
-        TareaEspecialTipo(nombre="municipalidad", dia_semana_aplicable=[2],
+        TareaEspecialTipo(nombre="tarea_especial_2", dia_semana_aplicable=[2],
                           hora_inicio=time(11, 0), hora_fin=time(13, 0)),
-        TareaEspecialTipo(nombre="gandulfo", dia_semana_aplicable=[3],
+        TareaEspecialTipo(nombre="tarea_especial_3", dia_semana_aplicable=[3],
                           hora_inicio=time(10, 0), hora_fin=time(13, 0)),
     ]
     for t in tasks:

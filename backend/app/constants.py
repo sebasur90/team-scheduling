@@ -12,23 +12,23 @@ FRANJAS_CONFIG: List[Tuple[time, time, int]] = [
 
 # Special tasks configuration
 SPECIAL_TASKS = {
-    "orientador": {
-        "nombre": "orientador",
+    "tarea_especial_1": {
+        "nombre": "tarea_especial_1",
         "dias_semana": [0, 1, 2, 3, 4],  # Monday-Friday
         "hora_inicio": time(10, 0),
         "hora_fin": time(15, 0),
         "cantidad": 1,
     },
-    "municipalidad": {
-        "nombre": "municipalidad",
+    "tarea_especial_2": {
+        "nombre": "tarea_especial_2",
         "dias_semana": [2],  # Wednesday
         "hora_inicio": time(11, 0),
         "hora_fin": time(13, 0),
         "cantidad": 1,
         "franjas_permitidas": [2, 3, 4],  # Franjas 3, 4, 5 (indices in FRANJAS_CONFIG)
     },
-    "gandulfo": {
-        "nombre": "gandulfo",
+    "tarea_especial_3": {
+        "nombre": "tarea_especial_3",
         "dias_semana": [3],  # Thursday
         "hora_inicio": time(10, 0),
         "hora_fin": time(13, 0),

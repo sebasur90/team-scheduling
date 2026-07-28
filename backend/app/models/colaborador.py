@@ -8,10 +8,10 @@ class Colaborador(BaseModel):
 
     nombre = Column(String(255), nullable=False)
     email = Column(String(255), nullable=False, unique=True, index=True)
-    sector = Column(String(50), nullable=False)  # 'comercial' or 'operativo'
+    sector = Column(String(50), nullable=False)  # 'tipo_a' or 'tipo_b'
     estado_atencion = Column(String(50), nullable=False, default="activo")  # 'activo' or 'desafectado'
-    habilitado_orientador = Column(Boolean, default=False)
-    habilitado_gestion_externa = Column(Boolean, default=False)
+    habilitado_tarea_especial_1 = Column(Boolean, default=False)
+    habilitado_tarea_especial_2 = Column(Boolean, default=False)
     rol = Column(String(50), nullable=False, default="usuario")  # 'admin' or 'usuario'
     puntaje_prioridad = Column(Integer, default=0)
     fcm_token = Column(String(512), nullable=True)

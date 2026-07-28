@@ -1,12 +1,12 @@
 # Gestión de Turnos de Almuerzo
 
-Sistema para organizar turnos de almuerzo y tareas externas de un equipo de 13 colaboradores en una sucursal bancaria.
+Sistema para organizar turnos de almuerzo y tareas externas de equipos de trabajo.
 
 ## Descripción
 
-Este es un sistema de asignación de turnos de almuerzo que garantiza la cobertura continua de la línea de atención al público. Implementa:
+Este es un sistema de asignación de turnos de almuerzo que garantiza la cobertura continua del equipo. Implementa:
 
-- **Motor de asignación inteligente** con cobertura mínima de 1 Comercial y 1 Operativo por franja
+- **Motor de asignación inteligente** con cobertura mínima de 1 Tipo-A y 1 Tipo-B por franja
 - **Sistema de prioridad por equidad** para resolver conflictos de cobertura
 - **Tareas especiales** (Orientador, Municipalidad, Gandulfo) con restricciones horarias
 - **Mercado de swaps** para intercambios de turnos entre colaboradores
@@ -255,7 +255,7 @@ pytest tests/ --cov=app --cov-report=html
 3. **Phase 2**: Rellenar personas sin franja asignada
 4. **Phase 3**: Validar cobertura mínima en todas las franjas
 
-**Cobertura Mínima**: Cada franja debe tener al menos 1 Comercial-activo y 1 Operativo-activo.
+**Cobertura Mínima**: Cada franja debe tener al menos 1 Tipo-A y 1 Tipo-B.
 
 **Prioridad**: Los colaboradores denegados en sus preferencias incrementan `puntaje_prioridad`. Empates exactos requieren resolución manual del admin.
 

@@ -1,9 +1,9 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useIncidencias, type IncidenciaData } from '../hooks/useIncidencias';
 import { useAuthContext } from '../contexts/AuthContext';
 import { colaboradoresApi, type ColaboradorCreate } from '../api/colaboradores';
 import { franjasApi, type FranjaHoraria, type FranjaCreate } from '../api/franjas';
-import { turnosApi, type TurnoListResponse } from '../api/turnos';
+import { turnosApi, type TurnoListResponse, type TurnoAlmuerzoResponse } from '../api/turnos';
 import { Colaborador } from '../api/auth';
 import client from '../api/client';
 import './AdminPanel.css';
@@ -11,6 +11,18 @@ import './AdminPanel.css';
 const API_URL = import.meta.env.VITE_API_URL;
 
 type Tab = 'colaboradores' | 'franjas' | 'asignacion' | 'incidencias';
+type ChipState = 'assigned' | 'available' | 'conflict' | 'disabled';
+
+interface OverrideModalState {
+  turnoId: number;
+  colaborador: Colaborador;
+  conflictingColaborador: Colaborador;
+}
+
+interface DeleteTurnoModalState {
+  turnoId: number;
+  turno: TurnoAlmuerzoResponse;
+}
 
 export function AdminPanel() {
   const { user } = useAuthContext();
@@ -28,11 +40,11 @@ export function AdminPanel() {
   const [colabFormData, setColabFormData] = useState<ColaboradorCreate>({
     nombre: '',
     email: '',
-    sector: 'comercial',
+    sector: 'tipo_a',
     estado_atencion: 'activo',
     rol: 'usuario',
-    habilitado_orientador: false,
-    habilitado_gestion_externa: false,
+    habilitado_tarea_especial_1: false,
+    habilitado_tarea_especial_2: false,
   });
 
   // Franjas state
@@ -61,6 +73,9 @@ export function AdminPanel() {
   const [turnosLoading, setTurnosLoading] = useState(false);
   const [turnosError, setTurnosError] = useState<string | null>(null);
   const [assignmentLoading, setAssignmentLoading] = useState<number | null>(null);
+  const [overrideModal, setOverrideModal] = useState<OverrideModalState | null>(null);
+  const [deleteTurnoModal, setDeleteTurnoModal] = useState<DeleteTurnoModalState | null>(null);
+  const [operationLoading, setOperationLoading] = useState(false);
 
   if (!user || user.rol !== 'admin') {
     return null;
@@ -127,11 +142,11 @@ export function AdminPanel() {
       setColabFormData({
         nombre: '',
         email: '',
-        sector: 'comercial',
+        sector: 'tipo_a',
         estado_atencion: 'activo',
         rol: 'usuario',
-        habilitado_orientador: false,
-        habilitado_gestion_externa: false,
+        habilitado_tarea_especial_1: false,
+        habilitado_tarea_especial_2: false,
       });
       setShowColabForm(false);
     } catch (err: any) {
@@ -227,11 +242,11 @@ export function AdminPanel() {
     setEditingColabData({
       nombre: colab.nombre,
       email: colab.email,
-      sector: colab.sector as 'comercial' | 'operativo',
+      sector: colab.sector as 'tipo_a' | 'tipo_b',
       estado_atencion: colab.estado_atencion as 'activo' | 'desafectado',
       rol: colab.rol as 'admin' | 'usuario',
-      habilitado_orientador: colab.habilitado_orientador,
-      habilitado_gestion_externa: colab.habilitado_gestion_externa,
+      habilitado_tarea_especial_1: colab.habilitado_tarea_especial_1,
+      habilitado_tarea_especial_2: colab.habilitado_tarea_especial_2,
     });
   };
 
@@ -276,6 +291,100 @@ export function AdminPanel() {
       alert(`Error: ${errorMessage}`);
     } finally {
       setAssignmentLoading(null);
+    }
+  };
+
+  const getChipState = (colab: Colaborador, turno: TurnoAlmuerzoResponse): ChipState => {
+    const isAssigned = turno.asignaciones.some((a) => a.colaborador_id === colab.id);
+    if (isAssigned) return 'assigned';
+
+    const isFull = turno.asignaciones.length >= turno.capacidad_maxima;
+    if (isFull) return 'disabled';
+
+    const sectoresOcupados = new Set(turno.asignaciones.map((a) => a.colaborador.sector));
+    if (sectoresOcupados.has(colab.sector)) return 'conflict';
+
+    return 'available';
+  };
+
+  const handleChipClick = async (colab: Colaborador, turno: TurnoAlmuerzoResponse) => {
+    const state = getChipState(colab, turno);
+
+    if (state === 'assigned') {
+      const asignacion = turno.asignaciones.find((a) => a.colaborador_id === colab.id);
+      if (!asignacion) return;
+      setOperationLoading(true);
+      try {
+        await turnosApi.deleteAsignacion(asignacion.id);
+        turnosApi
+          .list(asignacionFecha)
+          .then((res) => setTurnosData(res.data))
+          .catch((err) => setTurnosError(err.message));
+      } catch (err: any) {
+        const errorMessage = err.response?.data?.detail || err.message || 'Error al desasignar';
+        alert(`Error: ${errorMessage}`);
+      } finally {
+        setOperationLoading(false);
+      }
+    } else if (state === 'available') {
+      setOperationLoading(true);
+      try {
+        await turnosApi.createAsignacion(turno.id, colab.id);
+        turnosApi
+          .list(asignacionFecha)
+          .then((res) => setTurnosData(res.data))
+          .catch((err) => setTurnosError(err.message));
+      } catch (err: any) {
+        const errorMessage = err.response?.data?.detail || err.message || 'Error al asignar';
+        alert(`Error: ${errorMessage}`);
+      } finally {
+        setOperationLoading(false);
+      }
+    } else if (state === 'conflict') {
+      const conflictingAsignacion = turno.asignaciones.find((a) => a.colaborador.sector === colab.sector);
+      if (conflictingAsignacion) {
+        setOverrideModal({
+          turnoId: turno.id,
+          colaborador: colab,
+          conflictingColaborador: conflictingAsignacion.colaborador,
+        });
+      }
+    }
+  };
+
+  const handleConfirmOverride = async () => {
+    if (!overrideModal) return;
+    setOperationLoading(true);
+    try {
+      await turnosApi.createAsignacion(overrideModal.turnoId, overrideModal.colaborador.id);
+      turnosApi
+        .list(asignacionFecha)
+        .then((res) => setTurnosData(res.data))
+        .catch((err) => setTurnosError(err.message));
+      setOverrideModal(null);
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.detail || err.message || 'Error al asignar';
+      alert(`Error: ${errorMessage}`);
+    } finally {
+      setOperationLoading(false);
+    }
+  };
+
+  const handleConfirmDeleteTurno = async () => {
+    if (!deleteTurnoModal) return;
+    setOperationLoading(true);
+    try {
+      await turnosApi.deleteTurno(deleteTurnoModal.turnoId);
+      turnosApi
+        .list(asignacionFecha)
+        .then((res) => setTurnosData(res.data))
+        .catch((err) => setTurnosError(err.message));
+      setDeleteTurnoModal(null);
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.detail || err.message || 'Error al eliminar turno';
+      alert(`Error: ${errorMessage}`);
+    } finally {
+      setOperationLoading(false);
     }
   };
 
@@ -418,8 +527,8 @@ export function AdminPanel() {
                     required
                     disabled={colabFormLoading}
                   >
-                    <option value="comercial">Comercial</option>
-                    <option value="operativo">Operativo</option>
+                    <option value="tipo_a">Tipo-A</option>
+                    <option value="tipo_b">Tipo-B</option>
                   </select>
                 </div>
 
@@ -454,30 +563,30 @@ export function AdminPanel() {
 
               <div className="form-row">
                 <div className="form-group checkbox">
-                  <label htmlFor="habilitado_orientador">
+                  <label htmlFor="habilitado_tarea_especial_1">
                     <input
                       type="checkbox"
-                      id="habilitado_orientador"
-                      name="habilitado_orientador"
-                      checked={editingColabId ? editingColabData?.habilitado_orientador || false : colabFormData.habilitado_orientador}
+                      id="habilitado_tarea_especial_1"
+                      name="habilitado_tarea_especial_1"
+                      checked={editingColabId ? editingColabData?.habilitado_tarea_especial_1 || false : colabFormData.habilitado_tarea_especial_1}
                       onChange={editingColabId ? handleEditColabChange : handleColabFormChange}
                       disabled={colabFormLoading}
                     />
-                    Habilitado Orientador
+                    Habilitado Tarea Especial 1
                   </label>
                 </div>
 
                 <div className="form-group checkbox">
-                  <label htmlFor="habilitado_gestion_externa">
+                  <label htmlFor="habilitado_tarea_especial_2">
                     <input
                       type="checkbox"
-                      id="habilitado_gestion_externa"
-                      name="habilitado_gestion_externa"
-                      checked={editingColabId ? editingColabData?.habilitado_gestion_externa || false : colabFormData.habilitado_gestion_externa}
+                      id="habilitado_tarea_especial_2"
+                      name="habilitado_tarea_especial_2"
+                      checked={editingColabId ? editingColabData?.habilitado_tarea_especial_2 || false : colabFormData.habilitado_tarea_especial_2}
                       onChange={editingColabId ? handleEditColabChange : handleColabFormChange}
                       disabled={colabFormLoading}
                     />
-                    Habilitado Gestión Externa
+                    Habilitado Tarea Especial 2
                   </label>
                 </div>
               </div>
@@ -514,8 +623,8 @@ export function AdminPanel() {
                     <th>Sector</th>
                     <th>Rol</th>
                     <th>Estado</th>
-                    <th>Orientador</th>
-                    <th>Gest. Externa</th>
+                    <th>Tarea Esp. 1</th>
+                    <th>Tarea Esp. 2</th>
                     <th>Acciones</th>
                   </tr>
                 </thead>
@@ -526,8 +635,8 @@ export function AdminPanel() {
                       <td>{colab.sector}</td>
                       <td>{colab.rol}</td>
                       <td>{colab.estado_atencion}</td>
-                      <td>{colab.habilitado_orientador ? '✓' : '–'}</td>
-                      <td>{colab.habilitado_gestion_externa ? '✓' : '–'}</td>
+                      <td>{colab.habilitado_tarea_especial_1 ? '✓' : '–'}</td>
+                      <td>{colab.habilitado_tarea_especial_2 ? '✓' : '–'}</td>
                       <td>
                         <button
                           type="button"
@@ -708,46 +817,125 @@ export function AdminPanel() {
               {turnosData.franjas.map((turno) => (
                 <div key={turno.id} className="turno-card">
                   <div className="turno-card__header">
-                    <h4>
-                      {turno.franja_horaria.hora_inicio} - {turno.franja_horaria.hora_fin}
-                      <span className="turno-card__orden">(Orden {turno.franja_horaria.orden})</span>
-                    </h4>
-                    <span className="turno-card__capacidad">
-                      {turno.asignaciones.length} / {turno.capacidad_maxima}
-                    </span>
+                    <div>
+                      <h4>
+                        {turno.franja_horaria.hora_inicio} - {turno.franja_horaria.hora_fin}
+                        <span className="turno-card__orden">(Orden {turno.franja_horaria.orden})</span>
+                      </h4>
+                    </div>
+                    <div className="turno-card__header-right">
+                      <span className={`turno-card__capacidad ${turno.asignaciones.length >= turno.capacidad_maxima ? 'full' : ''}`}>
+                        {turno.asignaciones.length} / {turno.capacidad_maxima}
+                      </span>
+                      <button
+                        className="btn-delete-turno"
+                        onClick={() => setDeleteTurnoModal({ turnoId: turno.id, turno })}
+                        disabled={operationLoading}
+                        title="Eliminar turno"
+                      >
+                        🗑
+                      </button>
+                    </div>
                   </div>
 
                   <div className="turno-card__asignaciones">
-                    {turno.asignaciones.map((asignacion) => (
-                      <div key={asignacion.id} className="asignacion-item">
-                        <div className="asignacion-item__name">
-                          {asignacion.colaborador.nombre}
-                          <span className="asignacion-item__email">({asignacion.colaborador.email})</span>
-                        </div>
-                        <select
-                          value={asignacion.colaborador_id}
-                          onChange={(e) =>
-                            handleAsignacionChange(asignacion.id, parseInt(e.target.value))
-                          }
-                          disabled={assignmentLoading === asignacion.id}
-                          className="asignacion-item__select"
-                        >
-                          {colaboradores.map((colab) => (
-                            <option key={`asignacion-${asignacion.id}-colab-${colab.id}`} value={colab.id}>
-                              {colab.nombre}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    ))}
-                    {turno.asignaciones.length === 0 && (
+                    <div className="chips-container">
+                      {colaboradores.map((colab) => {
+                        const state = getChipState(colab, turno);
+                        return (
+                          <button
+                            key={`chip-${turno.id}-${colab.id}`}
+                            className={`chip chip--${state}`}
+                            onClick={() => handleChipClick(colab, turno)}
+                            disabled={operationLoading || state === 'disabled'}
+                            title={`${colab.nombre} - ${colab.sector}`}
+                          >
+                            <span className="chip__icon">
+                              {state === 'assigned' && '✓'}
+                              {state === 'conflict' && '⚠'}
+                              {state === 'available' && '+'}
+                            </span>
+                            <span className="chip__text">
+                              <span className="chip__name">{colab.nombre}</span>
+                              <span className="chip__sector">{colab.sector}</span>
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                    {colaboradores.length === 0 && (
                       <div className="asignacion-item__empty">
-                        Sin asignaciones para esta franja
+                        No hay colaboradores disponibles
                       </div>
                     )}
                   </div>
                 </div>
               ))}
+            </div>
+          )}
+
+          {/* OVERRIDE MODAL */}
+          {overrideModal && (
+            <div className="modal-overlay" onClick={() => setOverrideModal(null)}>
+              <div className="modal" onClick={(e) => e.stopPropagation()}>
+                <h3>⚠️ Superposición de funciones</h3>
+                <p>
+                  <strong>{overrideModal.colaborador.nombre}</strong> es <strong>{overrideModal.colaborador.sector}</strong> y ya hay un{' '}
+                  <strong>{overrideModal.colaborador.sector}</strong> asignado en esta franja (
+                  <strong>{overrideModal.conflictingColaborador.nombre}</strong>).
+                  <br />
+                  <br />
+                  La función <strong>{overrideModal.colaborador.sector}</strong> quedaría sin cobertura durante el almuerzo. ¿Igualmente asignar?
+                </p>
+                <div className="modal-actions">
+                  <button
+                    className="btn btn-secondary"
+                    onClick={() => setOverrideModal(null)}
+                    disabled={operationLoading}
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    className="btn btn-primary"
+                    onClick={handleConfirmOverride}
+                    disabled={operationLoading}
+                  >
+                    {operationLoading ? 'Asignando...' : 'Asignar igualmente'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* DELETE TURNO MODAL */}
+          {deleteTurnoModal && (
+            <div className="modal-overlay" onClick={() => setDeleteTurnoModal(null)}>
+              <div className="modal" onClick={(e) => e.stopPropagation()}>
+                <h3>🗑 Borrar turno del día</h3>
+                <p>
+                  Se eliminarán todas las asignaciones del turno{' '}
+                  <strong>
+                    {deleteTurnoModal.turno.franja_horaria.hora_inicio} – {deleteTurnoModal.turno.franja_horaria.hora_fin}
+                  </strong>{' '}
+                  del <strong>{asignacionFecha}</strong>. Esta acción no se puede deshacer.
+                </p>
+                <div className="modal-actions">
+                  <button
+                    className="btn btn-secondary"
+                    onClick={() => setDeleteTurnoModal(null)}
+                    disabled={operationLoading}
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    className="btn btn-danger"
+                    onClick={handleConfirmDeleteTurno}
+                    disabled={operationLoading}
+                  >
+                    {operationLoading ? 'Eliminando...' : 'Confirmar borrado'}
+                  </button>
+                </div>
+              </div>
             </div>
           )}
         </div>

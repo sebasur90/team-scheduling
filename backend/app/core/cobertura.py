@@ -14,11 +14,11 @@ class CoberturaValidator:
         excluidos_o_ausentes: Set[int],  # who is NOT available in this franja
     ) -> Tuple[int, int]:
         """
-        Returns: (comercial_activos, operativo_activos) among those NOT in this franja
+        Returns: (tipo_a_activos, tipo_b_activos) among those NOT in this franja
         but ARE available/present that day
         """
-        comercial_activos = 0
-        operativo_activos = 0
+        tipo_a_activos = 0
+        tipo_b_activos = 0
 
         for colab_id, colab in self.colaboradores.items():
             # Skip if absent/excluded that day
@@ -29,21 +29,21 @@ class CoberturaValidator:
             if colab_id not in asignados_en_franja:
                 # Only count activos
                 if colab.estado_atencion == "activo":
-                    if colab.sector == "comercial":
-                        comercial_activos += 1
-                    elif colab.sector == "operativo":
-                        operativo_activos += 1
+                    if colab.sector == "tipo_a":
+                        tipo_a_activos += 1
+                    elif colab.sector == "tipo_b":
+                        tipo_b_activos += 1
 
-        return comercial_activos, operativo_activos
+        return tipo_a_activos, tipo_b_activos
 
     def satisfies_minimum_coverage(
         self,
         asignados_en_franja: List[int],
         excluidos_o_ausentes: Set[int],
     ) -> bool:
-        """Check if franja maintains >=1 Comercial-activo and >=1 Operativo-activo"""
-        comercial, operativo = self.get_cobertura_status(asignados_en_franja, excluidos_o_ausentes)
-        return comercial >= 1 and operativo >= 1
+        """Check if franja maintains >=1 Tipo-A and >=1 Tipo-B"""
+        tipo_a, tipo_b = self.get_cobertura_status(asignados_en_franja, excluidos_o_ausentes)
+        return tipo_a >= 1 and tipo_b >= 1
 
     def can_remove_person_safely(
         self,

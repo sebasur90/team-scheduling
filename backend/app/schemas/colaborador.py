@@ -6,11 +6,11 @@ from datetime import datetime
 class ColaboradorBase(BaseModel):
     nombre: str
     email: EmailStr
-    sector: str  # 'comercial' or 'operativo'
+    sector: str  # 'tipo_a' or 'tipo_b'
     estado_atencion: str = "activo"
     rol: str = "usuario"
-    habilitado_orientador: bool = False
-    habilitado_gestion_externa: bool = False
+    habilitado_tarea_especial_1: bool = False
+    habilitado_tarea_especial_2: bool = False
 
 
 class ColaboradorCreate(ColaboradorBase):
@@ -22,8 +22,8 @@ class ColaboradorUpdate(BaseModel):
     sector: Optional[str] = None
     estado_atencion: Optional[str] = None
     rol: Optional[str] = None
-    habilitado_orientador: Optional[bool] = None
-    habilitado_gestion_externa: Optional[bool] = None
+    habilitado_tarea_especial_1: Optional[bool] = None
+    habilitado_tarea_especial_2: Optional[bool] = None
 
 
 class ColaboradorResponse(ColaboradorBase):
