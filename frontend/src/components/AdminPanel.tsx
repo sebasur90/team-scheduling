@@ -4,13 +4,14 @@ import { useAuthContext } from '../contexts/AuthContext';
 import { colaboradoresApi, type ColaboradorCreate } from '../api/colaboradores';
 import { franjasApi, type FranjaHoraria, type FranjaCreate } from '../api/franjas';
 import { turnosApi, type TurnoListResponse, type TurnoAlmuerzoResponse } from '../api/turnos';
+import { diasNolaborablesApi, type DiaNoLaborable, type DiaNoLaborableCreate } from '../api/diasNolaborables';
 import { Colaborador } from '../api/auth';
 import client from '../api/client';
 import './AdminPanel.css';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-type Tab = 'colaboradores' | 'franjas' | 'asignacion' | 'incidencias';
+type Tab = 'colaboradores' | 'franjas' | 'asignacion' | 'dias-no-laborables' | 'incidencias';
 type ChipState = 'assigned' | 'available' | 'conflict' | 'disabled';
 
 interface OverrideModalState {
@@ -77,6 +78,18 @@ export function AdminPanel() {
   const [deleteTurnoModal, setDeleteTurnoModal] = useState<DeleteTurnoModalState | null>(null);
   const [operationLoading, setOperationLoading] = useState(false);
 
+  // Días no laborables state
+  const [diasNoLaborables, setDiasNoLaborables] = useState<DiaNoLaborable[]>([]);
+  const [diasLoading, setDiasLoading] = useState(true);
+  const [showDiaForm, setShowDiaForm] = useState(false);
+  const [diaFormError, setDiaFormError] = useState<string | null>(null);
+  const [diaFormLoading, setDiaFormLoading] = useState(false);
+  const [diaFormData, setDiaFormData] = useState<DiaNoLaborableCreate>({
+    fecha: '',
+    motivo: '',
+  });
+  const [selectedDateDiaNoLaborable, setSelectedDateDiaNoLaborable] = useState<string | null>(null);
+
   if (!user || user.rol !== 'admin') {
     return null;
   }
@@ -118,6 +131,28 @@ export function AdminPanel() {
         .finally(() => setTurnosLoading(false));
     }
   }, [activeTab, asignacionFecha]);
+
+  // Load días no laborables
+  useEffect(() => {
+    if (activeTab === 'dias-no-laborables' || activeTab === 'asignacion') {
+      const now = new Date();
+      const mes = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+
+      diasNolaborablesApi
+        .list(mes)
+        .then((res) => setDiasNoLaborables(res.data))
+        .catch(() => setDiasNoLaborables([]))
+        .finally(() => setDiasLoading(false));
+    }
+  }, [activeTab]);
+
+  // Check if selected asignacion date is a non-working day
+  useEffect(() => {
+    if (activeTab === 'asignacion' && diasNoLaborables.length > 0) {
+      const matchingDia = diasNoLaborables.find((d) => d.fecha === asignacionFecha);
+      setSelectedDateDiaNoLaborable(matchingDia?.motivo || null);
+    }
+  }, [asignacionFecha, diasNoLaborables, activeTab]);
 
   // Colaboradores handlers
   const handleColabFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -413,6 +448,45 @@ export function AdminPanel() {
     }
   };
 
+  // Días no laborables handlers
+  const handleDiaFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setDiaFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+    setDiaFormError(null);
+  };
+
+  const handleCreateDia = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setDiaFormLoading(true);
+    setDiaFormError(null);
+
+    try {
+      const newDia = await diasNolaborablesApi.create(diaFormData);
+      setDiasNoLaborables([...diasNoLaborables, newDia.data].sort((a, b) => a.fecha.localeCompare(b.fecha)));
+      setDiaFormData({ fecha: '', motivo: '' });
+      setShowDiaForm(false);
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.detail || err.message || 'Error al crear día no laborable';
+      setDiaFormError(errorMessage);
+    } finally {
+      setDiaFormLoading(false);
+    }
+  };
+
+  const handleDeleteDia = async (fecha: string) => {
+    if (!window.confirm('¿Eliminar este día no laborable?')) return;
+
+    try {
+      await diasNolaborablesApi.delete(fecha);
+      setDiasNoLaborables(diasNoLaborables.filter((d) => d.fecha !== fecha));
+    } catch (err: any) {
+      alert(`Error: ${err.response?.data?.detail || err.message}`);
+    }
+  };
+
   // Incidencias handlers
   const handleBroadcast = async (incidenciaId: number) => {
     setActionLoading(true);
@@ -460,6 +534,12 @@ export function AdminPanel() {
           onClick={() => setActiveTab('asignacion')}
         >
           Asignación de Turnos
+        </button>
+        <button
+          className={`tab-button ${activeTab === 'dias-no-laborables' ? 'active' : ''}`}
+          onClick={() => setActiveTab('dias-no-laborables')}
+        >
+          Días no laborables
         </button>
         <button
           className={`tab-button ${activeTab === 'incidencias' ? 'active' : ''}`}
@@ -806,6 +886,12 @@ export function AdminPanel() {
             </div>
           </div>
 
+          {selectedDateDiaNoLaborable && (
+            <div className="warning-box">
+              <strong>Día no laborable:</strong> {selectedDateDiaNoLaborable}
+            </div>
+          )}
+
           {turnosLoading ? (
             <div className="loading">Cargando turnos...</div>
           ) : turnosError ? (
@@ -939,6 +1025,100 @@ export function AdminPanel() {
             </div>
           )}
         </div>
+      )}
+
+      {/* DÍAS NO LABORABLES TAB */}
+      {activeTab === 'dias-no-laborables' && (
+        <section className="admin-tab-content">
+          <h3>Días no laborables</h3>
+
+          {!showDiaForm && (
+            <button onClick={() => setShowDiaForm(true)} className="btn btn-primary">
+              + Agregar día no laborable
+            </button>
+          )}
+
+          {showDiaForm && (
+            <form onSubmit={handleCreateDia} className="admin-form">
+              <div className="form-row">
+                <div className="form-group">
+                  <label htmlFor="dia-fecha">Fecha *</label>
+                  <input
+                    type="date"
+                    id="dia-fecha"
+                    name="fecha"
+                    value={diaFormData.fecha}
+                    onChange={handleDiaFormChange}
+                    required
+                  />
+                </div>
+              </div>
+              <div className="form-row">
+                <div className="form-group">
+                  <label htmlFor="dia-motivo">Motivo *</label>
+                  <textarea
+                    id="dia-motivo"
+                    name="motivo"
+                    placeholder="Ej: Feriado, Paro, Reunión importante"
+                    value={diaFormData.motivo}
+                    onChange={handleDiaFormChange}
+                    required
+                  />
+                </div>
+              </div>
+              {diaFormError && <div className="form-error">{diaFormError}</div>}
+              <div className="form-actions">
+                <button type="submit" className="btn btn-primary" disabled={diaFormLoading}>
+                  {diaFormLoading ? 'Guardando...' : 'Guardar'}
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => {
+                    setShowDiaForm(false);
+                    setDiaFormData({ fecha: '', motivo: '' });
+                    setDiaFormError(null);
+                  }}
+                >
+                  Cancelar
+                </button>
+              </div>
+            </form>
+          )}
+
+          {diasNoLaborables.length > 0 ? (
+            <div className="table-container">
+              <table className="admin-table">
+                <thead>
+                  <tr>
+                    <th>Fecha</th>
+                    <th>Motivo</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {diasNoLaborables.map((dia) => (
+                    <tr key={dia.fecha}>
+                      <td>{new Date(dia.fecha).toLocaleDateString('es-AR')}</td>
+                      <td>{dia.motivo}</td>
+                      <td>
+                        <button
+                          className="btn-icon btn-delete"
+                          onClick={() => handleDeleteDia(dia.fecha)}
+                          title="Eliminar"
+                        >
+                          🗑
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div className="admin-panel__empty">No hay días no laborables registrados.</div>
+          )}
+        </section>
       )}
 
       {/* INCIDENCIAS TAB */}

@@ -2,11 +2,12 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from app.database import get_db
-from app.models import Colaborador, TurnoAlmuerzo, AsignacionAlmuerzo, FranjaHoraria
+from app.models import Colaborador, TurnoAlmuerzo, AsignacionAlmuerzo, FranjaHoraria, DiaNoLaborable
 from app.schemas.turno import TurnoAlmuerzoResponse, AsignacionResponse
 from app.dependencies import get_admin_user
+from app.core.engine import AssignmentEngine
 from datetime import date, timedelta
-from typing import List
+from typing import List, Dict, Any
 
 router = APIRouter(prefix="/admin/turnos", tags=["admin_turnos"], redirect_slashes=False)
 
@@ -21,7 +22,11 @@ def generar_turnos_semana(
     db: Session = Depends(get_db),
     admin: Colaborador = Depends(get_admin_user),
 ):
-    """Generate turns for a week (Mon-Fri). Returns preview with generated turns and any tie conflicts."""
+    """
+    Generate turns for a week (Mon-Fri) using the AssignmentEngine.
+    Respects coverage, preferences, and slot rotation.
+    Skips non-working days and cleans orphaned shifts.
+    """
     fecha_lunes = date.fromisoformat(semana)
 
     if fecha_lunes.weekday() != 0:
@@ -32,58 +37,124 @@ def generar_turnos_semana(
 
     dias_semana = [fecha_lunes + timedelta(days=i) for i in range(5)]
 
-    preview_turnos = []
+    turnos_generados = []
+    dias_salteados = []
+    dias_con_error = []
     conflictos = []
 
-    franjas = db.query(FranjaHoraria).order_by(FranjaHoraria.orden).all()
+    for fecha in dias_semana:
+        # Check if this is a non-working day
+        dia_no_laborable = db.query(DiaNoLaborable).filter_by(fecha=fecha).first()
 
-    # Get all active colaboradores
-    colaboradores_activos = db.query(Colaborador).filter_by(
-        estado_atencion='activo'
-    ).order_by(Colaborador.puntaje_prioridad).all()
+        if dia_no_laborable:
+            # Clean up any existing turnos for this date
+            _clean_orphaned_shifts(db, fecha)
 
-    colab_index = 0
+            dias_salteados.append({
+                "fecha": fecha.isoformat(),
+                "motivo": dia_no_laborable.motivo
+            })
+            continue
 
-    for dia in dias_semana:
-        for franja in franjas:
-            turno = db.query(TurnoAlmuerzo).filter_by(fecha=dia, franja_horaria_id=franja.id).first()
-            if not turno:
-                turno = TurnoAlmuerzo(
-                    fecha=dia,
-                    franja_horaria_id=franja.id,
-                    capacidad_maxima=2,
-                )
-                db.add(turno)
-                db.flush()  # Get the turno ID without committing
+        # Run the assignment engine for this day
+        engine = AssignmentEngine(db, fecha)
+        result = engine.run()
 
-            # Create assignments for the slot
-            existing_asignaciones = db.query(AsignacionAlmuerzo).filter_by(
-                turno_almuerzo_id=turno.id
-            ).count()
+        if not result.success:
+            dias_con_error.append({
+                "fecha": fecha.isoformat(),
+                "error": result.error
+            })
+            continue
 
-            # Create assignments up to capacity if none exist
-            if existing_asignaciones == 0 and colaboradores_activos:
-                for _ in range(turno.capacidad_maxima):
-                    colab = colaboradores_activos[colab_index % len(colaboradores_activos)]
-                    asignacion = AsignacionAlmuerzo(
-                        turno_almuerzo_id=turno.id,
-                        colaborador_id=colab.id,
-                        estado='firme'
-                    )
-                    db.add(asignacion)
-                    colab_index += 1
+        # Persist the day's assignments
+        try:
+            _persist_day_assignments(db, fecha, result.cronograma, result.puntajes_actualizados)
 
-            preview_turnos.append(TurnoAlmuerzoResponse.model_validate(turno))
+            # Build response with turnos for this day
+            turnos_dia = db.query(TurnoAlmuerzo).filter_by(fecha=fecha).all()
+            for turno in turnos_dia:
+                turnos_generados.append(TurnoAlmuerzoResponse.model_validate(turno))
+
+        except Exception as e:
+            dias_con_error.append({
+                "fecha": fecha.isoformat(),
+                "error": f"Error persisting assignments: {str(e)}"
+            })
+            continue
 
     db.commit()
 
     return {
-        "status": "preview_generated",
+        "status": "generado",
         "semana": semana,
-        "turnos": preview_turnos,
+        "turnos_generados": turnos_generados,
         "conflictos": conflictos,
-        "mensaje": "Preview generado. Confirma con POST /confirmar-semana"
+        "dias_salteados": dias_salteados,
+        "dias_con_error": dias_con_error,
+        "mensaje": f"Semana generada. {len(dias_salteados)} día(s) salteado(s), {len(dias_con_error)} error(es)."
     }
+
+
+def _clean_orphaned_shifts(db: Session, fecha: date) -> None:
+    """Delete all TurnoAlmuerzo for a given fecha (cascades to AsignacionAlmuerzo)."""
+    turnos_existentes = db.query(TurnoAlmuerzo).filter_by(fecha=fecha).all()
+    for turno in turnos_existentes:
+        db.delete(turno)
+
+
+def _persist_day_assignments(
+    db: Session,
+    fecha: date,
+    cronograma: Dict[int, List[int]],
+    puntajes_actualizados: Dict[int, int],
+) -> None:
+    """
+    Persist a day's assignments from the engine.
+
+    Args:
+        db: Database session
+        fecha: Date to persist assignments for
+        cronograma: Dict mapping franja_orden (int) -> [colaborador_ids]
+        puntajes_actualizados: Dict mapping colaborador_id -> new puntaje
+    """
+    # Get all franjas to map orden to franja_id
+    franjas = db.query(FranjaHoraria).all()
+    franja_map = {f.orden - 1: f.id for f in franjas}  # Convert orden to 0-based index
+
+    # Clean any existing turnos for this date (in case of re-generation)
+    _clean_orphaned_shifts(db, fecha)
+
+    # Create turnos and assignments from cronograma
+    for franja_orden, colaborador_ids in cronograma.items():
+        if franja_orden not in franja_map:
+            continue
+
+        franja_id = franja_map[franja_orden]
+
+        # Create turno
+        turno = TurnoAlmuerzo(
+            fecha=fecha,
+            franja_horaria_id=franja_id,
+            capacidad_maxima=2,
+        )
+        db.add(turno)
+        db.flush()
+
+        # Create assignments for this turno
+        for colaborador_id in colaborador_ids:
+            asignacion = AsignacionAlmuerzo(
+                turno_almuerzo_id=turno.id,
+                colaborador_id=colaborador_id,
+                estado='firme'
+            )
+            db.add(asignacion)
+
+    # Update puntajes for affected colaboradores
+    for colaborador_id, nuevo_puntaje in puntajes_actualizados.items():
+        colaborador = db.query(Colaborador).filter_by(id=colaborador_id).first()
+        if colaborador:
+            colaborador.puntaje_prioridad = nuevo_puntaje
 
 
 @router.post("/{turno_id}/asignaciones", status_code=status.HTTP_201_CREATED, response_model=AsignacionResponse)
@@ -162,28 +233,6 @@ def delete_turno(
     db.delete(turno)
     db.commit()
     return None
-
-
-@router.post("/confirmar-semana", status_code=status.HTTP_200_OK)
-def confirmar_turnos_semana(
-    semana: str,
-    db: Session = Depends(get_db),
-    admin: Colaborador = Depends(get_admin_user),
-):
-    """Confirm the generated preview for the week."""
-    fecha_lunes = date.fromisoformat(semana)
-
-    if fecha_lunes.weekday() != 0:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="El parámetro semana debe ser un lunes (YYYY-MM-DD)"
-        )
-
-    return {
-        "status": "confirmed",
-        "semana": semana,
-        "mensaje": "Turnos confirmados para la semana"
-    }
 
 
 @router.patch("/asignaciones/{asignacion_id}", status_code=status.HTTP_200_OK)

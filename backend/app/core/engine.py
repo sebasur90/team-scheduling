@@ -10,6 +10,7 @@ from app.core.tipos import (
 )
 from app.core.cobertura import CoberturaValidator
 from app.core.prioridad import PrioridadResolver
+from app.core.franja_history import find_least_recent_franja
 
 
 class AssignmentEngine:
@@ -237,13 +238,14 @@ class AssignmentEngine:
 
     def _phase_2_fill_remaining(self, context: ContextData, asignaciones_phase1: List[AsignacionResult]) -> List[AsignacionResult]:
         """
-        Phase 2: Fill remaining unassigned people into available franjas.
+        Phase 2: Fill remaining unassigned people into available franjas with slot rotation.
+        Uses franja history to assign each person to the slot they haven't eaten in most recently.
         """
         # Find who's still unassigned
         asignados_ids = {a.colaborador_id for a in asignaciones_phase1 if a.estado_concesion == "otorgado"}
         unassigned = [c for c in context.pool_disponible if c.id not in asignados_ids]
 
-        # Count capacity per franja
+        # Count capacity per franja (assume max 2 per slot)
         asignaciones = asignaciones_phase1.copy()
         asignados_por_franja = {}
         for a in asignaciones:
@@ -252,41 +254,51 @@ class AssignmentEngine:
                     asignados_por_franja[a.franja_orden] = []
                 asignados_por_franja[a.franja_orden].append(a.colaborador_id)
 
-        # Simple distribution: round-robin through franjas with space
+        # Fill remaining people using slot rotation
         for person in unassigned:
-            assigned = False
+            # Build list of franjas allowed by restrictions
+            allowed_franjas = []
             for franja_idx in range(self.num_franjas):
-                # Check restrictions
                 if person.id in context.tareas_restringidas:
-                    if franja_idx not in context.tareas_restringidas[person.id]:
-                        continue
+                    if franja_idx in context.tareas_restringidas[person.id]:
+                        allowed_franjas.append(franja_idx)
+                else:
+                    allowed_franjas.append(franja_idx)
 
-                if franja_idx not in asignados_por_franja:
-                    asignados_por_franja[franja_idx] = []
+            if not allowed_franjas:
+                continue  # Skip if no allowed franjas
 
-                # For now, simple assignment (no complex balancing)
+            # Filter to only franjas with capacity (max 2 per slot)
+            available_with_capacity = [
+                f for f in allowed_franjas
+                if f not in asignados_por_franja or len(asignados_por_franja[f]) < 2
+            ]
+
+            if available_with_capacity:
+                # Use rotation logic to pick best franja
+                try:
+                    best_franja = find_least_recent_franja(
+                        self.db, person.id, available_with_capacity, self.fecha
+                    )
+                except Exception:
+                    # Fallback if franja_history fails
+                    best_franja = available_with_capacity[0]
+
                 asignaciones.append(AsignacionResult(
                     colaborador_id=person.id,
-                    franja_orden=franja_idx,
+                    franja_orden=best_franja,
                     estado_concesion="otorgado",
                 ))
-                asignados_por_franja[franja_idx].append(person.id)
-                assigned = True
-                break
-
-            if not assigned:
-                # Fallback: assign to first available franja
-                for franja_idx in range(self.num_franjas):
-                    if person.id in context.tareas_restringidas:
-                        if franja_idx not in context.tareas_restringidas[person.id]:
-                            continue
-                    asignaciones.append(AsignacionResult(
-                        colaborador_id=person.id,
-                        franja_orden=franja_idx,
-                        estado_concesion="otorgado",
-                    ))
-                    assigned = True
-                    break
+                if best_franja not in asignados_por_franja:
+                    asignados_por_franja[best_franja] = []
+                asignados_por_franja[best_franja].append(person.id)
+            else:
+                # No capacity in preferred franjas, skip (will be unassigned)
+                asignaciones.append(AsignacionResult(
+                    colaborador_id=person.id,
+                    franja_orden=-1,
+                    estado_concesion="denegado",
+                ))
 
         return asignaciones
 

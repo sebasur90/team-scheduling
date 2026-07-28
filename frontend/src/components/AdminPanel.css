@@ -697,6 +697,16 @@
   background: #d32f2f;
 }
 
+.warning-box {
+  background: #fff3cd;
+  border: 1px solid #ffc107;
+  border-radius: 4px;
+  padding: 1rem;
+  margin: 1rem 0;
+  color: #856404;
+  font-weight: 500;
+}
+
 @media (max-width: 768px) {
   .admin-panel__section-header {
     flex-direction: column;
