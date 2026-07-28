@@ -1,0 +1,68 @@
+# Environment variables
+.env
+.env.local
+.env.*.local
+.env.docker
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+pip-log.txt
+pip-delete-this-directory.txt
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+venv/
+ENV/
+env/
+
+# Node/Frontend
+node_modules/
+frontend/node_modules/
+dist/
+.next/
+out/
+.nuxt/
+coverage/
+.cache/
+*.tgz
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+.project
+.classpath
+
+# Claude Code local
+.claude/projects/
+.superpowers/
+
+# OS
+.DS_Store
+Thumbs.db
