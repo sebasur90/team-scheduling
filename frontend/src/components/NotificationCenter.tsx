@@ -1,39 +1,27 @@
 import React, { useState, useEffect } from 'react'
 import './NotificationCenter.css'
-
-interface Notification {
-  id: number
-  tipo: string
-  mensaje: string
-  leida: boolean
-  created_at: string
-}
+import { notificacionesApi, type Notificacion } from '../api/notificaciones'
 
 export const NotificationCenter: React.FC = () => {
-  const [notifications, setNotifications] = useState<Notification[]>([])
+  const [notifications, setNotifications] = useState<Notificacion[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    setTimeout(() => {
-      setNotifications([
-        {
-          id: 1,
-          tipo: 'info',
-          mensaje: 'Tu preferencia para el 28/07 ha sido otorgada: 13:00 - 13:45',
-          leida: false,
-          created_at: new Date().toISOString(),
-        },
-        {
-          id: 2,
-          tipo: 'warning',
-          mensaje:
-            'No fue posible asignar tu preferencia del 29/07 por restricción de cobertura. Tu puntaje de prioridad aumentó.',
-          leida: false,
-          created_at: new Date(Date.now() - 3600000).toISOString(),
-        },
-      ])
-      setIsLoading(false)
-    }, 500)
+    const loadNotifications = async () => {
+      try {
+        const res = await notificacionesApi.list()
+        setNotifications(res.data)
+      } catch (err: any) {
+        const errorMsg = err.response?.data?.detail || err.message || 'Error al cargar notificaciones'
+        setError(errorMsg)
+        setNotifications([])
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    loadNotifications()
   }, [])
 
   const markAsRead = (id: number) => {
@@ -46,10 +34,39 @@ export const NotificationCenter: React.FC = () => {
     setNotifications((notifs) => notifs.filter((n) => n.id !== id))
   }
 
+  const handleAceptarCambioFranja = async (id: number) => {
+    try {
+      await notificacionesApi.aceptarCambioFranja(id)
+      setNotifications((notifs) =>
+        notifs.map((n) => (n.id === id ? { ...n, estado: 'aceptada' } : n))
+      )
+    } catch (error) {
+      console.error('Error aceptando cambio de franja:', error)
+    }
+  }
+
   const unreadCount = notifications.filter((n) => !n.leida).length
+
+  const getMessageForNotification = (notif: Notificacion): string => {
+    if (notif.tipo === 'franja_preferida_disponible' && notif.franja_detalles && notif.fecha) {
+      const fecha = new Date(notif.fecha).toLocaleDateString('es-AR')
+      const horaInicio = notif.franja_detalles.hora_inicio.slice(0, 5)
+      const horaFin = notif.franja_detalles.hora_fin.slice(0, 5)
+      return `Se liberó tu franja preferida el ${fecha}: ${horaInicio} - ${horaFin}. ¿Querés cambiarte?`
+    }
+    return notif.mensaje
+  }
 
   if (isLoading) {
     return <div className="notifications-loading">Cargando notificaciones...</div>
+  }
+
+  if (error) {
+    return (
+      <div className="notifications-error">
+        <p>Error al cargar notificaciones: {error}</p>
+      </div>
+    )
   }
 
   return (
@@ -68,19 +85,19 @@ export const NotificationCenter: React.FC = () => {
           {notifications.map((notif) => (
             <div key={notif.id} className={`notification-item notification-${notif.tipo} ${notif.leida ? 'read' : 'unread'}`}>
               <div className="notification-content">
-                <p className="notification-message">{notif.mensaje}</p>
+                <p className="notification-message">{getMessageForNotification(notif)}</p>
                 <time className="notification-time">
-                  {new Date(notif.created_at).toLocaleString('es-ES')}
+                  {new Date(notif.created_at).toLocaleString('es-AR')}
                 </time>
               </div>
               <div className="notification-actions">
-                {!notif.leida && (
+                {notif.tipo === 'franja_preferida_disponible' && notif.estado === 'pendiente' && (
                   <button
-                    className="btn-mark-read"
-                    onClick={() => markAsRead(notif.id)}
-                    title="Marcar como leída"
+                    className="btn-accept"
+                    onClick={() => handleAceptarCambioFranja(notif.id)}
+                    title="Aceptar cambio de franja"
                   >
-                    ✓
+                    Aceptar cambio
                   </button>
                 )}
                 <button

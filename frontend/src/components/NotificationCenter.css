@@ -129,6 +129,35 @@
   color: var(--color-gray-500);
 }
 
+.notifications-error {
+  padding: var(--space-2xl);
+  text-align: center;
+  color: var(--color-danger);
+  background-color: rgba(239, 68, 68, 0.05);
+}
+
+.btn-accept {
+  background-color: var(--color-success);
+  color: white;
+  border: none;
+  padding: var(--space-xs) var(--space-md);
+  border-radius: var(--radius-md);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+.btn-accept:hover {
+  background-color: #15803d;
+  box-shadow: 0 2px 8px rgba(22, 163, 74, 0.3);
+}
+
+.btn-accept:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 @media (max-width: 768px) {
   .notification-item {
     flex-direction: column;
