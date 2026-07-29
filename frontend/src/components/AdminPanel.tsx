@@ -3,6 +3,7 @@ import { useIncidencias, type IncidenciaData } from '../hooks/useIncidencias';
 import { useAuthContext } from '../contexts/AuthContext';
 import { colaboradoresApi, type ColaboradorCreate } from '../api/colaboradores';
 import { franjasApi, type FranjaHoraria, type FranjaCreate } from '../api/franjas';
+import { sectoresApi, type Sector, type SectorCreate, type SectorUpdate } from '../api/sectores';
 import { turnosApi, type TurnoListResponse, type TurnoAlmuerzoResponse } from '../api/turnos';
 import { diasNolaborablesApi, type DiaNoLaborable, type DiaNoLaborableCreate } from '../api/diasNolaborables';
 import { tareasEspecialesApi, type TareaEspecialTipo } from '../api/tareasEspeciales';
@@ -14,7 +15,7 @@ import './AdminPanel.css';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-type Tab = 'colaboradores' | 'franjas' | 'asignacion' | 'dias-no-laborables' | 'vacaciones' | 'configuracion' | 'incidencias' | 'preferencias';
+type Tab = 'colaboradores' | 'sectores' | 'franjas' | 'asignacion' | 'dias-no-laborables' | 'vacaciones' | 'configuracion' | 'incidencias' | 'preferencias';
 type ChipState = 'assigned' | 'available' | 'conflict' | 'disabled';
 
 interface OverrideModalState {
@@ -44,12 +45,29 @@ export function AdminPanel() {
   const [colabFormData, setColabFormData] = useState<ColaboradorCreate>({
     nombre: '',
     email: '',
-    sector: 'tipo_a',
+    sector_id: 1,
     estado_atencion: 'activo',
     rol: 'usuario',
     tarea_tipo_ids: [],
   });
   const [tareasEspeciales, setTareasEspeciales] = useState<any[]>([]);
+
+  // Sectores state
+  const [sectores, setSectores] = useState<Sector[]>([]);
+  const [sectoresLoading, setSectoresLoading] = useState(true);
+  const [showSectorForm, setShowSectorForm] = useState(false);
+  const [sectorFormError, setSectorFormError] = useState<string | null>(null);
+  const [sectorFormLoading, setSectorFormLoading] = useState(false);
+  const [sectorFormData, setSectorFormData] = useState<SectorCreate>({
+    nombre: '',
+    capacidad_maxima: 10,
+    participa_almuerzo: true,
+    acceso_rol: 'gestion',
+    minimo_cobertura: 1,
+    color: '#000000',
+  });
+  const [editingSectorId, setEditingSectorId] = useState<number | null>(null);
+  const [editingSectorData, setEditingSectorData] = useState<Partial<SectorUpdate> | null>(null);
 
   // Franjas state
   const [franjas, setFranjas] = useState<FranjaHoraria[]>([]);
@@ -121,6 +139,17 @@ export function AdminPanel() {
         .listTipos()
         .then((res) => setTareasEspeciales(res.data))
         .catch(() => setTareasEspeciales([]));
+    }
+  }, [activeTab]);
+
+  // Load sectores
+  useEffect(() => {
+    if (activeTab === 'sectores' || activeTab === 'colaboradores') {
+      sectoresApi
+        .list()
+        .then((res) => setSectores(res.data.sort((a, b) => a.nombre.localeCompare(b.nombre))))
+        .catch(() => setSectores([]))
+        .finally(() => setSectoresLoading(false));
     }
   }, [activeTab]);
 
@@ -206,7 +235,7 @@ export function AdminPanel() {
       setColabFormData({
         nombre: '',
         email: '',
-        sector: 'tipo_a',
+        sector_id: sectores.length > 0 ? sectores[0].id : 1,
         estado_atencion: 'activo',
         rol: 'usuario',
         tarea_tipo_ids: [],
@@ -305,7 +334,7 @@ export function AdminPanel() {
     setEditingColabData({
       nombre: colab.nombre,
       email: colab.email,
-      sector: colab.sector as 'tipo_a' | 'tipo_b',
+      sector_id: colab.sector_id,
       estado_atencion: colab.estado_atencion as 'activo' | 'desafectado',
       rol: colab.rol as 'admin' | 'usuario',
       tarea_tipo_ids: colab.tarea_tipo_ids || [],
@@ -578,6 +607,12 @@ export function AdminPanel() {
           Colaboradores
         </button>
         <button
+          className={`tab-button ${activeTab === 'sectores' ? 'active' : ''}`}
+          onClick={() => setActiveTab('sectores')}
+        >
+          Sectores
+        </button>
+        <button
           className={`tab-button ${activeTab === 'franjas' ? 'active' : ''}`}
           onClick={() => setActiveTab('franjas')}
         >
@@ -670,17 +705,21 @@ export function AdminPanel() {
 
               <div className="form-row">
                 <div className="form-group">
-                  <label htmlFor="sector">Sector *</label>
+                  <label htmlFor="sector_id">Sector *</label>
                   <select
-                    id="sector"
-                    name="sector"
-                    value={editingColabId ? editingColabData?.sector || '' : colabFormData.sector}
+                    id="sector_id"
+                    name="sector_id"
+                    value={editingColabId ? editingColabData?.sector_id || '' : colabFormData.sector_id}
                     onChange={editingColabId ? handleEditColabChange : handleColabFormChange}
                     required
-                    disabled={colabFormLoading}
+                    disabled={colabFormLoading || sectoresLoading}
                   >
-                    <option value="tipo_a">Tipo-A</option>
-                    <option value="tipo_b">Tipo-B</option>
+                    <option value="">-- Seleccionar sector --</option>
+                    {sectores.map((s) => (
+                      <option key={s.id} value={s.id}>
+                        {s.nombre}
+                      </option>
+                    ))}
                   </select>
                 </div>
 

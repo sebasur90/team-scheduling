@@ -4,7 +4,7 @@ import { Colaborador } from './auth'
 export interface ColaboradorCreate {
   nombre: string
   email: string
-  sector: 'tipo_a' | 'tipo_b'
+  sector_id: number
   estado_atencion?: 'activo' | 'desafectado'
   rol?: 'admin' | 'usuario' | 'viewer'
   tarea_tipo_ids?: number[]
