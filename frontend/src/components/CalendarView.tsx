@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { turnosApi, TurnoAlmuerzoResponse } from '../api/turnos'
 import { franjasApi, FranjaHoraria } from '../api/franjas'
+import { diasNolaborablesApi, DiaNoLaborable } from '../api/diasNolaborables'
 import { useAuthContext } from '../contexts/AuthContext'
 import './CalendarView.css'
 
@@ -9,7 +10,11 @@ export const CalendarView: React.FC = () => {
   const [selectedWeekMonday, setSelectedWeekMonday] = useState<Date>(getMonday(new Date()))
   const [franjas, setFranjas] = useState<FranjaHoraria[]>([])
   const [turnos, setTurnos] = useState<Map<string, TurnoAlmuerzoResponse>>(new Map())
+  const [diasNoLaborables, setDiasNoLaborables] = useState<Set<string>>(new Set())
   const [isLoading, setIsLoading] = useState(true)
+  const [showDiaNoLaborableModal, setShowDiaNoLaborableModal] = useState<string | null>(null)
+  const [diaNoLaborableMotivo, setDiaNoLaborableMotivo] = useState('')
+  const [diaNoLaborableLoading, setDiaNoLaborableLoading] = useState(false)
 
   function getMonday(date: Date): Date {
     const d = new Date(date)
@@ -36,6 +41,12 @@ export const CalendarView: React.FC = () => {
       try {
         const franjasRes = await franjasApi.list()
         setFranjas(franjasRes.data.sort((a, b) => a.orden - b.orden))
+
+        // Load non-working days for this month
+        const monthStr = formatDate(selectedWeekMonday).substring(0, 7)
+        const diasRes = await diasNolaborablesApi.list(monthStr)
+        const diasSet = new Set(diasRes.data.map(d => d.fecha))
+        setDiasNoLaborables(diasSet)
 
         const turnosMap = new Map<string, TurnoAlmuerzoResponse>()
         const weekDays = []
@@ -151,10 +162,68 @@ export const CalendarView: React.FC = () => {
 
   const getAsignados = (date: Date, franjaId: number): string => {
     const turno = turnos.get(`${formatDate(date)}-${franjaId}`)
-    if (!turno || turno.asignaciones.length === 0) {
+    if (!turno) {
       return '—'
     }
+    if (turno.asignaciones.length === 0) {
+      return 'Sin turno'
+    }
     return turno.asignaciones.map((a) => a.colaborador.nombre.split(' ')[0]).join(', ')
+  }
+
+  const isDiaNoLaborable = (date: Date): boolean => {
+    return diasNoLaborables.has(formatDate(date))
+  }
+
+  const handleDiaNoLaborableClick = (date: Date) => {
+    if (!user || user.rol !== 'admin') return
+    const dateStr = formatDate(date)
+    if (isDiaNoLaborable(date)) {
+      handleRemoveDiaNoLaborable(dateStr)
+    } else {
+      setShowDiaNoLaborableModal(dateStr)
+      setDiaNoLaborableMotivo('')
+    }
+  }
+
+  const handleRemoveDiaNoLaborable = async (fecha: string) => {
+    try {
+      setDiaNoLaborableLoading(true)
+      await diasNolaborablesApi.delete(fecha)
+      const newDias = new Set(diasNoLaborables)
+      newDias.delete(fecha)
+      setDiasNoLaborables(newDias)
+    } catch (error) {
+      console.error('Error removing non-working day:', error)
+      alert('Error al quitar el día no laborable')
+    } finally {
+      setDiaNoLaborableLoading(false)
+    }
+  }
+
+  const handleAddDiaNoLaborable = async () => {
+    if (!showDiaNoLaborableModal || !diaNoLaborableMotivo.trim()) {
+      alert('Ingresa un motivo')
+      return
+    }
+
+    try {
+      setDiaNoLaborableLoading(true)
+      await diasNolaborablesApi.create({
+        fecha: showDiaNoLaborableModal,
+        motivo: diaNoLaborableMotivo,
+      })
+      const newDias = new Set(diasNoLaborables)
+      newDias.add(showDiaNoLaborableModal)
+      setDiasNoLaborables(newDias)
+      setShowDiaNoLaborableModal(null)
+      setDiaNoLaborableMotivo('')
+    } catch (error) {
+      console.error('Error adding non-working day:', error)
+      alert('Error al marcar el día no laborable')
+    } finally {
+      setDiaNoLaborableLoading(false)
+    }
   }
 
   return (
@@ -190,9 +259,15 @@ export const CalendarView: React.FC = () => {
             <tr>
               <th className="franja-col">Franja</th>
               {weekDays.map((date) => (
-                <th key={formatDate(date)} className="day-col">
+                <th
+                  key={formatDate(date)}
+                  className={`day-col ${isDiaNoLaborable(date) ? 'no-laborable' : ''}`}
+                  onClick={() => handleDiaNoLaborableClick(date)}
+                  style={{ cursor: user?.rol === 'admin' ? 'pointer' : 'default' }}
+                >
                   <div className="day-name">{getDayName(date)}</div>
                   <div className="day-date">{date.getDate()}</div>
+                  {isDiaNoLaborable(date) && <div className="no-laborable-badge">No laborable</div>}
                 </th>
               ))}
             </tr>
@@ -205,18 +280,62 @@ export const CalendarView: React.FC = () => {
                     {franja.hora_inicio} – {franja.hora_fin}
                   </div>
                 </td>
-                {weekDays.map((date) => (
-                  <td key={`${formatDate(date)}-${franja.id}`} className="turno-cell">
-                    <div className="turno-content">
-                      {getAsignados(date, franja.id)}
-                    </div>
-                  </td>
-                ))}
+                {weekDays.map((date) => {
+                  const dateStr = formatDate(date)
+                  const isSinTurno = getAsignados(date, franja.id) === 'Sin turno'
+                  return (
+                    <td
+                      key={`${dateStr}-${franja.id}`}
+                      className={`turno-cell ${isDiaNoLaborable(date) ? 'no-laborable-cell' : ''} ${isSinTurno ? 'sin-turno-cell' : ''}`}
+                    >
+                      <div className="turno-content">
+                        {getAsignados(date, franja.id)}
+                      </div>
+                    </td>
+                  )
+                })}
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+
+      {/* Modal for marking non-working day */}
+      {showDiaNoLaborableModal && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h3>Marcar día no laborable</h3>
+            <p>Fecha: {new Date(showDiaNoLaborableModal).toLocaleDateString('es-ES')}</p>
+            <div className="form-group">
+              <label htmlFor="motivo">Motivo:</label>
+              <input
+                id="motivo"
+                type="text"
+                value={diaNoLaborableMotivo}
+                onChange={(e) => setDiaNoLaborableMotivo(e.target.value)}
+                placeholder="Ej: Feriado, cierre"
+                disabled={diaNoLaborableLoading}
+              />
+            </div>
+            <div className="modal-actions">
+              <button
+                className="btn btn-primary"
+                onClick={handleAddDiaNoLaborable}
+                disabled={diaNoLaborableLoading}
+              >
+                {diaNoLaborableLoading ? 'Guardando...' : 'Guardar'}
+              </button>
+              <button
+                className="btn btn-secondary"
+                onClick={() => setShowDiaNoLaborableModal(null)}
+                disabled={diaNoLaborableLoading}
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="calendar-legend">
         <div className="legend-item">
