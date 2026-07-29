@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from app.database import get_db
-from app.models import TurnoAlmuerzo
+from app.models import TurnoAlmuerzo, FranjaHoraria
 from app.schemas.turno import TurnoListResponse, TurnoAlmuerzoResponse
 from datetime import date
 
@@ -19,6 +19,21 @@ def list_turnos_by_date(
 
     turnos = db.query(TurnoAlmuerzo).filter_by(fecha=fecha_obj).all()
 
-    response_turnos = [TurnoAlmuerzoResponse.model_validate(t) for t in turnos]
+    if turnos:
+        response_turnos = [TurnoAlmuerzoResponse.model_validate(t) for t in turnos]
+    else:
+        # If no turnos exist for this date, return all available franjas with empty assignments
+        franjas = db.query(FranjaHoraria).order_by(FranjaHoraria.orden).all()
+        response_turnos = [
+            TurnoAlmuerzoResponse(
+                id=0,
+                fecha=fecha_obj,
+                franja_horaria_id=f.id,
+                capacidad_maxima=2,
+                franja_horaria=f,
+                asignaciones=[]
+            )
+            for f in franjas
+        ]
 
     return TurnoListResponse(fecha=fecha_obj, franjas=response_turnos)

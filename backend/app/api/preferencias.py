@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from app.database import get_db
-from app.models import PreferenciaDiaria, Colaborador
+from app.models import PreferenciaDiaria, Colaborador, TurnoAlmuerzo
 from app.schemas.preferencia import PreferenciaCreate, PreferenciaResponse
 from app.dependencies import get_current_user
 from typing import Optional
@@ -17,6 +17,14 @@ def create_preferencia(
     current_user: Colaborador = Depends(get_current_user),
 ):
     """Create or replace a preference for a specific date. Only allowed if admin hasn't generated turns for that day."""
+    # Check if turnos already generated for this date
+    turnos_existentes = db.query(TurnoAlmuerzo).filter_by(fecha=data.fecha).first()
+    if turnos_existentes:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="No se pueden actualizar preferencias después de que el administrador ha generado los turnos para este día"
+        )
+
     existing = db.query(PreferenciaDiaria).filter_by(
         colaborador_id=current_user.id,
         fecha=data.fecha

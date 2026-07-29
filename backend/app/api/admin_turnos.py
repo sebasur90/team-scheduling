@@ -96,6 +96,44 @@ def generar_turnos_semana(
     }
 
 
+@router.post("/confirmar-semana", status_code=status.HTTP_200_OK)
+def confirmar_turnos_semana(
+    semana: str,
+    db: Session = Depends(get_db),
+    admin: Colaborador = Depends(get_admin_user),
+):
+    """Confirm and verify that a week's turnos have been persisted."""
+    fecha_lunes = date.fromisoformat(semana)
+
+    if fecha_lunes.weekday() != 0:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="El parámetro semana debe ser un lunes (YYYY-MM-DD)"
+        )
+
+    dias_semana = [fecha_lunes + timedelta(days=i) for i in range(5)]
+    turnos_confirmados = []
+
+    for fecha in dias_semana:
+        # Check if this is a non-working day
+        dia_no_laborable = db.query(DiaNoLaborable).filter_by(fecha=fecha).first()
+
+        if dia_no_laborable:
+            continue
+
+        # Get all turnos for this day
+        turnos = db.query(TurnoAlmuerzo).filter_by(fecha=fecha).all()
+        for turno in turnos:
+            turnos_confirmados.append(TurnoAlmuerzoResponse.model_validate(turno))
+
+    return {
+        "status": "confirmado",
+        "semana": semana,
+        "turnos_confirmados": turnos_confirmados,
+        "mensaje": f"Semana {semana} confirmada con {len(turnos_confirmados)} turnos."
+    }
+
+
 def _clean_orphaned_shifts(db: Session, fecha: date) -> None:
     """Delete all TurnoAlmuerzo for a given fecha (cascades to AsignacionAlmuerzo)."""
     turnos_existentes = db.query(TurnoAlmuerzo).filter_by(fecha=fecha).all()
