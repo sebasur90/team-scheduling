@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { ausenciasApi, Ausencia, VacacionesBloque } from '../api/ausencias'
-import { useAuthContext } from './AuthContext'
+import { useAuthContext } from '../contexts/AuthContext'
 import { colaboradoresApi } from '../api/colaboradores'
 import './Vacaciones.css'
 
