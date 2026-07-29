@@ -39,7 +39,7 @@ export const AdminDashboard: React.FC = () => {
       case 'colaboradores':
         return (
           <div className="dashboard-section">
-            <AdminPanel section="colaboradores" />
+            <AdminPanel />
           </div>
         )
       case 'tareas':
@@ -71,7 +71,7 @@ export const AdminDashboard: React.FC = () => {
       case 'configuracion':
         return (
           <div className="dashboard-section">
-            <AdminPanel section="configuracion" />
+            <AdminPanel />
           </div>
         )
       default:

@@ -24,12 +24,6 @@ export const NotificationCenter: React.FC = () => {
     loadNotifications()
   }, [])
 
-  const markAsRead = (id: number) => {
-    setNotifications((notifs) =>
-      notifs.map((n) => (n.id === id ? { ...n, leida: true } : n))
-    )
-  }
-
   const deleteNotification = (id: number) => {
     setNotifications((notifs) => notifs.filter((n) => n.id !== id))
   }

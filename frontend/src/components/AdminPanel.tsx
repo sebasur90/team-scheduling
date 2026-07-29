@@ -13,9 +13,7 @@ import { Colaborador } from '../api/auth';
 import client from '../api/client';
 import './AdminPanel.css';
 
-const API_URL = import.meta.env.VITE_API_URL;
-
-type Tab = 'colaboradores' | 'sectores' | 'franjas' | 'asignacion' | 'dias-no-laborables' | 'vacaciones' | 'configuracion' | 'incidencias' | 'preferencias';
+type Tab = 'colaboradores' | 'sectores' | 'franjas' | 'tareas-especiales' | 'asignacion' | 'dias-no-laborables' | 'vacaciones' | 'configuracion' | 'incidencias' | 'preferencias';
 type ChipState = 'assigned' | 'available' | 'conflict' | 'disabled';
 
 interface OverrideModalState {
@@ -83,6 +81,19 @@ export function AdminPanel() {
   const [editingFranjaId, setEditingFranjaId] = useState<number | null>(null);
   const [editingFranjaData, setEditingFranjaData] = useState<Partial<FranjaCreate> | null>(null);
 
+  // Tareas Especiales state
+  const [showTareaForm, setShowTareaForm] = useState(false);
+  const [tareaFormError, setTareaFormError] = useState<string | null>(null);
+  const [tareaFormLoading, setTareaFormLoading] = useState(false);
+  const [tareaFormData, setTareaFormData] = useState<any>({
+    nombre: '',
+    dia_semana_aplicable: [],
+    hora_inicio: '09:00',
+    hora_fin: '10:00',
+  });
+  const [editingTareaId, setEditingTareaId] = useState<number | null>(null);
+  const [editingTareaData, setEditingTareaData] = useState<Partial<any> | null>(null);
+
   // Colaboradores edit state
   const [editingColabId, setEditingColabId] = useState<number | null>(null);
   const [editingColabData, setEditingColabData] = useState<Partial<ColaboradorCreate> | null>(null);
@@ -94,7 +105,6 @@ export function AdminPanel() {
   const [turnosData, setTurnosData] = useState<TurnoListResponse | null>(null);
   const [turnosLoading, setTurnosLoading] = useState(false);
   const [turnosError, setTurnosError] = useState<string | null>(null);
-  const [assignmentLoading, setAssignmentLoading] = useState<number | null>(null);
   const [overrideModal, setOverrideModal] = useState<OverrideModalState | null>(null);
   const [deleteTurnoModal, setDeleteTurnoModal] = useState<DeleteTurnoModalState | null>(null);
   const [operationLoading, setOperationLoading] = useState(false);
@@ -111,7 +121,6 @@ export function AdminPanel() {
 
   // Días no laborables state
   const [diasNoLaborables, setDiasNoLaborables] = useState<DiaNoLaborable[]>([]);
-  const [diasLoading, setDiasLoading] = useState(true);
   const [showDiaForm, setShowDiaForm] = useState(false);
   const [diaFormError, setDiaFormError] = useState<string | null>(null);
   const [diaFormLoading, setDiaFormLoading] = useState(false);
@@ -189,8 +198,7 @@ export function AdminPanel() {
       diasNolaborablesApi
         .list(mes)
         .then((res) => setDiasNoLaborables(res.data))
-        .catch(() => setDiasNoLaborables([]))
-        .finally(() => setDiasLoading(false));
+        .catch(() => setDiasNoLaborables([]));
     }
   }, [activeTab]);
 
@@ -334,6 +342,112 @@ export function AdminPanel() {
     }));
   };
 
+  // Tareas Especiales handlers
+  const handleTareaFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    const checked = (e.target as HTMLInputElement).checked;
+
+    if (name.startsWith('dia_')) {
+      const dia = parseInt(name.split('_')[1]);
+      setTareaFormData((prev: any) => ({
+        ...prev,
+        dia_semana_aplicable: checked
+          ? [...(prev.dia_semana_aplicable || []), dia]
+          : (prev.dia_semana_aplicable || []).filter((d: number) => d !== dia),
+      }));
+    } else {
+      setTareaFormData((prev: any) => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
+    setTareaFormError(null);
+  };
+
+  const handleCreateTarea = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setTareaFormLoading(true);
+    setTareaFormError(null);
+
+    try {
+      const newTarea = await tareasEspecialesApi.createTipo(tareaFormData);
+      setTareasEspeciales([...tareasEspeciales, newTarea.data]);
+      setTareaFormData({
+        nombre: '',
+        dia_semana_aplicable: [],
+        hora_inicio: '09:00',
+        hora_fin: '10:00',
+      });
+      setShowTareaForm(false);
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.detail || err.message || 'Error al crear tarea especial';
+      setTareaFormError(errorMessage);
+    } finally {
+      setTareaFormLoading(false);
+    }
+  };
+
+  const handleEditTarea = (tarea: TareaEspecialTipo) => {
+    setEditingTareaId(tarea.id);
+    setEditingTareaData({
+      nombre: tarea.nombre,
+      dia_semana_aplicable: tarea.dia_semana_aplicable,
+      hora_inicio: tarea.hora_inicio,
+      hora_fin: tarea.hora_fin,
+    });
+  };
+
+  const handleUpdateTarea = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingTareaId || !editingTareaData) return;
+
+    try {
+      setTareaFormLoading(true);
+      const updated = await tareasEspecialesApi.updateTipo(editingTareaId, editingTareaData);
+      setTareasEspeciales(
+        tareasEspeciales.map((t) => (t.id === editingTareaId ? updated.data : t))
+      );
+      setEditingTareaId(null);
+      setEditingTareaData(null);
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.detail || err.message || 'Error al actualizar tarea especial';
+      alert(`Error: ${errorMessage}`);
+    } finally {
+      setTareaFormLoading(false);
+    }
+  };
+
+  const handleEditTareaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    const checked = (e.target as HTMLInputElement).checked;
+
+    if (name.startsWith('dia_')) {
+      const dia = parseInt(name.split('_')[1]);
+      setEditingTareaData((prev: any) => ({
+        ...prev,
+        dia_semana_aplicable: checked
+          ? [...(prev?.dia_semana_aplicable || []), dia]
+          : (prev?.dia_semana_aplicable || []).filter((d: number) => d !== dia),
+      }));
+    } else {
+      setEditingTareaData((prev: any) => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
+  };
+
+  const handleDeleteTarea = async (tareaId: number) => {
+    if (!window.confirm('¿Eliminar esta tarea especial?')) return;
+
+    try {
+      await tareasEspecialesApi.deleteTipo(tareaId);
+      setTareasEspeciales(tareasEspeciales.filter((t) => t.id !== tareaId));
+    } catch (err: any) {
+      alert(`Error: ${err.response?.data?.detail || err.message}`);
+    }
+  };
+
   // Sectores handlers
   const handleSectorFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
@@ -455,6 +569,18 @@ export function AdminPanel() {
     }
   };
 
+  const handleDeleteColaborador = async (colabId: number) => {
+    if (!window.confirm('¿Estás seguro de que deseas eliminar este colaborador?')) return;
+
+    try {
+      await colaboradoresApi.delete(colabId);
+      setColaboradores(colaboradores.filter((c) => c.id !== colabId));
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.detail || err.message || 'Error al eliminar colaborador';
+      alert(`Error: ${errorMessage}`);
+    }
+  };
+
   const handleEditColabChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
     const checked = (e.target as HTMLInputElement).checked;
@@ -475,21 +601,6 @@ export function AdminPanel() {
     }
   };
 
-  const handleAsignacionChange = async (asignacionId: number, nuevoColaboradorId: number) => {
-    setAssignmentLoading(asignacionId);
-    try {
-      await turnosApi.updateAsignacion(asignacionId, nuevoColaboradorId);
-      turnosApi
-        .list(asignacionFecha)
-        .then((res) => setTurnosData(res.data))
-        .catch((err) => setTurnosError(err.message));
-    } catch (err: any) {
-      const errorMessage = err.response?.data?.detail || err.message || 'Error al asignar';
-      alert(`Error: ${errorMessage}`);
-    } finally {
-      setAssignmentLoading(null);
-    }
-  };
 
   const getChipState = (colab: Colaborador, turno: TurnoAlmuerzoResponse): ChipState => {
     const isAssigned = turno.asignaciones.some((a) => a.colaborador_id === colab.id);
@@ -715,6 +826,12 @@ export function AdminPanel() {
           Franjas
         </button>
         <button
+          className={`tab-button ${activeTab === 'tareas-especiales' ? 'active' : ''}`}
+          onClick={() => setActiveTab('tareas-especiales')}
+        >
+          Tareas Especiales
+        </button>
+        <button
           className={`tab-button ${activeTab === 'asignacion' ? 'active' : ''}`}
           onClick={() => setActiveTab('asignacion')}
         >
@@ -793,7 +910,7 @@ export function AdminPanel() {
                     value={editingColabId ? editingColabData?.email || '' : colabFormData.email}
                     onChange={editingColabId ? handleEditColabChange : handleColabFormChange}
                     required={!editingColabId}
-                    disabled={editingColabId || colabFormLoading}
+                    disabled={!!editingColabId || colabFormLoading}
                     placeholder="Ej: juan@example.com"
                   />
                 </div>
@@ -933,6 +1050,13 @@ export function AdminPanel() {
                           >
                             ✏
                           </button>
+                          <button
+                            type="button"
+                            className="btn-icon btn-delete"
+                            onClick={() => handleDeleteColaborador(colab.id)}
+                          >
+                            🗑
+                          </button>
                         </td>
                       </tr>
                     );
@@ -1041,7 +1165,7 @@ export function AdminPanel() {
                       onChange={editingSectorId ? handleEditSectorChange : handleSectorFormChange}
                       disabled={sectorFormLoading}
                     />
-                    Participa en turnos de almuerzo
+                    Participa en turnos
                   </label>
                 </div>
               </div>
@@ -1079,7 +1203,7 @@ export function AdminPanel() {
                     <th>Capacidad Máx.</th>
                     <th>Mín. Cobertura</th>
                     <th>Acceso</th>
-                    <th>Almuerzo</th>
+                    <th>Participa</th>
                     <th>Color</th>
                     <th>Acciones</th>
                   </tr>
@@ -1252,10 +1376,169 @@ export function AdminPanel() {
         </div>
       )}
 
+      {/* TAREAS ESPECIALES TAB */}
+      {activeTab === 'tareas-especiales' && (
+        <div className="admin-tab-content">
+          <div className="tab-header">
+            <h3>Tareas Especiales</h3>
+            <button
+              className="btn btn-primary btn-small"
+              onClick={() => setShowTareaForm(!showTareaForm)}
+            >
+              + Nueva Tarea Especial
+            </button>
+          </div>
+
+          {(showTareaForm || editingTareaId) && (
+            <form onSubmit={editingTareaId ? handleUpdateTarea : handleCreateTarea} className="admin-form">
+              {tareaFormError && <div className="form-error">{tareaFormError}</div>}
+
+              <div className="form-row">
+                <div className="form-group">
+                  <label htmlFor="nombre">Nombre *</label>
+                  <input
+                    type="text"
+                    id="nombre"
+                    name="nombre"
+                    value={editingTareaId ? editingTareaData?.nombre || '' : tareaFormData.nombre}
+                    onChange={editingTareaId ? handleEditTareaChange : handleTareaFormChange}
+                    required
+                    disabled={tareaFormLoading}
+                    placeholder="Ej: Supervisión"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="hora_inicio">Hora Inicio *</label>
+                  <input
+                    type="time"
+                    id="hora_inicio"
+                    name="hora_inicio"
+                    value={editingTareaId ? editingTareaData?.hora_inicio || '' : tareaFormData.hora_inicio}
+                    onChange={editingTareaId ? handleEditTareaChange : handleTareaFormChange}
+                    required
+                    disabled={tareaFormLoading}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="hora_fin">Hora Fin *</label>
+                  <input
+                    type="time"
+                    id="hora_fin"
+                    name="hora_fin"
+                    value={editingTareaId ? editingTareaData?.hora_fin || '' : tareaFormData.hora_fin}
+                    onChange={editingTareaId ? handleEditTareaChange : handleTareaFormChange}
+                    required
+                    disabled={tareaFormLoading}
+                  />
+                </div>
+              </div>
+
+              <div className="form-row">
+                <fieldset className="form-group">
+                  <legend>Días Aplicables *</legend>
+                  <div className="dias-checkbox-group">
+                    {['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'].map((dia, idx) => {
+                      const diasArray = editingTareaId
+                        ? (editingTareaData?.dia_semana_aplicable || [])
+                        : (tareaFormData.dia_semana_aplicable || []);
+                      return (
+                        <label key={idx} className="checkbox-inline">
+                          <input
+                            type="checkbox"
+                            name={`dia_${idx}`}
+                            checked={diasArray.includes(idx)}
+                            onChange={editingTareaId ? handleEditTareaChange : handleTareaFormChange}
+                            disabled={tareaFormLoading}
+                          />
+                          {dia}
+                        </label>
+                      );
+                    })}
+                  </div>
+                </fieldset>
+              </div>
+
+              <div className="form-actions">
+                <button type="submit" className="btn btn-primary" disabled={tareaFormLoading}>
+                  {tareaFormLoading ? 'Guardando...' : editingTareaId ? 'Actualizar Tarea' : 'Crear Tarea'}
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => {
+                    setShowTareaForm(false);
+                    setEditingTareaId(null);
+                    setEditingTareaData(null);
+                    setTareaFormError(null);
+                  }}
+                  disabled={tareaFormLoading}
+                >
+                  Cancelar
+                </button>
+              </div>
+            </form>
+          )}
+
+          {colabLoading ? (
+            <div className="loading">Cargando tareas especiales...</div>
+          ) : tareasEspeciales.length === 0 ? (
+            <div className="empty-state">No hay tareas especiales creadas</div>
+          ) : (
+            <div className="table-wrapper">
+              <table className="admin-table">
+                <thead>
+                  <tr>
+                    <th>Nombre</th>
+                    <th>Hora Inicio</th>
+                    <th>Hora Fin</th>
+                    <th>Días Aplicables</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {tareasEspeciales.map((tarea) => {
+                    const diasNombres = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
+                    const diasAplicables = diasNombres
+                      .map((d, idx) => (tarea.dia_semana_aplicable?.includes(idx) ? d : null))
+                      .filter(Boolean)
+                      .join(', ');
+                    return (
+                      <tr key={tarea.id}>
+                        <td>{tarea.nombre}</td>
+                        <td>{tarea.hora_inicio}</td>
+                        <td>{tarea.hora_fin}</td>
+                        <td>{diasAplicables || '–'}</td>
+                        <td>
+                          <button
+                            className="btn btn-small btn-info"
+                            onClick={() => handleEditTarea(tarea)}
+                            disabled={editingTareaId === tarea.id}
+                          >
+                            Editar
+                          </button>
+                          <button
+                            className="btn btn-small btn-danger"
+                            onClick={() => handleDeleteTarea(tarea.id)}
+                          >
+                            Eliminar
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* ASIGNACIÓN DE TURNOS TAB */}
       {activeTab === 'asignacion' && (
         <div className="admin-tab-content">
-          <h3>Asignación de Horarios de Almuerzo</h3>
+          <h3>Asignación de Turnos</h3>
 
           <div className="form-row">
             <div className="form-group">
@@ -1266,16 +1549,6 @@ export function AdminPanel() {
                 value={asignacionFecha}
                 onChange={(e) => setAsignacionFecha(e.target.value)}
               />
-            </div>
-            <div className="form-group">
-              <label>&nbsp;</label>
-              <button
-                onClick={handleGenerarTurnos}
-                disabled={turnosLoading}
-                className="btn btn-primary"
-              >
-                {turnosLoading ? 'Generando...' : 'Generar Turnos de la Semana'}
-              </button>
             </div>
           </div>
 
@@ -1364,7 +1637,7 @@ export function AdminPanel() {
                   <strong>{overrideModal.conflictingColaborador.nombre}</strong>).
                   <br />
                   <br />
-                  La función <strong>{getSectorName(overrideModal.colaborador.sector_id)}</strong> quedaría sin cobertura durante el almuerzo. ¿Igualmente asignar?
+                  La función <strong>{getSectorName(overrideModal.colaborador.sector_id)}</strong> quedaría sin cobertura durante este turno. ¿Igualmente asignar?
                 </p>
                 <div className="modal-actions">
                   <button

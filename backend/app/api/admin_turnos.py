@@ -17,6 +17,10 @@ class CreateAsignacionRequest(BaseModel):
     colaborador_id: int
 
 
+class GenerateDayRequest(BaseModel):
+    fecha: str
+
+
 @router.post("/generar-semana", status_code=status.HTTP_200_OK)
 def generar_turnos_semana(
     semana: str,
@@ -103,6 +107,83 @@ def generar_turnos_semana(
         "dias_con_advertencia": dias_con_advertencia,
         "dias_con_error": dias_con_error,
         "mensaje": f"Semana generada. {len(dias_salteados)} día(s) salteado(s), {len(dias_con_advertencia)} con advertencia(s), {len(dias_con_error)} error(es)."
+    }
+
+
+@router.post("/generate-day", status_code=status.HTTP_200_OK)
+def generar_turnos_dia(
+    request: GenerateDayRequest,
+    db: Session = Depends(get_db),
+    admin: Colaborador = Depends(get_admin_user),
+):
+    """
+    Generate turns for a specific day using the AssignmentEngine.
+    Respects coverage, preferences, and slot rotation.
+    Skips non-working days and cleans orphaned shifts.
+    """
+    fecha = date.fromisoformat(request.fecha)
+
+    turnos_generados = []
+    dias_salteados = []
+    dias_con_error = []
+    dias_con_advertencia = []
+    conflictos = []
+
+    # Check if this is a non-working day
+    dia_no_laborable = db.query(DiaNoLaborable).filter_by(fecha=fecha).first()
+
+    if dia_no_laborable:
+        # Clean up any existing turnos for this date
+        _clean_orphaned_shifts(db, fecha)
+
+        dias_salteados.append({
+            "fecha": fecha.isoformat(),
+            "motivo": dia_no_laborable.motivo
+        })
+    else:
+        # Run the assignment engine for this day
+        engine = AssignmentEngine(db, fecha)
+        result = engine.run()
+
+        if not result.success:
+            dias_con_error.append({
+                "fecha": fecha.isoformat(),
+                "error": result.error
+            })
+        else:
+            # Persist the day's assignments (success with or without warnings)
+            try:
+                _persist_day_assignments(db, fecha, result.cronograma, result.puntajes_actualizados)
+
+                # Track warnings if any
+                if result.advertencias:
+                    dias_con_advertencia.append({
+                        "fecha": fecha.isoformat(),
+                        "advertencias": result.advertencias
+                    })
+
+                # Build response with turnos for this day
+                turnos_dia = db.query(TurnoAlmuerzo).filter_by(fecha=fecha).all()
+                for turno in turnos_dia:
+                    turnos_generados.append(TurnoAlmuerzoResponse.model_validate(turno))
+
+            except Exception as e:
+                dias_con_error.append({
+                    "fecha": fecha.isoformat(),
+                    "error": f"Error persisting assignments: {str(e)}"
+                })
+
+    db.commit()
+
+    return {
+        "status": "generado",
+        "fecha": request.fecha,
+        "turnos_generados": turnos_generados,
+        "conflictos": conflictos,
+        "dias_salteados": dias_salteados,
+        "dias_con_advertencia": dias_con_advertencia,
+        "dias_con_error": dias_con_error,
+        "mensaje": f"Día generado. {len(dias_salteados)} día(s) salteado(s), {len(dias_con_advertencia)} con advertencia(s), {len(dias_con_error)} error(es)."
     }
 
 

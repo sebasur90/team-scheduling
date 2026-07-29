@@ -13,13 +13,13 @@ export const Header: React.FC<HeaderProps> = ({ user, isAdmin, onLogout }) => {
     <header className="header">
       <div className="header-container">
         <div className="header-left">
-          <h1 className="logo">🍽️ Almuerzos</h1>
+          <h1 className="logo">🏢 Organización</h1>
         </div>
         <div className="header-right">
           <div className="user-info">
             <span className="user-name">{user.nombre}</span>
-            <span className={`user-role badge badge-${user.sector}`}>
-              {user.sector}
+            <span className={`user-role badge badge-${user.sector_id}`}>
+              Sector {user.sector_id}
             </span>
             {isAdmin && <span className="admin-badge">Administrador</span>}
           </div>

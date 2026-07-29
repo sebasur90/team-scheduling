@@ -1,6 +1,8 @@
 import client from './client'
 import { Colaborador } from './auth'
 
+export type { Colaborador }
+
 export interface ColaboradorCreate {
   nombre: string
   email: string
@@ -22,6 +24,9 @@ export const colaboradoresApi = {
 
   update: (id: number, data: Partial<Colaborador>) =>
     client.patch<Colaborador>(`/colaboradores/${id}`, data),
+
+  delete: (id: number) =>
+    client.delete(`/colaboradores/${id}`),
 
   updatePreference: (franjaId: number | null) =>
     client.patch<Colaborador>('/colaboradores/me/preferencia', {

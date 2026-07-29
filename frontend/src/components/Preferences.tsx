@@ -56,7 +56,7 @@ export const Preferences: React.FC = () => {
   return (
     <div className="preferences">
       <div className="preferences-card">
-        <h2>Tu Preferencia de Franja de Almuerzo</h2>
+        <h2>Tu Preferencia de Franja Horaria</h2>
         <p className="preferences-description">
           Indica tu franja horaria preferida. El sistema la considerará al asignarte turnos.
         </p>
@@ -71,7 +71,7 @@ export const Preferences: React.FC = () => {
           <label>Franja Horaria Preferida:</label>
           {franjas.length === 0 ? (
             <div className="alert alert-warning">
-              El administrador aún no cargó los horarios de almuerzo disponibles.
+              El administrador aún no cargó los horarios disponibles.
             </div>
           ) : (
             <div className="franjas-selection">

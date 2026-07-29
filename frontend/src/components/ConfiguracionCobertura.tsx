@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { configuracionApi, type ConfiguracionCobertura, type ConfiguracionCoberturaUpdate } from '../api/configuracion';
 
 export function ConfiguracionCobertura() {

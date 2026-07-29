@@ -1,12 +1,20 @@
 import React, { useState, useEffect } from 'react'
 import { turnosApi, TurnoAlmuerzoResponse } from '../api/turnos'
 import { franjasApi, FranjaHoraria } from '../api/franjas'
-import { diasNolaborablesApi, DiaNoLaborable } from '../api/diasNolaborables'
+import { diasNolaborablesApi } from '../api/diasNolaborables'
 import { ausenciasApi, Ausencia } from '../api/ausencias'
 import { useAuthContext } from '../contexts/AuthContext'
 import './CalendarView.css'
 
 import { colaboradoresApi, type Colaborador } from '../api/colaboradores'
+
+interface GenerationResult {
+  status: string
+  message: string
+  dias_con_advertencia: Array<{ fecha: string; advertencias: string[] }>
+  dias_con_error: Array<{ fecha: string; error: string }>
+  dias_salteados: Array<{ fecha: string; motivo: string }>
+}
 
 export const CalendarView: React.FC = () => {
   const { user } = useAuthContext()
@@ -20,6 +28,8 @@ export const CalendarView: React.FC = () => {
   const [showDiaNoLaborableModal, setShowDiaNoLaborableModal] = useState<string | null>(null)
   const [diaNoLaborableMotivo, setDiaNoLaborableMotivo] = useState('')
   const [diaNoLaborableLoading, setDiaNoLaborableLoading] = useState(false)
+  const [generationResult, setGenerationResult] = useState<GenerationResult | null>(null)
+  const [isGenerating, setIsGenerating] = useState(false)
 
   function getMonday(date: Date): Date {
     const d = new Date(date)
@@ -35,7 +45,7 @@ export const CalendarView: React.FC = () => {
     return `${year}-${month}-${day}`
   }
 
-  function getDayName(date: Date, locale: string = 'es-ES'): string {
+  function getDayName(date: Date): string {
     const days = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sab']
     return days[date.getDay()]
   }
@@ -171,7 +181,7 @@ export const CalendarView: React.FC = () => {
     }
   }
 
-  const weekDays = []
+  const weekDays: Date[] = []
   for (let i = 0; i < 5; i++) {
     const date = new Date(selectedWeekMonday)
     date.setDate(date.getDate() + i)
@@ -211,7 +221,7 @@ export const CalendarView: React.FC = () => {
         {turno.asignaciones.map((a, idx) => (
           <span
             key={idx}
-            className={`pill pill-${a.colaborador.sector}`}
+            className={`pill pill-${a.colaborador.sector_id}`}
             title={a.colaborador.nombre}
           >
             {a.colaborador.nombre.split(' ')[0]}
@@ -298,6 +308,88 @@ export const CalendarView: React.FC = () => {
     }
   }
 
+  const handleGenerarDesdeElDia = async (date: Date) => {
+    try {
+      setIsGenerating(true)
+      const startDate = new Date(date)
+      const endDateOfWeek = new Date(selectedWeekMonday)
+      endDateOfWeek.setDate(endDateOfWeek.getDate() + 4) // Friday
+
+      const daysToGenerate = []
+      for (let d = new Date(startDate); d <= endDateOfWeek; d.setDate(d.getDate() + 1)) {
+        daysToGenerate.push(new Date(d))
+      }
+
+      const results: GenerationResult[] = []
+
+      for (const day of daysToGenerate) {
+        const dateStr = formatDate(day)
+        try {
+          const response = await turnosApi.generateDay(dateStr)
+          results.push({
+            status: response.data.status,
+            message: response.data.mensaje,
+            dias_con_advertencia: response.data.dias_con_advertencia || [],
+            dias_con_error: response.data.dias_con_error || [],
+            dias_salteados: response.data.dias_salteados || [],
+          })
+        } catch (error: any) {
+          console.error(`Error generating day ${dateStr}:`, error)
+          results.push({
+            status: 'error',
+            message: `Error en ${dateStr}`,
+            dias_con_advertencia: [],
+            dias_con_error: [{ fecha: dateStr, error: error.response?.data?.detail || error.message }],
+            dias_salteados: [],
+          })
+        }
+      }
+
+      // Aggregate results
+      const aggregated: GenerationResult = {
+        status: results.some(r => r.status === 'error') ? 'error' : results.some(r => r.status === 'warning') ? 'warning' : 'ok',
+        message: `Generación completada para ${daysToGenerate.length} día(s)`,
+        dias_con_advertencia: results.flatMap(r => r.dias_con_advertencia),
+        dias_con_error: results.flatMap(r => r.dias_con_error),
+        dias_salteados: results.flatMap(r => r.dias_salteados),
+      }
+
+      setGenerationResult(aggregated)
+
+      // Reload calendar data
+      const turnosMap = new Map<string, TurnoAlmuerzoResponse>()
+      const weekDays = []
+      for (let i = 0; i < 5; i++) {
+        const d = new Date(selectedWeekMonday)
+        d.setDate(d.getDate() + i)
+        weekDays.push(d)
+      }
+
+      await Promise.all(
+        weekDays.map(async (d) => {
+          const dateStr = formatDate(d)
+          const res = await turnosApi.list(dateStr)
+          res.data.franjas.forEach((turno) => {
+            turnosMap.set(`${dateStr}-${turno.franja_horaria_id}`, turno)
+          })
+        })
+      )
+
+      setTurnos(turnosMap)
+    } catch (error: any) {
+      console.error('Error in handleGenerarDesdeElDia:', error)
+      setGenerationResult({
+        status: 'error',
+        message: 'Error al generar turnos',
+        dias_con_advertencia: [],
+        dias_con_error: [],
+        dias_salteados: [],
+      })
+    } finally {
+      setIsGenerating(false)
+    }
+  }
+
   return (
     <div className="calendar-view">
       <div className="calendar-header">
@@ -337,8 +429,25 @@ export const CalendarView: React.FC = () => {
                   onClick={() => handleDiaNoLaborableClick(date)}
                   style={{ cursor: user?.rol === 'admin' ? 'pointer' : 'default' }}
                 >
-                  <div className="day-name">{getDayName(date)}</div>
-                  <div className="day-date">{date.getDate()}</div>
+                  <div className="day-header">
+                    <div>
+                      <div className="day-name">{getDayName(date)}</div>
+                      <div className="day-date">{date.getDate()}</div>
+                    </div>
+                    {user?.rol === 'admin' && (
+                      <button
+                        className="btn-generar-dia"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleGenerarDesdeElDia(date)
+                        }}
+                        disabled={isGenerating}
+                        title="Generar desde este día"
+                      >
+                        ↻
+                      </button>
+                    )}
+                  </div>
                   {isDiaNoLaborable(date) && <div className="no-laborable-badge">No laborable</div>}
                 </th>
               ))}
@@ -418,6 +527,80 @@ export const CalendarView: React.FC = () => {
                 disabled={diaNoLaborableLoading}
               >
                 Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal for generation result */}
+      {generationResult && (
+        <div className="modal-overlay" onClick={() => setGenerationResult(null)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Resultado de Generación</h3>
+              <button
+                className="modal-close"
+                onClick={() => setGenerationResult(null)}
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="modal-body">
+              <p className="modal-message">{generationResult.message}</p>
+
+              {generationResult.dias_salteados.length > 0 && (
+                <div className="result-section">
+                  <h4>Días Saltados ({generationResult.dias_salteados.length})</h4>
+                  <ul>
+                    {generationResult.dias_salteados.map((d) => (
+                      <li key={d.fecha}>
+                        <strong>{d.fecha}</strong>: {d.motivo}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {generationResult.dias_con_advertencia.length > 0 && (
+                <div className="result-section warning">
+                  <h4>Días con Advertencia ⚠️ ({generationResult.dias_con_advertencia.length})</h4>
+                  <ul>
+                    {generationResult.dias_con_advertencia.map((d) => (
+                      <li key={d.fecha}>
+                        <strong>{d.fecha}</strong>:
+                        <ul>
+                          {d.advertencias.map((adv, idx) => (
+                            <li key={`${d.fecha}-adv-${idx}`}>{adv}</li>
+                          ))}
+                        </ul>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {generationResult.dias_con_error.length > 0 && (
+                <div className="result-section error">
+                  <h4>Días con Error ❌ ({generationResult.dias_con_error.length})</h4>
+                  <ul>
+                    {generationResult.dias_con_error.map((d) => (
+                      <li key={d.fecha}>
+                        <strong>{d.fecha}</strong>: {d.error}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+
+            <div className="modal-footer">
+              <button
+                className="btn btn-secondary"
+                onClick={() => setGenerationResult(null)}
+              >
+                Cerrar
               </button>
             </div>
           </div>

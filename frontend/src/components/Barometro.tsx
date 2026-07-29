@@ -1,4 +1,3 @@
-import React from 'react';
 import { useBarometro } from '../hooks/useBarometro';
 import './Barometro.css';
 

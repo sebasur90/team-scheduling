@@ -48,6 +48,8 @@ export const turnosApi = {
     client.get<TurnoListResponse>(`/turnos?fecha=${fecha}`),
   generateWeek: (semana: string) =>
     client.post<GenerarSemanaResponse>(`/admin/turnos/generar-semana?semana=${semana}`),
+  generateDay: (fecha: string) =>
+    client.post<GenerarSemanaResponse>(`/admin/turnos/generate-day`, { fecha }),
   confirmWeek: (semana: string) =>
     client.post<ConfirmarSemanaResponse>(`/admin/turnos/confirmar-semana?semana=${semana}`),
   updateAsignacion: (asignacionId: number, colaboradorId: number) =>

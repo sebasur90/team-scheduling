@@ -26,7 +26,7 @@ export const Login: React.FC = () => {
   return (
     <div className="login-container">
       <div className="login-card">
-        <h1>Gestión de Turnos de Almuerzo</h1>
+        <h1>Gestión de Organización</h1>
         <p className="subtitle">Ingresa tu email para continuar</p>
 
         {error && <div className="alert alert-error">{error}</div>}

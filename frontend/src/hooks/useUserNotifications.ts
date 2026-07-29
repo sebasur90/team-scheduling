@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useAuthContext } from '../contexts/AuthContext';
 import { db } from '../lib/firebase';
-import { collection, collectionGroup, query, where, onSnapshot } from 'firebase/firestore';
+import { collection, query, onSnapshot } from 'firebase/firestore';
 
 export interface UserNotification {
   id: number;
