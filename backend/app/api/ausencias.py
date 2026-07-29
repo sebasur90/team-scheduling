@@ -3,14 +3,14 @@ from sqlalchemy.orm import Session
 from datetime import date, timedelta
 from typing import List, Optional
 from app.database import get_db
-from app.models import Ausencia, Colaborador, AsignacionAlmuerzo
+from app.models import Ausencia, Colaborador, AsignacionAlmuerzo, TurnoAlmuerzo
 from app.schemas.ausencia import (
     AusenciaCreateRango,
     AusenciaDeleteBloque,
     AusenciaResponse,
     VacacionesBlockResponse,
 )
-from app.dependencies import get_current_user, get_admin_user
+from app.dependencies import get_current_user
 
 router = APIRouter(prefix="/ausencias", tags=["ausencias"], redirect_slashes=False)
 
@@ -77,7 +77,9 @@ def create_vacaciones(
     # Delete existing lunch assignments for these days
     db.query(AsignacionAlmuerzo).filter(
         AsignacionAlmuerzo.colaborador_id == data.colaborador_id,
-        AsignacionAlmuerzo.fecha.in_(dias_crear),
+        AsignacionAlmuerzo.turno_almuerzo_id.in_(
+            db.query(TurnoAlmuerzo.id).filter(TurnoAlmuerzo.fecha.in_(dias_crear))
+        ),
     ).delete()
 
     # Create vacation records
