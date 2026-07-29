@@ -5,10 +5,11 @@ import { Barometro } from './Barometro'
 import { CalendarView } from './CalendarView'
 import { Preferences } from './Preferences'
 import { NotificationCenter } from './NotificationCenter'
+import { Vacaciones } from './Vacaciones'
 import { AdminPanel } from './AdminPanel'
 import './Dashboard.css'
 
-type TabType = 'calendar' | 'preferences' | 'notifications'
+type TabType = 'calendar' | 'preferences' | 'vacaciones' | 'notifications'
 
 export const Dashboard: React.FC = () => {
   const { user, logout } = useAuth()
@@ -41,6 +42,12 @@ export const Dashboard: React.FC = () => {
             ✨ Preferencias
           </button>
           <button
+            className={`tab-button ${activeTab === 'vacaciones' ? 'active' : ''}`}
+            onClick={() => setActiveTab('vacaciones')}
+          >
+            🏖️ Vacaciones
+          </button>
+          <button
             className={`tab-button ${activeTab === 'notifications' ? 'active' : ''}`}
             onClick={() => setActiveTab('notifications')}
           >
@@ -51,6 +58,7 @@ export const Dashboard: React.FC = () => {
         <div className="tab-content">
           {activeTab === 'calendar' && <CalendarView />}
           {activeTab === 'preferences' && <Preferences />}
+          {activeTab === 'vacaciones' && <Vacaciones mode="personal" />}
           {activeTab === 'notifications' && <NotificationCenter />}
         </div>
       </main>

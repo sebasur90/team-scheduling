@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { turnosApi, TurnoAlmuerzoResponse } from '../api/turnos'
 import { franjasApi, FranjaHoraria } from '../api/franjas'
 import { diasNolaborablesApi, DiaNoLaborable } from '../api/diasNolaborables'
+import { ausenciasApi, Ausencia } from '../api/ausencias'
 import { useAuthContext } from '../contexts/AuthContext'
 import './CalendarView.css'
 
@@ -11,6 +12,7 @@ export const CalendarView: React.FC = () => {
   const [franjas, setFranjas] = useState<FranjaHoraria[]>([])
   const [turnos, setTurnos] = useState<Map<string, TurnoAlmuerzoResponse>>(new Map())
   const [diasNoLaborables, setDiasNoLaborables] = useState<Set<string>>(new Set())
+  const [vacaciones, setVacaciones] = useState<Map<string, Ausencia[]>>(new Map())
   const [isLoading, setIsLoading] = useState(true)
   const [showDiaNoLaborableModal, setShowDiaNoLaborableModal] = useState<string | null>(null)
   const [diaNoLaborableMotivo, setDiaNoLaborableMotivo] = useState('')
@@ -47,6 +49,17 @@ export const CalendarView: React.FC = () => {
         const diasRes = await diasNolaborablesApi.list(monthStr)
         const diasSet = new Set(diasRes.data.map(d => d.fecha))
         setDiasNoLaborables(diasSet)
+
+        // Load vacaciones for this month
+        const vacacionesRes = await ausenciasApi.list(undefined, monthStr)
+        const vacacionesMap = new Map<string, Ausencia[]>()
+        vacacionesRes.data.forEach(v => {
+          if (!vacacionesMap.has(v.fecha)) {
+            vacacionesMap.set(v.fecha, [])
+          }
+          vacacionesMap.get(v.fecha)!.push(v)
+        })
+        setVacaciones(vacacionesMap)
 
         const turnosMap = new Map<string, TurnoAlmuerzoResponse>()
         const weekDays = []
@@ -171,6 +184,52 @@ export const CalendarView: React.FC = () => {
     return turno.asignaciones.map((a) => a.colaborador.nombre.split(' ')[0]).join(', ')
   }
 
+  const getVacacionesEnDia = (date: Date): Ausencia[] => {
+    const dateStr = formatDate(date)
+    return vacaciones.get(dateStr) || []
+  }
+
+  const renderTurnoPills = (date: Date, franjaId: number) => {
+    const turno = turnos.get(`${formatDate(date)}-${franjaId}`)
+    if (!turno) {
+      return <span className="turno-empty">—</span>
+    }
+    if (turno.asignaciones.length === 0) {
+      return <span className="turno-empty">Sin turno</span>
+    }
+    return (
+      <div className="turno-pills">
+        {turno.asignaciones.map((a, idx) => (
+          <span
+            key={idx}
+            className={`pill pill-${a.colaborador.sector}`}
+            title={a.colaborador.nombre}
+          >
+            {a.colaborador.nombre.split(' ')[0]}
+          </span>
+        ))}
+      </div>
+    )
+  }
+
+  const renderVacacionesPills = (date: Date) => {
+    const vacs = getVacacionesEnDia(date)
+    if (vacs.length === 0) {
+      return <span className="vacaciones-empty">—</span>
+    }
+    // Group by colaborador_id to get unique colaboradores
+    const colabIds = new Set(vacs.map(v => v.colaborador_id))
+    return (
+      <div className="vacaciones-pills">
+        {Array.from(colabIds).map((colabId, idx) => (
+          <span key={idx} className="pill pill-vacation">
+            Col. {colabId}
+          </span>
+        ))}
+      </div>
+    )
+  }
+
   const isDiaNoLaborable = (date: Date): boolean => {
     return diasNoLaborables.has(formatDate(date))
   }
@@ -273,6 +332,21 @@ export const CalendarView: React.FC = () => {
             </tr>
           </thead>
           <tbody>
+            {/* Vacation row */}
+            <tr className="vacation-row">
+              <td className="franja-col vacation-label">
+                <div className="franja-time">De vacaciones</div>
+              </td>
+              {weekDays.map((date) => (
+                <td key={`vacation-${formatDate(date)}`} className="vacation-cell">
+                  <div className="vacation-content">
+                    {renderVacacionesPills(date)}
+                  </div>
+                </td>
+              ))}
+            </tr>
+
+            {/* Franjas rows */}
             {franjas.map((franja) => (
               <tr key={franja.id}>
                 <td className="franja-col">
@@ -289,7 +363,7 @@ export const CalendarView: React.FC = () => {
                       className={`turno-cell ${isDiaNoLaborable(date) ? 'no-laborable-cell' : ''} ${isSinTurno ? 'sin-turno-cell' : ''}`}
                     >
                       <div className="turno-content">
-                        {getAsignados(date, franja.id)}
+                        {renderTurnoPills(date, franja.id)}
                       </div>
                     </td>
                   )
@@ -343,8 +417,16 @@ export const CalendarView: React.FC = () => {
           <span>Sin turnos generados</span>
         </div>
         <div className="legend-item">
-          <div className="legend-box assigned">Nombre</div>
-          <span>Colaborador asignado</span>
+          <div className="legend-box pill pill-tipo_a">Tipo A</div>
+          <span>Sector Tipo A</span>
+        </div>
+        <div className="legend-item">
+          <div className="legend-box pill pill-tipo_b">Tipo B</div>
+          <span>Sector Tipo B</span>
+        </div>
+        <div className="legend-item">
+          <div className="legend-box pill pill-vacation">Vac</div>
+          <span>De vacaciones</span>
         </div>
       </div>
     </div>

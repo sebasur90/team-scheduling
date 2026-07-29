@@ -140,14 +140,102 @@
 .turno-content {
   min-height: 2rem;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: center;
+  gap: 0.4rem;
   color: #333;
   font-size: 0.9rem;
 }
 
+.turno-empty {
+  color: #999;
+}
+
+.turno-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  justify-content: center;
+}
+
+.pill {
+  display: inline-block;
+  padding: 0.25rem 0.6rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  white-space: nowrap;
+  color: white;
+  text-overflow: ellipsis;
+  max-width: 90px;
+}
+
+.pill-tipo_a {
+  background: #4caf50;
+}
+
+.pill-tipo_b {
+  background: #2196f3;
+}
+
+.pill-vacation {
+  background: #ff9800;
+}
+
+/* Vacation row */
+.vacation-row {
+  background: #fff8e1;
+  border-top: 2px solid #fbc02d;
+  border-bottom: 2px solid #fbc02d;
+}
+
+.vacation-row td {
+  border-bottom: 1px solid #fde5a1;
+}
+
+.vacation-row td.franja-col {
+  background: #fff9c4;
+  font-weight: 600;
+  color: #f57f17;
+}
+
+.vacation-label {
+  text-align: left !important;
+}
+
+.vacation-cell {
+  text-align: center;
+  background: #fffde7;
+}
+
+.vacation-content {
+  min-height: 1.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+}
+
+.vacaciones-empty {
+  color: #ccc;
+  font-size: 0.9rem;
+}
+
+.vacaciones-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  justify-content: center;
+}
+
 .calendar-grid tbody tr:hover td.turno-cell {
   background: #f0f7ff;
+}
+
+.calendar-grid tbody tr:hover td.vacation-cell {
+  background: #ffffe0;
 }
 
 .calendar-legend {
@@ -183,6 +271,14 @@
   border-color: #4caf50;
   color: #2e7d32;
   font-size: 0.85rem;
+}
+
+.legend-box.pill {
+  border-radius: 12px;
+  border: none;
+  color: white;
+  font-weight: 500;
+  font-size: 0.75rem;
 }
 
 .calendar-loading {

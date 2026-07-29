@@ -40,6 +40,7 @@ class MotivosAusencia(str, Enum):
     LICENCIA = "licencia"
     ENFERMEDAD = "enfermedad"
     OTRO = "otro"
+    VACACIONES = "vacaciones"
 
 
 class TipoConcesion(str, Enum):

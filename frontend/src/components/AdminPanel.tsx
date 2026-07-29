@@ -5,13 +5,14 @@ import { colaboradoresApi, type ColaboradorCreate } from '../api/colaboradores';
 import { franjasApi, type FranjaHoraria, type FranjaCreate } from '../api/franjas';
 import { turnosApi, type TurnoListResponse, type TurnoAlmuerzoResponse } from '../api/turnos';
 import { diasNolaborablesApi, type DiaNoLaborable, type DiaNoLaborableCreate } from '../api/diasNolaborables';
+import { Vacaciones } from './Vacaciones';
 import { Colaborador } from '../api/auth';
 import client from '../api/client';
 import './AdminPanel.css';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-type Tab = 'colaboradores' | 'franjas' | 'asignacion' | 'dias-no-laborables' | 'incidencias';
+type Tab = 'colaboradores' | 'franjas' | 'asignacion' | 'dias-no-laborables' | 'vacaciones' | 'incidencias';
 type ChipState = 'assigned' | 'available' | 'conflict' | 'disabled';
 
 interface OverrideModalState {
@@ -540,6 +541,12 @@ export function AdminPanel() {
           onClick={() => setActiveTab('dias-no-laborables')}
         >
           Días no laborables
+        </button>
+        <button
+          className={`tab-button ${activeTab === 'vacaciones' ? 'active' : ''}`}
+          onClick={() => setActiveTab('vacaciones')}
+        >
+          🏖️ Vacaciones
         </button>
         <button
           className={`tab-button ${activeTab === 'incidencias' ? 'active' : ''}`}
@@ -1119,6 +1126,13 @@ export function AdminPanel() {
             <div className="admin-panel__empty">No hay días no laborables registrados.</div>
           )}
         </section>
+      )}
+
+      {/* VACACIONES TAB */}
+      {activeTab === 'vacaciones' && (
+        <div className="admin-tab-content">
+          <Vacaciones mode="admin" />
+        </div>
       )}
 
       {/* INCIDENCIAS TAB */}
