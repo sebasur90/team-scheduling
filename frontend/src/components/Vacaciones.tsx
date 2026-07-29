@@ -142,8 +142,9 @@ export const Vacaciones: React.FC<VacacionesProps> = ({ mode }) => {
   }
 
   const formatFecha = (fecha: string) => {
-    const d = new Date(fecha)
-    return d.toLocaleDateString('es-ES', { weekday: 'short', month: 'short', day: 'numeric' })
+    const [year, month, day] = fecha.split('-').map(Number)
+    const d = new Date(year, month - 1, day)
+    return d.toLocaleDateString('es-AR', { weekday: 'short', month: 'short', day: 'numeric' })
   }
 
   return (
