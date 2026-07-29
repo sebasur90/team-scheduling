@@ -2,7 +2,7 @@ from datetime import date
 from typing import List, Dict, Set, Tuple, Optional
 from sqlalchemy.orm import Session
 from app.models import (
-    Colaborador, Ausencia, PreferenciaDiaria, TareaEspecialAsignacion, FranjaHoraria, TurnoAlmuerzo
+    Colaborador, Ausencia, PreferenciaDiaria, TareaEspecialAsignacion, TareaEspecialTipo, FranjaHoraria, TurnoAlmuerzo
 )
 from app.constants import FRANJAS_CONFIG
 from app.core.tipos import (
@@ -69,10 +69,10 @@ class AssignmentEngine:
         orientador_id = None
         tarea_orient = (
             self.db.query(TareaEspecialAsignacion)
-            .join(TareaEspecialAsignacion.tipo)
+            .join(TareaEspecialTipo)
             .filter(
                 TareaEspecialAsignacion.fecha == self.fecha,
-                TareaEspecialAsignacion.tipo.nombre == "orientador",
+                TareaEspecialTipo.nombre == "orientador",
             )
             .first()
         )

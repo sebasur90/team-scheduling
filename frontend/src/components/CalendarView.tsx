@@ -19,7 +19,10 @@ export const CalendarView: React.FC = () => {
   }
 
   function formatDate(date: Date): string {
-    return date.toISOString().split('T')[0]
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    return `${year}-${month}-${day}`
   }
 
   function getDayName(date: Date, locale: string = 'es-ES'): string {
@@ -78,6 +81,63 @@ export const CalendarView: React.FC = () => {
     setSelectedWeekMonday(getMonday(new Date()))
   }
 
+  const handleGenerarSemana = async () => {
+    try {
+      setIsLoading(true)
+      const monday = getMonday(new Date(selectedWeekMonday))
+      const mondayFormatted = formatDate(monday)
+      console.log('📅 Generando semana para:', mondayFormatted)
+      console.log('   Día de semana:', monday.getDay(), '(0=dom, 1=lun)')
+      console.log('   selectedWeekMonday:', selectedWeekMonday)
+
+      const response = await turnosApi.generateWeek(mondayFormatted)
+      console.log('✅ Respuesta de generación:', response.data)
+      console.log('   Turnos generados:', response.data.turnos_generados?.length || 0)
+      console.log('   Días con error:', response.data.dias_con_error)
+      console.log('   Mensaje:', response.data.mensaje)
+
+      if (response.data.dias_con_error?.length > 0) {
+        alert('⚠️ Generación con errores:\n' + JSON.stringify(response.data.dias_con_error, null, 2))
+      } else {
+        alert('✅ Semana generada: ' + response.data.mensaje)
+      }
+
+      // Reload calendar after generation
+      const turnosMap = new Map<string, TurnoAlmuerzoResponse>()
+      const weekDays = []
+      for (let i = 0; i < 5; i++) {
+        const date = new Date(monday)
+        date.setDate(date.getDate() + i)
+        weekDays.push(date)
+      }
+
+      console.log('📥 Recargando datos para:', weekDays.map(d => formatDate(d)))
+
+      await Promise.all(
+        weekDays.map(async (date) => {
+          const dateStr = formatDate(date)
+          console.log('  Leyendo turnos para:', dateStr)
+          const res = await turnosApi.list(dateStr)
+          console.log('    Respuesta:', res.data.franjas.length, 'franjas')
+          res.data.franjas.forEach((turno) => {
+            turnosMap.set(`${dateStr}-${turno.franja_horaria_id}`, turno)
+            console.log(`      Turno: ${dateStr}-${turno.franja_horaria_id} = ${turno.asignaciones.length} asignaciones`)
+          })
+        })
+      )
+
+      console.log('Total turnos en mapa:', turnosMap.size)
+      setTurnos(turnosMap)
+    } catch (error: any) {
+      console.error('❌ Error generating week:', error)
+      console.error('Response data:', error.response?.data)
+      console.error('Message:', error.message)
+      alert('❌ Error: ' + (error.response?.data?.detail || error.message || 'Error desconocido'))
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   const weekDays = []
   for (let i = 0; i < 5; i++) {
     const date = new Date(selectedWeekMonday)
@@ -120,7 +180,7 @@ export const CalendarView: React.FC = () => {
           {weekDays[4].toLocaleDateString('es-ES')}
         </span>
         {user?.rol === 'admin' && (
-          <button className="btn btn-primary btn-small">Generar Semana</button>
+          <button className="btn btn-primary btn-small" onClick={handleGenerarSemana}>Generar Semana</button>
         )}
       </div>
 

@@ -28,6 +28,8 @@ export interface TurnoListResponse {
 export const turnosApi = {
   list: (fecha: string) =>
     client.get<TurnoListResponse>(`/turnos?fecha=${fecha}`),
+  generateWeek: (semana: string) =>
+    client.post(`/admin/turnos/generar-semana?semana=${semana}`),
   updateAsignacion: (asignacionId: number, colaboradorId: number) =>
     client.patch(`/admin/turnos/asignaciones/${asignacionId}?colaborador_id=${colaboradorId}`),
   createAsignacion: (turnoId: number, colaboradorId: number) =>
