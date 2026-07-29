@@ -4,11 +4,10 @@ import { Colaborador } from './auth'
 export interface ColaboradorCreate {
   nombre: string
   email: string
-  sector: 'comercial' | 'operativo'
+  sector: 'tipo_a' | 'tipo_b'
   estado_atencion?: 'activo' | 'desafectado'
-  rol?: 'admin' | 'usuario'
-  habilitado_orientador?: boolean
-  habilitado_gestion_externa?: boolean
+  rol?: 'admin' | 'usuario' | 'viewer'
+  tarea_tipo_ids?: number[]
 }
 
 export const colaboradoresApi = {

@@ -5,6 +5,7 @@ import { colaboradoresApi, type ColaboradorCreate } from '../api/colaboradores';
 import { franjasApi, type FranjaHoraria, type FranjaCreate } from '../api/franjas';
 import { turnosApi, type TurnoListResponse, type TurnoAlmuerzoResponse } from '../api/turnos';
 import { diasNolaborablesApi, type DiaNoLaborable, type DiaNoLaborableCreate } from '../api/diasNolaborables';
+import { tareasEspecialesApi, type TareaEspecialTipo } from '../api/tareasEspeciales';
 import { ConfiguracionCobertura } from './ConfiguracionCobertura';
 import { Vacaciones } from './Vacaciones';
 import { Colaborador } from '../api/auth';
@@ -46,9 +47,9 @@ export function AdminPanel() {
     sector: 'tipo_a',
     estado_atencion: 'activo',
     rol: 'usuario',
-    habilitado_tarea_especial_1: false,
-    habilitado_tarea_especial_2: false,
+    tarea_tipo_ids: [],
   });
+  const [tareasEspeciales, setTareasEspeciales] = useState<any[]>([]);
 
   // Franjas state
   const [franjas, setFranjas] = useState<FranjaHoraria[]>([]);
@@ -106,7 +107,7 @@ export function AdminPanel() {
     return null;
   }
 
-  // Load colaboradores
+  // Load colaboradores and tareas especiales
   useEffect(() => {
     if (activeTab === 'colaboradores' || activeTab === 'asignacion') {
       colaboradoresApi
@@ -114,6 +115,12 @@ export function AdminPanel() {
         .then((res) => setColaboradores(res.data))
         .catch(() => setColaboradores([]))
         .finally(() => setColabLoading(false));
+
+      // Load tareas especiales
+      tareasEspecialesApi
+        .listTipos()
+        .then((res) => setTareasEspeciales(res.data))
+        .catch(() => setTareasEspeciales([]));
     }
   }, [activeTab]);
 
@@ -171,10 +178,20 @@ export function AdminPanel() {
     const { name, value, type } = e.target;
     const checked = (e.target as HTMLInputElement).checked;
 
-    setColabFormData((prev) => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value,
-    }));
+    if (name.startsWith('tarea_tipo_')) {
+      const tipoId = parseInt(name.split('_')[2]);
+      setColabFormData((prev) => ({
+        ...prev,
+        tarea_tipo_ids: checked
+          ? [...(prev.tarea_tipo_ids || []), tipoId]
+          : (prev.tarea_tipo_ids || []).filter((id) => id !== tipoId),
+      }));
+    } else {
+      setColabFormData((prev) => ({
+        ...prev,
+        [name]: type === 'checkbox' ? checked : value,
+      }));
+    }
     setColabFormError(null);
   };
 
@@ -192,8 +209,7 @@ export function AdminPanel() {
         sector: 'tipo_a',
         estado_atencion: 'activo',
         rol: 'usuario',
-        habilitado_tarea_especial_1: false,
-        habilitado_tarea_especial_2: false,
+        tarea_tipo_ids: [],
       });
       setShowColabForm(false);
     } catch (err: any) {
@@ -292,8 +308,7 @@ export function AdminPanel() {
       sector: colab.sector as 'tipo_a' | 'tipo_b',
       estado_atencion: colab.estado_atencion as 'activo' | 'desafectado',
       rol: colab.rol as 'admin' | 'usuario',
-      habilitado_tarea_especial_1: colab.habilitado_tarea_especial_1,
-      habilitado_tarea_especial_2: colab.habilitado_tarea_especial_2,
+      tarea_tipo_ids: colab.tarea_tipo_ids || [],
     });
   };
 
@@ -319,10 +334,20 @@ export function AdminPanel() {
     const { name, value, type } = e.target;
     const checked = (e.target as HTMLInputElement).checked;
 
-    setEditingColabData((prev) => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value,
-    }));
+    if (name.startsWith('tarea_tipo_')) {
+      const tipoId = parseInt(name.split('_')[2]);
+      setEditingColabData((prev) => ({
+        ...prev,
+        tarea_tipo_ids: checked
+          ? [...(prev?.tarea_tipo_ids || []), tipoId]
+          : (prev?.tarea_tipo_ids || []).filter((id) => id !== tipoId),
+      }));
+    } else {
+      setEditingColabData((prev) => ({
+        ...prev,
+        [name]: type === 'checkbox' ? checked : value,
+      }));
+    }
   };
 
   const handleAsignacionChange = async (asignacionId: number, nuevoColaboradorId: number) => {
@@ -689,33 +714,31 @@ export function AdminPanel() {
               </div>
 
               <div className="form-row">
-                <div className="form-group checkbox">
-                  <label htmlFor="habilitado_tarea_especial_1">
-                    <input
-                      type="checkbox"
-                      id="habilitado_tarea_especial_1"
-                      name="habilitado_tarea_especial_1"
-                      checked={editingColabId ? editingColabData?.habilitado_tarea_especial_1 || false : colabFormData.habilitado_tarea_especial_1}
-                      onChange={editingColabId ? handleEditColabChange : handleColabFormChange}
-                      disabled={colabFormLoading}
-                    />
-                    Habilitado Tarea Especial 1
-                  </label>
-                </div>
-
-                <div className="form-group checkbox">
-                  <label htmlFor="habilitado_tarea_especial_2">
-                    <input
-                      type="checkbox"
-                      id="habilitado_tarea_especial_2"
-                      name="habilitado_tarea_especial_2"
-                      checked={editingColabId ? editingColabData?.habilitado_tarea_especial_2 || false : colabFormData.habilitado_tarea_especial_2}
-                      onChange={editingColabId ? handleEditColabChange : handleColabFormChange}
-                      disabled={colabFormLoading}
-                    />
-                    Habilitado Tarea Especial 2
-                  </label>
-                </div>
+                <fieldset className="form-group">
+                  <legend>Tareas Especiales Habilitadas</legend>
+                  {tareasEspeciales.length === 0 ? (
+                    <p style={{ fontSize: '0.9em', color: '#666' }}>No hay tareas especiales disponibles</p>
+                  ) : (
+                    tareasEspeciales.map((tarea) => {
+                      const tareaIds = editingColabId ? (editingColabData?.tarea_tipo_ids || []) : (colabFormData.tarea_tipo_ids || []);
+                      return (
+                        <div key={tarea.id} className="form-group checkbox">
+                          <label htmlFor={`tarea_tipo_${tarea.id}`}>
+                            <input
+                              type="checkbox"
+                              id={`tarea_tipo_${tarea.id}`}
+                              name={`tarea_tipo_${tarea.id}`}
+                              checked={tareaIds.includes(tarea.id)}
+                              onChange={editingColabId ? handleEditColabChange : handleColabFormChange}
+                              disabled={colabFormLoading}
+                            />
+                            {tarea.nombre}
+                          </label>
+                        </div>
+                      );
+                    })
+                  )}
+                </fieldset>
               </div>
 
               <div className="form-actions">
@@ -750,31 +773,35 @@ export function AdminPanel() {
                     <th>Sector</th>
                     <th>Rol</th>
                     <th>Estado</th>
-                    <th>Tarea Esp. 1</th>
-                    <th>Tarea Esp. 2</th>
+                    <th>Tareas Especiales</th>
                     <th>Acciones</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {colaboradores.map((colab) => (
-                    <tr key={colab.id}>
-                      <td>{colab.nombre}</td>
-                      <td>{colab.sector}</td>
-                      <td>{colab.rol}</td>
-                      <td>{colab.estado_atencion}</td>
-                      <td>{colab.habilitado_tarea_especial_1 ? '✓' : '–'}</td>
-                      <td>{colab.habilitado_tarea_especial_2 ? '✓' : '–'}</td>
-                      <td>
-                        <button
-                          type="button"
-                          className="btn-icon"
-                          onClick={() => handleEditColaborador(colab)}
-                        >
-                          ✏
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
+                  {colaboradores.map((colab) => {
+                    const tareasHabilitadas = tareasEspeciales
+                      .filter((t) => colab.tarea_tipo_ids?.includes(t.id))
+                      .map((t) => t.nombre)
+                      .join(', ');
+                    return (
+                      <tr key={colab.id}>
+                        <td>{colab.nombre}</td>
+                        <td>{colab.sector}</td>
+                        <td>{colab.rol}</td>
+                        <td>{colab.estado_atencion}</td>
+                        <td>{tareasHabilitadas || '–'}</td>
+                        <td>
+                          <button
+                            type="button"
+                            className="btn-icon"
+                            onClick={() => handleEditColaborador(colab)}
+                          >
+                            ✏
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>

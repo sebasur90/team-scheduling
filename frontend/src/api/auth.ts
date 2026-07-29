@@ -4,14 +4,13 @@ export interface Colaborador {
   id: number
   nombre: string
   email: string
-  sector: 'comercial' | 'operativo'
+  sector: 'tipo_a' | 'tipo_b'
   estado_atencion: 'activo' | 'desafectado'
-  rol: 'admin' | 'usuario'
-  habilitado_orientador: boolean
-  habilitado_gestion_externa: boolean
+  rol: 'admin' | 'usuario' | 'viewer'
   puntaje_prioridad: number
   es_admin: boolean
   franja_preferida_id?: number | null
+  tarea_tipo_ids: number[]
   created_at: string
   updated_at: string
 }
