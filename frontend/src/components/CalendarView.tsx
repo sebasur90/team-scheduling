@@ -6,6 +6,8 @@ import { ausenciasApi, Ausencia } from '../api/ausencias'
 import { useAuthContext } from '../contexts/AuthContext'
 import './CalendarView.css'
 
+import { colaboradoresApi, type Colaborador } from '../api/colaboradores'
+
 export const CalendarView: React.FC = () => {
   const { user } = useAuthContext()
   const [selectedWeekMonday, setSelectedWeekMonday] = useState<Date>(getMonday(new Date()))
@@ -13,6 +15,7 @@ export const CalendarView: React.FC = () => {
   const [turnos, setTurnos] = useState<Map<string, TurnoAlmuerzoResponse>>(new Map())
   const [diasNoLaborables, setDiasNoLaborables] = useState<Set<string>>(new Set())
   const [vacaciones, setVacaciones] = useState<Map<string, Ausencia[]>>(new Map())
+  const [colaboradores, setColaboradores] = useState<Map<number, Colaborador>>(new Map())
   const [isLoading, setIsLoading] = useState(true)
   const [showDiaNoLaborableModal, setShowDiaNoLaborableModal] = useState<string | null>(null)
   const [diaNoLaborableMotivo, setDiaNoLaborableMotivo] = useState('')
@@ -43,6 +46,12 @@ export const CalendarView: React.FC = () => {
       try {
         const franjasRes = await franjasApi.list()
         setFranjas(franjasRes.data.sort((a, b) => a.orden - b.orden))
+
+        // Load colaboradores for name mapping
+        const colabsRes = await colaboradoresApi.list()
+        const colabMap = new Map<number, Colaborador>()
+        colabsRes.data.forEach(c => colabMap.set(c.id, c))
+        setColaboradores(colabMap)
 
         // Load non-working days for this month
         const monthStr = formatDate(selectedWeekMonday).substring(0, 7)
@@ -221,11 +230,15 @@ export const CalendarView: React.FC = () => {
     const colabIds = new Set(vacs.map(v => v.colaborador_id))
     return (
       <div className="vacaciones-pills">
-        {Array.from(colabIds).map((colabId, idx) => (
-          <span key={idx} className="pill pill-vacation">
-            Col. {colabId}
-          </span>
-        ))}
+        {Array.from(colabIds).map((colabId, idx) => {
+          const colab = colaboradores.get(colabId)
+          const nombre = colab ? colab.nombre.split(' ')[0] : `Col. ${colabId}`
+          return (
+            <span key={idx} className="pill pill-vacation" title={colab?.nombre}>
+              {nombre}
+            </span>
+          )
+        })}
       </div>
     )
   }
