@@ -103,6 +103,7 @@ class AssignmentEngine:
         for colab in colaboradores:
             if colab.id in ausentes_ids or colab.id == orientador_id:
                 continue
+            tarea_tipos_ids = [t.tarea_tipo_id for t in colab.tareas_habilitadas]
             pool.append(
                 ColaboradorInfo(
                     id=colab.id,
@@ -110,6 +111,7 @@ class AssignmentEngine:
                     sector=colab.sector,
                     estado_atencion=colab.estado_atencion,
                     puntaje_prioridad=colab.puntaje_prioridad,
+                    tarea_tipos_ids=tarea_tipos_ids,
                 )
             )
 

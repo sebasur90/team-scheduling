@@ -9,9 +9,10 @@ class ColaboradorInfo:
     """Lightweight colaborador data for algorithm"""
     id: int
     nombre: str
-    sector: str  # 'comercial' or 'operativo'
+    sector: str  # 'tipo_a' or 'tipo_b'
     estado_atencion: str  # 'activo' or 'desafectado'
     puntaje_prioridad: int = 0
+    tarea_tipos_ids: List[int] = field(default_factory=list)
 
 
 @dataclass

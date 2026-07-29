@@ -13,9 +13,23 @@ class TareaEspecialTipo(BaseModel):
     hora_fin = Column(Time, nullable=False)
 
     asignaciones = relationship("TareaEspecialAsignacion", back_populates="tipo", cascade="all, delete-orphan")
+    colaboradores_habilitados = relationship("ColaboradorTareaTipo", back_populates="tarea_tipo", cascade="all, delete-orphan")
 
     def __repr__(self):
         return f"<TareaEspecialTipo(nombre={self.nombre})>"
+
+
+class ColaboradorTareaTipo(BaseModel):
+    __tablename__ = "colaborador_tarea_tipo"
+
+    colaborador_id = Column(Integer, ForeignKey("colaborador.id", ondelete="CASCADE"), nullable=False)
+    tarea_tipo_id = Column(Integer, ForeignKey("tarea_especial_tipo.id", ondelete="CASCADE"), nullable=False)
+
+    colaborador = relationship("Colaborador", back_populates="tareas_habilitadas")
+    tarea_tipo = relationship("TareaEspecialTipo", back_populates="colaboradores_habilitados")
+
+    def __repr__(self):
+        return f"<ColaboradorTareaTipo(colaborador_id={self.colaborador_id}, tarea_tipo_id={self.tarea_tipo_id})>"
 
 
 class TareaEspecialAsignacion(BaseModel):

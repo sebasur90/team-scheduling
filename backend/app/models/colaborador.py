@@ -10,9 +10,7 @@ class Colaborador(BaseModel):
     email = Column(String(255), nullable=False, unique=True, index=True)
     sector = Column(String(50), nullable=False)  # 'tipo_a' or 'tipo_b'
     estado_atencion = Column(String(50), nullable=False, default="activo")  # 'activo' or 'desafectado'
-    habilitado_tarea_especial_1 = Column(Boolean, default=False)
-    habilitado_tarea_especial_2 = Column(Boolean, default=False)
-    rol = Column(String(50), nullable=False, default="usuario")  # 'admin' or 'usuario'
+    rol = Column(String(50), nullable=False, default="usuario")  # 'admin', 'usuario', or 'viewer'
     puntaje_prioridad = Column(Integer, default=0)
     fcm_token = Column(String(512), nullable=True)
     password_hash = Column(String(255), nullable=True)
@@ -22,6 +20,7 @@ class Colaborador(BaseModel):
     asignaciones = relationship("AsignacionAlmuerzo", back_populates="colaborador", cascade="all, delete-orphan")
     ausencias = relationship("Ausencia", back_populates="colaborador", cascade="all, delete-orphan")
     tareas_especiales = relationship("TareaEspecialAsignacion", back_populates="colaborador")
+    tareas_habilitadas = relationship("ColaboradorTareaTipo", back_populates="colaborador", cascade="all, delete-orphan")
     notificaciones = relationship("Notificacion", back_populates="colaborador", cascade="all, delete-orphan")
     franja_preferida = relationship("FranjaHoraria")
 

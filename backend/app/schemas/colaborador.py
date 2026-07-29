@@ -1,5 +1,5 @@
 from pydantic import BaseModel, EmailStr
-from typing import Optional
+from typing import Optional, List
 from datetime import datetime
 
 
@@ -9,8 +9,7 @@ class ColaboradorBase(BaseModel):
     sector: str  # 'tipo_a' or 'tipo_b'
     estado_atencion: str = "activo"
     rol: str = "usuario"
-    habilitado_tarea_especial_1: bool = False
-    habilitado_tarea_especial_2: bool = False
+    tarea_tipo_ids: List[int] = []
 
 
 class ColaboradorCreate(ColaboradorBase):
@@ -22,8 +21,7 @@ class ColaboradorUpdate(BaseModel):
     sector: Optional[str] = None
     estado_atencion: Optional[str] = None
     rol: Optional[str] = None
-    habilitado_tarea_especial_1: Optional[bool] = None
-    habilitado_tarea_especial_2: Optional[bool] = None
+    tarea_tipo_ids: Optional[List[int]] = None
 
 
 class ColaboradorResponse(ColaboradorBase):
