@@ -12,7 +12,6 @@ class FranjaHoraria(BaseModel):
     orden = Column(Integer, nullable=False, unique=True)
 
     turnos = relationship("TurnoAlmuerzo", back_populates="franja_horaria")
-    preferencias = relationship("PreferenciaDiaria", back_populates="franja_horaria_deseada")
 
     def __repr__(self):
         return f"<FranjaHoraria(orden={self.orden}, {self.hora_inicio}-{self.hora_fin})>"

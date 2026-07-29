@@ -6,6 +6,7 @@ from app.models import Colaborador, TurnoAlmuerzo, AsignacionAlmuerzo, FranjaHor
 from app.schemas.turno import TurnoAlmuerzoResponse, AsignacionResponse
 from app.dependencies import get_admin_user
 from app.core.engine import AssignmentEngine
+from app.core.notificador import notificar_franja_liberada
 from datetime import date, timedelta
 from typing import List, Dict, Any
 
@@ -40,6 +41,7 @@ def generar_turnos_semana(
     turnos_generados = []
     dias_salteados = []
     dias_con_error = []
+    dias_con_advertencia = []
     conflictos = []
 
     for fecha in dias_semana:
@@ -67,9 +69,16 @@ def generar_turnos_semana(
             })
             continue
 
-        # Persist the day's assignments
+        # Persist the day's assignments (success with or without warnings)
         try:
             _persist_day_assignments(db, fecha, result.cronograma, result.puntajes_actualizados)
+
+            # Track warnings if any
+            if result.advertencias:
+                dias_con_advertencia.append({
+                    "fecha": fecha.isoformat(),
+                    "advertencias": result.advertencias
+                })
 
             # Build response with turnos for this day
             turnos_dia = db.query(TurnoAlmuerzo).filter_by(fecha=fecha).all()
@@ -91,8 +100,9 @@ def generar_turnos_semana(
         "turnos_generados": turnos_generados,
         "conflictos": conflictos,
         "dias_salteados": dias_salteados,
+        "dias_con_advertencia": dias_con_advertencia,
         "dias_con_error": dias_con_error,
-        "mensaje": f"Semana generada. {len(dias_salteados)} día(s) salteado(s), {len(dias_con_error)} error(es)."
+        "mensaje": f"Semana generada. {len(dias_salteados)} día(s) salteado(s), {len(dias_con_advertencia)} con advertencia(s), {len(dias_con_error)} error(es)."
     }
 
 
@@ -249,8 +259,15 @@ def delete_asignacion(
             detail=f"Asignación {asignacion_id} no encontrada"
         )
 
+    fecha = asignacion.turno_almuerzo.fecha
+    franja_horaria_id = asignacion.turno_almuerzo.franja_horaria_id
+
     db.delete(asignacion)
     db.commit()
+
+    # Trigger notification for eligible candidates
+    notificar_franja_liberada(db, fecha, franja_horaria_id)
+
     return None
 
 
@@ -268,8 +285,15 @@ def delete_turno(
             detail=f"Turno {turno_id} no encontrado"
         )
 
+    fecha = turno.fecha
+    franja_horaria_id = turno.franja_horaria_id
+
     db.delete(turno)
     db.commit()
+
+    # Trigger notification for eligible candidates
+    notificar_franja_liberada(db, fecha, franja_horaria_id)
+
     return None
 
 

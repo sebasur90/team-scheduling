@@ -4,8 +4,8 @@ from sqlalchemy.orm import sessionmaker
 from app.models.base import Base
 from app.models import (
     Colaborador, FranjaHoraria, TurnoAlmuerzo, AsignacionAlmuerzo,
-    PreferenciaDiaria, TareaEspecialTipo, TareaEspecialAsignacion,
-    Ausencia, SwapSolicitud, Notificacion
+    TareaEspecialTipo, TareaEspecialAsignacion,
+    Ausencia, SwapSolicitud, Notificacion, ConfiguracionCobertura
 )
 from datetime import time, date, timedelta
 
@@ -98,3 +98,12 @@ def test_special_tasks(db_session):
         db_session.add(t)
     db_session.commit()
     return tasks
+
+
+@pytest.fixture
+def test_configuracion_cobertura(db_session):
+    """Create default coverage configuration"""
+    config = ConfiguracionCobertura(minimo_tipo_a=1, minimo_tipo_b=1)
+    db_session.add(config)
+    db_session.commit()
+    return config

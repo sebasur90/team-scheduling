@@ -11,6 +11,7 @@ from app.schemas.ausencia import (
     VacacionesBlockResponse,
 )
 from app.dependencies import get_current_user
+from app.core.notificador import notificar_franja_liberada
 
 router = APIRouter(prefix="/ausencias", tags=["ausencias"], redirect_slashes=False)
 
@@ -74,13 +75,19 @@ def create_vacaciones(
     # Dias a crear: los que no existen ya
     dias_crear = [d for d in dias_habiles if d not in existing_dates]
 
-    # Delete existing lunch assignments for these days
-    db.query(AsignacionAlmuerzo).filter(
+    # Delete existing lunch assignments for these days and track freed slots
+    asignaciones_a_borrar = db.query(AsignacionAlmuerzo).filter(
         AsignacionAlmuerzo.colaborador_id == data.colaborador_id,
         AsignacionAlmuerzo.turno_almuerzo_id.in_(
             db.query(TurnoAlmuerzo.id).filter(TurnoAlmuerzo.fecha.in_(dias_crear))
         ),
-    ).delete()
+    ).all()
+
+    # Track which (date, franja) pairs are being freed
+    liberaciones = []
+    for asignacion in asignaciones_a_borrar:
+        liberaciones.append((asignacion.turno_almuerzo.fecha, asignacion.turno_almuerzo.franja_horaria_id))
+        db.delete(asignacion)
 
     # Create vacation records
     for dia in dias_crear:
@@ -92,6 +99,10 @@ def create_vacaciones(
         db.add(ausencia)
 
     db.commit()
+
+    # Notify eligible candidates for each freed slot
+    for fecha, franja_horaria_id in liberaciones:
+        notificar_franja_liberada(db, fecha, franja_horaria_id)
 
     return VacacionesBlockResponse(
         colaborador_id=data.colaborador_id,

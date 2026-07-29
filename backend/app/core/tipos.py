@@ -46,6 +46,8 @@ class ContextData:
     pool_disponible: List[ColaboradorInfo] = field(default_factory=list)
     # Preferences loaded
     preferencias: Dict[int, int] = field(default_factory=dict)  # colaborador_id -> franja_orden
+    # Coverage minimums
+    minimos_cobertura: Dict[str, int] = field(default_factory=lambda: {"tipo_a": 1, "tipo_b": 1})
 
 
 @dataclass
@@ -65,3 +67,4 @@ class AssignmentResult:
     asignaciones: List[AsignacionResult] = field(default_factory=list)
     conflictos_pendientes: List[ConflictoEmpate] = field(default_factory=list)
     puntajes_actualizados: Dict[int, int] = field(default_factory=dict)  # colaborador_id -> new score
+    advertencias: List[str] = field(default_factory=list)

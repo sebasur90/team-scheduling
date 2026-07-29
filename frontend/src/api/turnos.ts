@@ -31,6 +31,7 @@ export interface GenerarSemanaResponse {
   turnos_generados: TurnoAlmuerzoResponse[]
   conflictos: Array<{ fecha: string; conflicto: string }>
   dias_salteados: Array<{ fecha: string; motivo: string }>
+  dias_con_advertencia: Array<{ fecha: string; advertencias: string[] }>
   dias_con_error: Array<{ fecha: string; error: string }>
   mensaje: string
 }

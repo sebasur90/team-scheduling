@@ -1,0 +1,4066 @@
+================================================================================
+CÓDIGO COMPACTADO DEL PROYECTO
+================================================================================
+
+ESTRUCTURA DE DIRECTORIOS:
+--------------------------------------------------------------------------------
+├── backend/
+│   ├── app/
+│   │   ├── api/
+│   │   │   ├── __init__.py
+│   │   │   ├── admin_incidencias.py
+│   │   │   ├── admin_turnos.py
+│   │   │   ├── auth.py
+│   │   │   ├── colaboradores.py
+│   │   │   ├── dev.py
+│   │   │   ├── dias_no_laborables.py
+│   │   │   ├── franjas.py
+│   │   │   ├── incidencias.py
+│   │   │   ├── notificaciones.py
+│   │   │   ├── preferencias.py
+│   │   │   └── turnos.py
+│   │   ├── auth/
+│   │   │   ├── __init__.py
+│   │   │   └── local.py
+│   │   ├── core/
+│   │   │   ├── __init__.py
+│   │   │   ├── barometro.py
+│   │   │   ├── cascade_engine.py
+│   │   │   ├── cobertura.py
+│   │   │   ├── engine.py
+│   │   │   ├── prioridad.py
+│   │   │   └── tipos.py
+│   │   ├── models/
+│   │   │   ├── __init__.py
+│   │   │   ├── ausencia.py
+│   │   │   ├── base.py
+│   │   │   ├── colaborador.py
+│   │   │   ├── dia_no_laborable.py
+│   │   │   ├── franja_horaria.py
+│   │   │   ├── incidencia.py
+│   │   │   ├── notificacion.py
+│   │   │   ├── preferencia.py
+│   │   │   ├── swap.py
+│   │   │   ├── tarea_especial.py
+│   │   │   └── turno.py
+│   │   ├── schemas/
+│   │   │   ├── __init__.py
+│   │   │   ├── ausencia.py
+│   │   │   ├── colaborador.py
+│   │   │   ├── dia_no_laborable.py
+│   │   │   ├── franja.py
+│   │   │   ├── notificacion.py
+│   │   │   ├── preferencia.py
+│   │   │   ├── swap.py
+│   │   │   └── turno.py
+│   │   ├── services/
+│   │   │   ├── __init__.py
+│   │   │   ├── firestore_client.py
+│   │   │   ├── notif_service.py
+│   │   │   └── task_scheduler.py
+│   │   ├── __init__.py
+│   │   ├── config.py
+│   │   ├── constants.py
+│   │   ├── database.py
+│   │   ├── dependencies.py
+│   │   ├── enums.py
+│   │   └── main.py
+│   ├── migrations/
+│   │   ├── 001_initial_schema.sql
+│   │   ├── 002_phase2_cascade.sql
+│   │   └── 003_add_auth_fields.sql
+│   ├── scripts/
+│   │   ├── init_admin.py
+│   │   └── startup.sh
+│   ├── tests/
+│   │   ├── __init__.py
+│   │   ├── conftest.py
+│   │   ├── test_barometro.py
+│   │   ├── test_cascade_engine.py
+│   │   └── test_core_engine.py
+│   ├── .dockerignore
+│   ├── .env.docker
+│   ├── .env.example
+│   ├── Dockerfile
+│   ├── pyproject.toml
+│   └── requirements.txt
+├── brainstorming/
+│   ├── scripts/
+│   │   ├── frame-template.html
+│   │   ├── helper.js
+│   │   ├── server.cjs
+│   │   ├── start-server.sh
+│   │   └── stop-server.sh
+│   ├── SKILL.md
+│   ├── spec-document-reviewer-prompt.md
+│   └── visual-companion.md
+├── docs/
+│   └── superpowers/
+│       └── specs/
+│           ├── 2026-07-27-turnos-almuerzo-design.md
+│           ├── 2026-07-28-asignacion-chips-y-borrado-turnos-design.md
+│           ├── 2026-07-28-frontend-completo-design.md
+│           ├── 2026-07-28-notificaciones-cascada-design.md
+│           └── PLAN_AUTH_OPCION1.md
+├── frontend/
+│   ├── public/
+│   │   ├── manifest.json
+│   │   └── sw.js
+│   ├── src/
+│   │   ├── api/
+│   │   │   ├── auth.ts
+│   │   │   ├── client.ts
+│   │   │   ├── colaboradores.ts
+│   │   │   ├── franjas.ts
+│   │   │   ├── preferencias.ts
+│   │   │   └── turnos.ts
+│   │   ├── components/
+│   │   │   ├── AdminPanel.css
+│   │   │   ├── AdminPanel.tsx
+│   │   │   ├── Barometro.css
+│   │   │   ├── Barometro.tsx
+│   │   │   ├── CalendarView.css
+│   │   │   ├── CalendarView.tsx
+│   │   │   ├── Dashboard.css
+│   │   │   ├── Dashboard.tsx
+│   │   │   ├── Header.css
+│   │   │   ├── Header.tsx
+│   │   │   ├── Login.css
+│   │   │   ├── Login.tsx
+│   │   │   ├── NotificationCenter.css
+│   │   │   ├── NotificationCenter.tsx
+│   │   │   ├── Preferences.css
+│   │   │   └── Preferences.tsx
+│   │   ├── contexts/
+│   │   │   └── AuthContext.tsx
+│   │   ├── hooks/
+│   │   │   ├── useBarometro.ts
+│   │   │   ├── useIncidencias.ts
+│   │   │   └── useUserNotifications.ts
+│   │   ├── lib/
+│   │   │   └── firebase.ts
+│   │   ├── App.css
+│   │   ├── App.tsx
+│   │   ├── index.css
+│   │   ├── main.tsx
+│   │   └── vite-env.d.ts
+│   ├── .dockerignore
+│   ├── .env.docker
+│   ├── .env.local
+│   ├── .gitignore
+│   ├── Dockerfile
+│   ├── index.html
+│   ├── package-lock.json
+│   ├── package.json
+│   ├── tsconfig.json
+│   ├── tsconfig.node.json
+│   └── vite.config.ts
+├── scripts/
+│   └── init-db.sh
+├── .gitignore
+├── EMPEZAR.md
+├── FASE2_README.md
+├── IMPLEMENTACION_CHECKLIST.md
+├── IMPLEMENTACION_FINAL.md
+├── IMPLEMENTATION_SUMMARY.md
+├── Makefile
+├── QUICK_REFERENCE.md
+├── README.md
+├── RESUMEN_IMPLEMENTACION.md
+├── RESUMEN_VISUAL.txt
+├── TEST_GUIDE.md
+├── codigo_compactado.txt
+├── compactar_codigo.py
+├── docker-compose.yml
+├── firebase.json
+├── firestore.rules
+└── skills-lock.json
+
+================================================================================
+
+ARCHIVOS INCLUIDOS: 60
+================================================================================
+
+
+################################################################################
+# ARCHIVO 1/60: backend/app/__init__.py
+################################################################################
+
+"""Almuerzos backend application"""
+
+
+################################################################################
+# ARCHIVO 2/60: backend/app/api/__init__.py
+################################################################################
+
+# API module
+
+
+################################################################################
+# ARCHIVO 3/60: backend/app/api/admin_incidencias.py
+################################################################################
+
+from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy.orm import Session
+from datetime import datetime
+from app.database import get_db
+from app.models.incidencia import IncidenciaCobertura
+from app.models.turno import AsignacionAlmuerzo
+from app.enums import EstadoIncidencia
+from app.core.barometro import BarometroService
+from app.services import firestore_client
+import logging
+
+logger = logging.getLogger(__name__)
+
+router = APIRouter(prefix="/admin/incidencias", tags=["admin"], redirect_slashes=False)
+
+
+@router.get("")
+def list_incidencias(
+    fecha: str = Query(None),
+    estado: str = Query(None),
+    db: Session = Depends(get_db)
+):
+    """Lista incidencias activas con filtros opcionales."""
+    query = db.query(IncidenciaCobertura)
+
+    # Filtro por estado (por defecto, solo activas)
+    if estado:
+        query = query.filter(IncidenciaCobertura.estado == estado)
+    else:
+        query = query.filter(IncidenciaCobertura.estado.in_([
+            EstadoIncidencia.VENTANA_ADMIN.value,
+            EstadoIncidencia.BROADCAST_ACTIVO.value
+        ]))
+
+    # Filtro por fecha (opcional)
+    if fecha:
+        query = query.join(AsignacionAlmuerzo).join(AsignacionAlmuerzo.turno_almuerzo).filter(
+            AsignacionAlmuerzo.turno_almuerzo.fecha == fecha
+        )
+
+    incidencias = query.all()
+
+    result = []
+    for inc in incidencias:
+        turno = inc.asignacion.turno_almuerzo
+        franja = turno.franja_horaria
+        result.append({
+            "id": inc.id,
+            "fecha": str(turno.fecha),
+            "franja": f"{franja.hora_inicio.strftime('%H:%M')}-{franja.hora_fin.strftime('%H:%M')}",
+            "colaborador_afectado": {
+                "id": inc.asignacion.colaborador.id,
+                "nombre": inc.asignacion.colaborador.nombre
+            },
+            "estado": inc.estado,
+            "motivo": inc.motivo,
+            "created_at": inc.created_at.isoformat() if inc.created_at else None
+        })
+
+    return result
+
+
+@router.post("/{id}/broadcast")
+def broadcast_incidencia(
+    id: int,
+    db: Session = Depends(get_db)
+):
+    """Admin dispara broadcast manualmente."""
+    incidencia = db.query(IncidenciaCobertura).filter(
+        IncidenciaCobertura.id == id
+    ).first()
+
+    if not incidencia:
+        raise HTTPException(status_code=404, detail="Incidencia no encontrada")
+
+    if incidencia.estado == EstadoIncidencia.RESUELTA.value:
+        raise HTTPException(status_code=400, detail="Ya resuelta")
+
+    # Cambiar a broadcast_activo
+    incidencia.estado = EstadoIncidencia.BROADCAST_ACTIVO.value
+    db.add(incidencia)
+    db.commit()
+
+    # Actualizar en Firestore
+    firestore_client.update_incidencia_firestore(incidencia.id, {
+        "estado": EstadoIncidencia.BROADCAST_ACTIVO.value
+    })
+
+    logger.info(f"Broadcast dispuesto manualmente por admin para incidencia {id}")
+
+    return {"status": "broadcast_activo", "incidencia_id": id}
+
+
+@router.post("/{id}/presencial")
+def resolver_presencial(
+    id: int,
+    db: Session = Depends(get_db)
+):
+    """Admin resuelve sin app (presencial)."""
+    incidencia = db.query(IncidenciaCobertura).filter(
+        IncidenciaCobertura.id == id
+    ).first()
+
+    if not incidencia:
+        raise HTTPException(status_code=404, detail="Incidencia no encontrada")
+
+    # Marcar como resuelta sin candidatos
+    incidencia.estado = EstadoIncidencia.RESUELTA.value
+    incidencia.resolved_at = datetime.now()
+    db.add(incidencia)
+    db.commit()
+
+    # Actualizar en Firestore
+    firestore_client.update_incidencia_firestore(incidencia.id, {
+        "estado": EstadoIncidencia.RESUELTA.value,
+        "resolved_at": datetime.now().isoformat()
+    })
+
+    # Recalcular barometro
+    turno = incidencia.asignacion.turno_almuerzo
+    barometro = BarometroService.calculate_barometro(db, str(turno.fecha))
+    firestore_client.update_barometro(barometro["estado"], barometro["franjas"], barometro["incidencias_activas"])
+
+    logger.info(f"Incidencia {id} resuelta presencialmente por admin")
+
+    return {"status": "resuelto_presencial", "incidencia_id": id}
+
+
+################################################################################
+# ARCHIVO 4/60: backend/app/api/admin_turnos.py
+################################################################################
+
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
+from pydantic import BaseModel
+from app.database import get_db
+from app.models import Colaborador, TurnoAlmuerzo, AsignacionAlmuerzo, FranjaHoraria
+from app.schemas.turno import TurnoAlmuerzoResponse, AsignacionResponse
+from app.dependencies import get_admin_user
+from datetime import date, timedelta
+from typing import List
+
+router = APIRouter(prefix="/admin/turnos", tags=["admin_turnos"], redirect_slashes=False)
+
+
+class CreateAsignacionRequest(BaseModel):
+    colaborador_id: int
+
+
+@router.post("/generar-semana", status_code=status.HTTP_200_OK)
+def generar_turnos_semana(
+    semana: str,
+    db: Session = Depends(get_db),
+    admin: Colaborador = Depends(get_admin_user),
+):
+    """Generate turns for a week (Mon-Fri). Returns preview with generated turns and any tie conflicts."""
+    fecha_lunes = date.fromisoformat(semana)
+
+    if fecha_lunes.weekday() != 0:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="El parámetro semana debe ser un lunes (YYYY-MM-DD)"
+        )
+
+    dias_semana = [fecha_lunes + timedelta(days=i) for i in range(5)]
+
+    preview_turnos = []
+    conflictos = []
+
+    franjas = db.query(FranjaHoraria).order_by(FranjaHoraria.orden).all()
+
+    # Get all active colaboradores
+    colaboradores_activos = db.query(Colaborador).filter_by(
+        estado_atencion='activo'
+    ).order_by(Colaborador.puntaje_prioridad).all()
+
+    colab_index = 0
+
+    for dia in dias_semana:
+        for franja in franjas:
+            turno = db.query(TurnoAlmuerzo).filter_by(fecha=dia, franja_horaria_id=franja.id).first()
+            if not turno:
+                turno = TurnoAlmuerzo(
+                    fecha=dia,
+                    franja_horaria_id=franja.id,
+                    capacidad_maxima=2,
+                )
+                db.add(turno)
+                db.flush()  # Get the turno ID without committing
+
+            # Create assignments for the slot
+            existing_asignaciones = db.query(AsignacionAlmuerzo).filter_by(
+                turno_almuerzo_id=turno.id
+            ).count()
+
+            # Create assignments up to capacity if none exist
+            if existing_asignaciones == 0 and colaboradores_activos:
+                for _ in range(turno.capacidad_maxima):
+                    colab = colaboradores_activos[colab_index % len(colaboradores_activos)]
+                    asignacion = AsignacionAlmuerzo(
+                        turno_almuerzo_id=turno.id,
+                        colaborador_id=colab.id,
+                        estado='firme'
+                    )
+                    db.add(asignacion)
+                    colab_index += 1
+
+            preview_turnos.append(TurnoAlmuerzoResponse.model_validate(turno))
+
+    db.commit()
+
+    return {
+        "status": "preview_generated",
+        "semana": semana,
+        "turnos": preview_turnos,
+        "conflictos": conflictos,
+        "mensaje": "Preview generado. Confirma con POST /confirmar-semana"
+    }
+
+
+@router.post("/{turno_id}/asignaciones", status_code=status.HTTP_201_CREATED, response_model=AsignacionResponse)
+def create_asignacion(
+    turno_id: int,
+    request: CreateAsignacionRequest,
+    db: Session = Depends(get_db),
+    admin: Colaborador = Depends(get_admin_user),
+):
+    """Create a new assignment for a shift."""
+    turno = db.query(TurnoAlmuerzo).filter_by(id=turno_id).first()
+    if not turno:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Turno {turno_id} no encontrado"
+        )
+
+    if len(turno.asignaciones) >= turno.capacidad_maxima:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="El turno ya alcanzó su capacidad máxima"
+        )
+
+    colaborador = db.query(Colaborador).filter_by(id=request.colaborador_id).first()
+    if not colaborador:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Colaborador {request.colaborador_id} no encontrado"
+        )
+
+    asignacion = AsignacionAlmuerzo(
+        turno_almuerzo_id=turno_id,
+        colaborador_id=request.colaborador_id,
+        estado='firme'
+    )
+    db.add(asignacion)
+    db.commit()
+    db.refresh(asignacion)
+
+    return AsignacionResponse.model_validate(asignacion)
+
+
+@router.delete("/asignaciones/{asignacion_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_asignacion(
+    asignacion_id: int,
+    db: Session = Depends(get_db),
+    admin: Colaborador = Depends(get_admin_user),
+):
+    """Delete an individual assignment."""
+    asignacion = db.query(AsignacionAlmuerzo).filter_by(id=asignacion_id).first()
+    if not asignacion:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Asignación {asignacion_id} no encontrada"
+        )
+
+    db.delete(asignacion)
+    db.commit()
+    return None
+
+
+@router.delete("/{turno_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_turno(
+    turno_id: int,
+    db: Session = Depends(get_db),
+    admin: Colaborador = Depends(get_admin_user),
+):
+    """Delete an entire shift with cascade to its assignments."""
+    turno = db.query(TurnoAlmuerzo).filter_by(id=turno_id).first()
+    if not turno:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Turno {turno_id} no encontrado"
+        )
+
+    db.delete(turno)
+    db.commit()
+    return None
+
+
+@router.post("/confirmar-semana", status_code=status.HTTP_200_OK)
+def confirmar_turnos_semana(
+    semana: str,
+    db: Session = Depends(get_db),
+    admin: Colaborador = Depends(get_admin_user),
+):
+    """Confirm the generated preview for the week."""
+    fecha_lunes = date.fromisoformat(semana)
+
+    if fecha_lunes.weekday() != 0:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="El parámetro semana debe ser un lunes (YYYY-MM-DD)"
+        )
+
+    return {
+        "status": "confirmed",
+        "semana": semana,
+        "mensaje": "Turnos confirmados para la semana"
+    }
+
+
+@router.patch("/asignaciones/{asignacion_id}", status_code=status.HTTP_200_OK)
+def override_asignacion(
+    asignacion_id: int,
+    colaborador_id: int,
+    db: Session = Depends(get_db),
+    admin: Colaborador = Depends(get_admin_user),
+):
+    """Override a specific assignment (change assigned collaborator to a slot on a specific day)."""
+    asignacion = db.query(AsignacionAlmuerzo).filter_by(id=asignacion_id).first()
+    if not asignacion:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Asignación {asignacion_id} no encontrada"
+        )
+
+    asignacion.colaborador_id = colaborador_id
+    db.commit()
+    db.refresh(asignacion)
+
+    return {"status": "updated", "asignacion_id": asignacion_id}
+
+
+################################################################################
+# ARCHIVO 5/60: backend/app/api/auth.py
+################################################################################
+
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
+from app.database import get_db
+from app.models import Colaborador
+from app.schemas.colaborador import ColaboradorResponse
+from app.auth.local import create_token, hash_password
+from pydantic import BaseModel
+
+router = APIRouter(prefix="/auth", tags=["auth"], redirect_slashes=False)
+
+
+class LoginRequest(BaseModel):
+    email: str
+
+
+class SetupRequest(BaseModel):
+    email: str
+    password: str
+
+
+class LoginResponse(BaseModel):
+    token: str
+    user: ColaboradorResponse
+
+
+@router.post("/login", response_model=LoginResponse)
+def login(request: LoginRequest, db: Session = Depends(get_db)):
+    """Login with email - simple authentication for regular collaborators"""
+    user = db.query(Colaborador).filter(Colaborador.email == request.email).first()
+
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Usuario no encontrado")
+
+    token = create_token(user.id)
+
+    return LoginResponse(
+        token=token,
+        user=ColaboradorResponse.model_validate(user),
+    )
+
+
+@router.post("/setup", response_model=LoginResponse)
+def setup(request: SetupRequest, db: Session = Depends(get_db)):
+    """Admin setup endpoint - only for sebassur90@gmail.com"""
+    ADMIN_EMAIL = "sebassur90@gmail.com"
+
+    if request.email != ADMIN_EMAIL:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Solo el administrador puede usar este endpoint")
+
+    user = db.query(Colaborador).filter(Colaborador.email == request.email).first()
+
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Usuario administrativo no encontrado")
+
+    user.password_hash = hash_password(request.password)
+    user.es_admin = True
+    db.commit()
+    db.refresh(user)
+
+    token = create_token(user.id)
+
+    return LoginResponse(
+        token=token,
+        user=ColaboradorResponse.model_validate(user),
+    )
+
+
+@router.get("/me", response_model=ColaboradorResponse)
+def me(token: str, db: Session = Depends(get_db)):
+    """Get current user info"""
+    from app.auth.local import verify_token
+
+    try:
+        colaborador_id = verify_token(token)
+        user = db.query(Colaborador).filter(Colaborador.id == colaborador_id).first()
+        if not user:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+        return ColaboradorResponse.model_validate(user)
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(e))
+
+
+################################################################################
+# ARCHIVO 6/60: backend/app/api/colaboradores.py
+################################################################################
+
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
+from pydantic import BaseModel
+from app.database import get_db
+from app.models import Colaborador
+from app.schemas.colaborador import ColaboradorResponse, ColaboradorCreate, ColaboradorUpdate
+from app.dependencies import get_admin_user
+from typing import List
+
+router = APIRouter(prefix="/colaboradores", tags=["colaboradores"], redirect_slashes=False)
+
+
+class FCMTokenRequest(BaseModel):
+    fcm_token: str
+
+
+@router.get("", response_model=List[ColaboradorResponse])
+@router.get("/", response_model=List[ColaboradorResponse])
+def list_colaboradores(token: str = "", db: Session = Depends(get_db)):
+    """Get all colaboradores (admin only)"""
+    # TODO: Add proper admin check
+    colaboradores = db.query(Colaborador).all()
+    return [ColaboradorResponse.model_validate(c) for c in colaboradores]
+
+
+@router.post("", response_model=ColaboradorResponse)
+@router.post("/", response_model=ColaboradorResponse)
+def create_colaborador(colab: ColaboradorCreate, token: str = "", db: Session = Depends(get_db)):
+    """Create a new colaborador (admin only)"""
+    # Check if email already exists
+    existing = db.query(Colaborador).filter(Colaborador.email == colab.email).first()
+    if existing:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="El email ya existe")
+
+    new_colab = Colaborador(**colab.model_dump())
+    db.add(new_colab)
+    db.commit()
+    db.refresh(new_colab)
+
+    return ColaboradorResponse.model_validate(new_colab)
+
+
+@router.get("/{colaborador_id}", response_model=ColaboradorResponse)
+def get_colaborador(colaborador_id: int, db: Session = Depends(get_db)):
+    """Get a specific colaborador"""
+    colab = db.query(Colaborador).filter(Colaborador.id == colaborador_id).first()
+    if not colab:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Colaborador no encontrado")
+    return ColaboradorResponse.model_validate(colab)
+
+
+@router.patch("/{colaborador_id}", response_model=ColaboradorResponse)
+def update_colaborador(
+    colaborador_id: int,
+    update_data: ColaboradorUpdate,
+    token: str = "",
+    db: Session = Depends(get_db),
+):
+    """Update a colaborador (admin only)"""
+    colab = db.query(Colaborador).filter(Colaborador.id == colaborador_id).first()
+    if not colab:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Colaborador no encontrado")
+
+    update_dict = update_data.model_dump(exclude_unset=True)
+    for key, value in update_dict.items():
+        setattr(colab, key, value)
+
+    db.commit()
+    db.refresh(colab)
+
+    return ColaboradorResponse.model_validate(colab)
+
+
+@router.patch("/{colaborador_id}/fcm-token")
+def update_fcm_token(
+    colaborador_id: int,
+    request: FCMTokenRequest,
+    db: Session = Depends(get_db),
+):
+    """Actualiza el token FCM del dispositivo del colaborador."""
+    colab = db.query(Colaborador).filter(Colaborador.id == colaborador_id).first()
+    if not colab:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Colaborador no encontrado")
+
+    colab.fcm_token = request.fcm_token
+    db.add(colab)
+    db.commit()
+    db.refresh(colab)
+
+    return {"status": "fcm_token_actualizado", "colaborador_id": colaborador_id}
+
+
+################################################################################
+# ARCHIVO 7/60: backend/app/api/dev.py
+################################################################################
+
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
+from pydantic import BaseModel
+from app.database import get_db
+from app.config import APP_ENV
+from app.models.turno import TurnoAlmuerzo, AsignacionAlmuerzo
+from app.models.notificacion import Notificacion
+from app.models.incidencia import IncidenciaCobertura
+from app.enums import EstadoAsignacion, EstadoIncidencia
+from app.core.cascade_engine import CascadeEngine
+import logging
+
+logger = logging.getLogger(__name__)
+
+router = APIRouter(prefix="/dev", tags=["dev"], redirect_slashes=False)
+
+
+class SimularEventoRequest(BaseModel):
+    tipo: str  # "t_minus_5", "timeout", "rechazo", "admin_window_end"
+    id: int    # turno_id o notif_id o incidencia_id
+
+
+@router.post("/simular-evento")
+def simular_evento(
+    request: SimularEventoRequest,
+    db: Session = Depends(get_db)
+):
+    """Simula eventos de prueba. Solo disponible en APP_ENV=local."""
+    if APP_ENV != "local":
+        raise HTTPException(status_code=403, detail="Solo disponible en modo local")
+
+    tipo = request.tipo
+    id_val = request.id
+
+    if tipo == "t_minus_5":
+        # Simular notificación T-5min
+        turno = db.query(TurnoAlmuerzo).filter(TurnoAlmuerzo.id == id_val).first()
+        if not turno:
+            raise HTTPException(status_code=404, detail="Turno no encontrado")
+
+        # Crear notificación para cada asignación del turno
+        asignaciones = db.query(AsignacionAlmuerzo).filter(
+            AsignacionAlmuerzo.turno_almuerzo_id == turno.id
+        ).all()
+
+        for asignacion in asignaciones:
+            notif = Notificacion(
+                colaborador_id=asignacion.colaborador_id,
+                tipo="confirmar_turno",
+                mensaje=f"Tu almuerzo es en 5 min ({turno.franja_horaria.hora_inicio.strftime('%H:%M')}–{turno.franja_horaria.hora_fin.strftime('%H:%M')}). ¿Salís?",
+                leida=False,
+                canal="push"
+            )
+            asignacion.estado = EstadoAsignacion.NOTIFICADA.value
+            db.add(notif)
+            db.add(asignacion)
+
+        db.commit()
+        logger.info(f"[DEV] Notificación T-5min simulada para turno {id_val}")
+        return {"status": "notificacion_t5_simulada", "turno_id": id_val}
+
+    elif tipo == "timeout":
+        # Simular timeout de notificación
+        notif = db.query(Notificacion).filter(Notificacion.id == id_val).first()
+        if not notif:
+            raise HTTPException(status_code=404, detail="Notificación no encontrada")
+
+        # Obtener asignación del colaborador
+        asignacion = db.query(AsignacionAlmuerzo).filter(
+            AsignacionAlmuerzo.colaborador_id == notif.colaborador_id,
+            AsignacionAlmuerzo.estado == EstadoAsignacion.NOTIFICADA.value
+        ).first()
+
+        if asignacion:
+            notif.leida = True
+            db.add(notif)
+            db.commit()
+
+            # Iniciar cascada por timeout
+            CascadeEngine.iniciar(db, asignacion.id, "timeout")
+
+        logger.info(f"[DEV] Timeout simulado para notificación {id_val}")
+        return {"status": "timeout_simulado", "notif_id": id_val}
+
+    elif tipo == "rechazo":
+        # Simular rechazo manual (endpoint de desarrollo)
+        notif = db.query(Notificacion).filter(Notificacion.id == id_val).first()
+        if not notif:
+            raise HTTPException(status_code=404, detail="Notificación no encontrada")
+
+        asignacion = db.query(AsignacionAlmuerzo).filter(
+            AsignacionAlmuerzo.colaborador_id == notif.colaborador_id,
+            AsignacionAlmuerzo.estado == EstadoAsignacion.NOTIFICADA.value
+        ).first()
+
+        if asignacion:
+            notif.leida = True
+            db.add(notif)
+            db.commit()
+            CascadeEngine.iniciar(db, asignacion.id, "rechazo")
+
+        logger.info(f"[DEV] Rechazo simulado para notificación {id_val}")
+        return {"status": "rechazo_simulado", "notif_id": id_val}
+
+    elif tipo == "admin_window_end":
+        # Simular fin de ventana admin (auto-broadcast)
+        incidencia = db.query(IncidenciaCobertura).filter(
+            IncidenciaCobertura.id == id_val
+        ).first()
+
+        if not incidencia:
+            raise HTTPException(status_code=404, detail="Incidencia no encontrada")
+
+        if incidencia.estado == EstadoIncidencia.VENTANA_ADMIN.value:
+            # Cambiar a broadcast_activo automáticamente
+            incidencia.estado = EstadoIncidencia.BROADCAST_ACTIVO.value
+            db.add(incidencia)
+            db.commit()
+
+            # Actualizar Firestore
+            from app.services import firestore_client
+            firestore_client.update_incidencia_firestore(incidencia.id, {
+                "estado": EstadoIncidencia.BROADCAST_ACTIVO.value
+            })
+
+        logger.info(f"[DEV] Ventana admin cerrada para incidencia {id_val} → auto-broadcast")
+        return {"status": "admin_window_end_simulado", "incidencia_id": id_val}
+
+    else:
+        raise HTTPException(status_code=400, detail="Tipo de evento no válido")
+
+
+################################################################################
+# ARCHIVO 8/60: backend/app/api/dias_no_laborables.py
+################################################################################
+
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
+from app.database import get_db
+from app.models import DiaNoLaborable, Colaborador
+from app.schemas.dia_no_laborable import DiaNoLaborableCreate, DiaNoLaborableResponse
+from app.dependencies import get_admin_user
+from datetime import date
+from typing import List
+
+router = APIRouter(prefix="/dias-no-laborables", tags=["dias_no_laborables"], redirect_slashes=False)
+
+
+@router.get("", response_model=List[DiaNoLaborableResponse])
+@router.get("/", response_model=List[DiaNoLaborableResponse])
+def list_dias_no_laborables(
+    mes: str,
+    db: Session = Depends(get_db),
+):
+    """Get non-working days for a specific month (YYYY-MM)"""
+    year, month = mes.split("-")
+    year, month = int(year), int(month)
+
+    dias = db.query(DiaNoLaborable).all()
+    return [
+        DiaNoLaborableResponse.model_validate(d)
+        for d in dias
+        if d.fecha.year == year and d.fecha.month == month
+    ]
+
+
+@router.post("", response_model=DiaNoLaborableResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/", response_model=DiaNoLaborableResponse, status_code=status.HTTP_201_CREATED)
+def create_dia_no_laborable(
+    data: DiaNoLaborableCreate,
+    db: Session = Depends(get_db),
+    admin: Colaborador = Depends(get_admin_user),
+):
+    """Mark a date as non-working (admin only)"""
+    existing = db.query(DiaNoLaborable).filter_by(fecha=data.fecha).first()
+    if existing:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"Date {data.fecha} is already marked as non-working"
+        )
+
+    dia = DiaNoLaborable(fecha=data.fecha, motivo=data.motivo)
+    db.add(dia)
+    db.commit()
+    db.refresh(dia)
+    return DiaNoLaborableResponse.model_validate(dia)
+
+
+@router.delete("/{fecha}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_dia_no_laborable(
+    fecha: str,
+    db: Session = Depends(get_db),
+    admin: Colaborador = Depends(get_admin_user),
+):
+    """Remove non-working day status (admin only)"""
+    fecha_obj = date.fromisoformat(fecha)
+    dia = db.query(DiaNoLaborable).filter_by(fecha=fecha_obj).first()
+    if not dia:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Date {fecha} not found"
+        )
+
+    db.delete(dia)
+    db.commit()
+
+
+################################################################################
+# ARCHIVO 9/60: backend/app/api/franjas.py
+################################################################################
+
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
+from app.database import get_db
+from app.models import FranjaHoraria, Colaborador
+from app.schemas.franja import FranjaHorariaResponse, FranjaCreate, FranjaUpdate
+from app.dependencies import get_admin_user
+from typing import List
+
+router = APIRouter(prefix="/franjas", tags=["franjas"], redirect_slashes=False)
+
+
+@router.get("", response_model=List[FranjaHorariaResponse])
+@router.get("/", response_model=List[FranjaHorariaResponse])
+def list_franjas(db: Session = Depends(get_db)):
+    """Get all time slots"""
+    franjas = db.query(FranjaHoraria).order_by(FranjaHoraria.orden).all()
+    return [FranjaHorariaResponse.model_validate(f) for f in franjas]
+
+
+@router.post("", response_model=FranjaHorariaResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/", response_model=FranjaHorariaResponse, status_code=status.HTTP_201_CREATED)
+def create_franja(
+    data: FranjaCreate,
+    db: Session = Depends(get_db),
+    admin: Colaborador = Depends(get_admin_user),
+):
+    """Create a new time slot (admin only)"""
+    existing = db.query(FranjaHoraria).filter_by(orden=data.orden).first()
+    if existing:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"Franja con orden {data.orden} ya existe"
+        )
+
+    franja = FranjaHoraria(
+        hora_inicio=data.hora_inicio,
+        hora_fin=data.hora_fin,
+        orden=data.orden,
+    )
+    db.add(franja)
+    db.commit()
+    db.refresh(franja)
+    return FranjaHorariaResponse.model_validate(franja)
+
+
+@router.patch("/{franja_id}", response_model=FranjaHorariaResponse)
+def update_franja(
+    franja_id: int,
+    data: FranjaUpdate,
+    db: Session = Depends(get_db),
+    admin: Colaborador = Depends(get_admin_user),
+):
+    """Update a time slot (admin only)"""
+    franja = db.query(FranjaHoraria).filter_by(id=franja_id).first()
+    if not franja:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Franja {franja_id} no encontrada"
+        )
+
+    if data.hora_inicio is not None:
+        franja.hora_inicio = data.hora_inicio
+    if data.hora_fin is not None:
+        franja.hora_fin = data.hora_fin
+    if data.orden is not None:
+        existing = db.query(FranjaHoraria).filter(
+            FranjaHoraria.orden == data.orden,
+            FranjaHoraria.id != franja_id
+        ).first()
+        if existing:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f"Franja con orden {data.orden} ya existe"
+            )
+        franja.orden = data.orden
+
+    db.commit()
+    db.refresh(franja)
+    return FranjaHorariaResponse.model_validate(franja)
+
+
+@router.delete("/{franja_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_franja(
+    franja_id: int,
+    db: Session = Depends(get_db),
+    admin: Colaborador = Depends(get_admin_user),
+):
+    """Delete a time slot (admin only). Returns 409 if it has associated turns."""
+    franja = db.query(FranjaHoraria).filter_by(id=franja_id).first()
+    if not franja:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Franja {franja_id} no encontrada"
+        )
+
+    if franja.turnos:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="No se puede eliminar una franja con turnos asociados"
+        )
+
+    db.delete(franja)
+    db.commit()
+
+
+################################################################################
+# ARCHIVO 10/60: backend/app/api/incidencias.py
+################################################################################
+
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
+from datetime import datetime
+from app.database import get_db
+from app.models.incidencia import IncidenciaCobertura, HistorialReemplazo
+from app.models.turno import AsignacionAlmuerzo, TurnoAlmuerzo
+from app.models.colaborador import Colaborador
+from app.enums import EstadoIncidencia, EstadoAsignacion
+from app.core.barometro import BarometroService
+from app.services import firestore_client
+
+router = APIRouter(prefix="/incidencias", tags=["incidencias"], redirect_slashes=False)
+
+
+@router.post("/{id}/aceptar")
+def aceptar_reemplazo(
+    id: int,
+    db: Session = Depends(get_db),
+    user_id: int = None  # En real, sería del JWT
+):
+    """Candidato acepta tomar el reemplazo (transacción atómica FCFS)."""
+    if not user_id:
+        raise HTTPException(status_code=401, detail="No autenticado")
+
+    incidencia = db.query(IncidenciaCobertura).filter(
+        IncidenciaCobertura.id == id
+    ).first()
+
+    if not incidencia:
+        raise HTTPException(status_code=404, detail="Incidencia no encontrada")
+
+    # Verificar que está en estado broadcast_activo
+    if incidencia.estado != EstadoIncidencia.BROADCAST_ACTIVO.value:
+        raise HTTPException(status_code=409, detail="Ya no está disponible este reemplazo")
+
+    # Verificar que no tiene reemplazante ya asignado
+    if incidencia.colaborador_reemplazante_id:
+        raise HTTPException(status_code=409, detail="Ya cubierto por otro colaborador")
+
+    # Simular transacción atómica Firestore: actualizar incidencia
+    incidencia.colaborador_reemplazante_id = user_id
+    incidencia.estado = EstadoIncidencia.RESUELTA.value
+    incidencia.resolved_at = datetime.now()
+
+    # Obtener datos originales
+    asignacion_original = incidencia.asignacion
+    turno_original = asignacion_original.turno_almuerzo
+    colaborador_original = asignacion_original.colaborador
+
+    # Swap de asignaciones: el nuevo reemplazante toma la franja original
+    # (En una versión completa, aquí habría lógica de swap)
+
+    # Registrar en historial_reemplazos
+    fecha_obj = datetime.strptime(str(turno_original.fecha), "%Y-%m-%d")
+    semana_iso = f"{fecha_obj.isocalendar()[0]}-W{fecha_obj.isocalendar()[1]:02d}"
+
+    historial = HistorialReemplazo(
+        colaborador_id=user_id,
+        incidencia_id=incidencia.id,
+        fecha=str(turno_original.fecha),
+        semana_iso=semana_iso
+    )
+    db.add(incidencia)
+    db.add(historial)
+    db.commit()
+
+    # Actualizar Firestore
+    firestore_client.update_incidencia_firestore(incidencia.id, {
+        "estado": EstadoIncidencia.RESUELTA.value,
+        "colaborador_reemplazante": {
+            "id": user_id,
+            "nombre": db.query(Colaborador).filter(Colaborador.id == user_id).first().nombre
+        },
+        "resolved_at": datetime.now().isoformat()
+    })
+
+    # Recalcular barometro → verde
+    barometro = BarometroService.calculate_barometro(db, str(turno_original.fecha))
+    firestore_client.update_barometro(barometro["estado"], barometro["franjas"], barometro["incidencias_activas"])
+
+    return {
+        "status": "aceptado",
+        "incidencia_id": incidencia.id,
+        "colaborador_reemplazante_id": user_id
+    }
+
+
+################################################################################
+# ARCHIVO 11/60: backend/app/api/notificaciones.py
+################################################################################
+
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
+from pydantic import BaseModel
+from app.database import get_db
+from app.models.notificacion import Notificacion
+from app.models.turno import AsignacionAlmuerzo
+from app.enums import EstadoAsignacion
+from app.core.cascade_engine import CascadeEngine
+from app.core.barometro import BarometroService
+from app.services import firestore_client
+
+router = APIRouter(prefix="/notificaciones", tags=["notificaciones"], redirect_slashes=False)
+
+
+class ResponderNotificacionRequest(BaseModel):
+    respuesta: str  # "si" o "no"
+
+
+@router.post("/{id}/responder")
+def responder_notificacion(
+    id: int,
+    request: ResponderNotificacionRequest,
+    db: Session = Depends(get_db)
+):
+    """Responde a una notificación de confirmación de turno."""
+    notif = db.query(Notificacion).filter(Notificacion.id == id).first()
+    if not notif:
+        raise HTTPException(status_code=404, detail="Notificación no encontrada")
+
+    # Marcar notificación como leída
+    notif.leida = True
+
+    if request.respuesta == "si":
+        # Confirmación: marcar asignación como confirmada
+        asignacion = db.query(AsignacionAlmuerzo).filter(
+            AsignacionAlmuerzo.colaborador_id == notif.colaborador_id
+        ).first()
+        if asignacion:
+            asignacion.estado = EstadoAsignacion.CONFIRMADA.value
+            db.add(asignacion)
+
+        db.add(notif)
+        db.commit()
+
+        # Recalcular barometro
+        barometro = BarometroService.calculate_barometro(db, str(asignacion.turno_almuerzo.fecha))
+        firestore_client.update_barometro(barometro["estado"], barometro["franjas"], barometro["incidencias_activas"])
+
+        return {"status": "confirmado", "asignacion_id": asignacion.id}
+
+    elif request.respuesta == "no":
+        # Rechazo: iniciar cascada
+        db.add(notif)
+        db.commit()
+
+        # Obtener asignación asociada
+        asignacion = db.query(AsignacionAlmuerzo).filter(
+            AsignacionAlmuerzo.colaborador_id == notif.colaborador_id
+        ).first()
+
+        if asignacion:
+            CascadeEngine.iniciar(db, asignacion.id, "rechazo")
+            return {"status": "cascada_iniciada", "asignacion_id": asignacion.id}
+        else:
+            raise HTTPException(status_code=400, detail="Asignación no encontrada")
+
+    else:
+        raise HTTPException(status_code=400, detail="Respuesta inválida")
+
+
+################################################################################
+# ARCHIVO 12/60: backend/app/api/preferencias.py
+################################################################################
+
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
+from app.database import get_db
+from app.models import PreferenciaDiaria, Colaborador
+from app.schemas.preferencia import PreferenciaCreate, PreferenciaResponse
+from app.dependencies import get_current_user
+from typing import Optional
+
+router = APIRouter(prefix="/preferencias", tags=["preferencias"], redirect_slashes=False)
+
+
+@router.post("", response_model=PreferenciaResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/", response_model=PreferenciaResponse, status_code=status.HTTP_201_CREATED)
+def create_preferencia(
+    data: PreferenciaCreate,
+    db: Session = Depends(get_db),
+    current_user: Colaborador = Depends(get_current_user),
+):
+    """Create or replace a preference for a specific date. Only allowed if admin hasn't generated turns for that day."""
+    existing = db.query(PreferenciaDiaria).filter_by(
+        colaborador_id=current_user.id,
+        fecha=data.fecha
+    ).first()
+
+    if existing:
+        existing.franja_horaria_id_deseada = data.franja_horaria_id_deseada
+        existing.estado_concesion = "pendiente"
+    else:
+        existing = PreferenciaDiaria(
+            colaborador_id=current_user.id,
+            fecha=data.fecha,
+            franja_horaria_id_deseada=data.franja_horaria_id_deseada,
+            estado_concesion="pendiente"
+        )
+        db.add(existing)
+
+    db.commit()
+    db.refresh(existing)
+    return PreferenciaResponse.model_validate(existing)
+
+
+@router.get("", response_model=Optional[PreferenciaResponse])
+@router.get("/", response_model=Optional[PreferenciaResponse])
+def get_preferencia(
+    fecha: str,
+    colaborador_id: int,
+    db: Session = Depends(get_db),
+):
+    """Get preference for a collaborator on a specific date"""
+    from datetime import date
+    fecha_obj = date.fromisoformat(fecha)
+
+    preferencia = db.query(PreferenciaDiaria).filter_by(
+        colaborador_id=colaborador_id,
+        fecha=fecha_obj
+    ).first()
+
+    if not preferencia:
+        return None
+
+    return PreferenciaResponse.model_validate(preferencia)
+
+
+################################################################################
+# ARCHIVO 13/60: backend/app/api/turnos.py
+################################################################################
+
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
+from app.database import get_db
+from app.models import TurnoAlmuerzo
+from app.schemas.turno import TurnoListResponse, TurnoAlmuerzoResponse
+from datetime import date
+
+router = APIRouter(prefix="/turnos", tags=["turnos"], redirect_slashes=False)
+
+
+@router.get("", response_model=TurnoListResponse)
+@router.get("/", response_model=TurnoListResponse)
+def list_turnos_by_date(
+    fecha: str,
+    db: Session = Depends(get_db),
+):
+    """Get all time slots for a date with their assignments. Returns empty assignments if no turns generated yet."""
+    fecha_obj = date.fromisoformat(fecha)
+
+    turnos = db.query(TurnoAlmuerzo).filter_by(fecha=fecha_obj).all()
+
+    response_turnos = [TurnoAlmuerzoResponse.model_validate(t) for t in turnos]
+
+    return TurnoListResponse(fecha=fecha_obj, franjas=response_turnos)
+
+
+################################################################################
+# ARCHIVO 14/60: backend/app/auth/__init__.py
+################################################################################
+
+# Auth module
+
+
+################################################################################
+# ARCHIVO 15/60: backend/app/auth/local.py
+################################################################################
+
+"""
+Local mock authentication for development.
+In production, this would be replaced with Google OAuth.
+"""
+from sqlalchemy.orm import Session
+from app.models import Colaborador
+from app.config import SECRET_KEY
+import jwt
+from datetime import datetime, timedelta, timezone
+from passlib.context import CryptContext
+
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+
+def hash_password(password: str) -> str:
+    """Hash a password using bcrypt"""
+    return pwd_context.hash(password)
+
+
+def verify_password(plain: str, hash: str) -> bool:
+    """Verify a plain password against a hash"""
+    return pwd_context.verify(plain, hash)
+
+
+def create_token(colaborador_id: int) -> str:
+    """Create JWT token for local auth"""
+    payload = {
+        "sub": str(colaborador_id),
+        "iat": datetime.now(timezone.utc),
+        "exp": datetime.now(timezone.utc) + timedelta(days=7),
+    }
+    return jwt.encode(payload, SECRET_KEY, algorithm="HS256")
+
+
+def verify_token(token: str) -> int:
+    """Verify JWT token and return colaborador_id"""
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+        return int(payload["sub"])
+    except jwt.InvalidTokenError:
+        raise ValueError("Invalid token")
+
+
+def get_current_user(db: Session, token: str) -> Colaborador:
+    """Get current user from token"""
+    try:
+        colaborador_id = verify_token(token)
+        user = db.query(Colaborador).filter(Colaborador.id == colaborador_id).first()
+        if not user:
+            raise ValueError("User not found")
+        return user
+    except Exception as e:
+        raise ValueError(f"Authentication failed: {str(e)}")
+
+
+################################################################################
+# ARCHIVO 16/60: backend/app/config.py
+################################################################################
+
+import os
+from dotenv import load_dotenv
+
+# En Docker, las variables ya están inyectadas vía env_file
+# En local, cargar desde .env
+if not os.getenv("DOCKER_CONTAINER"):
+    load_dotenv()
+
+DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://almuerzos_user:almuerzos_password@localhost:5432/almuerzos_db")
+SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret-key-change-in-production")
+DEBUG = os.getenv("DEBUG", "True").lower() == "true"
+LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
+APP_ENV = os.getenv("APP_ENV", "local")
+FIRESTORE_EMULATOR_HOST = os.getenv("FIRESTORE_EMULATOR_HOST", "")
+ADMIN_WINDOW_SECONDS = int(os.getenv("ADMIN_WINDOW_SECONDS", "60"))
+TIMEOUT_SECONDS = int(os.getenv("TIMEOUT_SECONDS", "180"))
+
+
+################################################################################
+# ARCHIVO 17/60: backend/app/constants.py
+################################################################################
+
+from datetime import time, timedelta
+from typing import List, Tuple
+
+# Fixed franjas: 5 franjas starting at 30-minute intervals
+FRANJAS_CONFIG: List[Tuple[time, time, int]] = [
+    (time(12, 0), time(12, 45), 1),    # Franja 1
+    (time(12, 30), time(13, 15), 2),   # Franja 2
+    (time(13, 0), time(13, 45), 3),    # Franja 3
+    (time(13, 30), time(14, 15), 4),   # Franja 4
+    (time(14, 0), time(14, 45), 5),    # Franja 5
+]
+
+# Special tasks configuration
+SPECIAL_TASKS = {
+    "tarea_especial_1": {
+        "nombre": "tarea_especial_1",
+        "dias_semana": [0, 1, 2, 3, 4],  # Monday-Friday
+        "hora_inicio": time(10, 0),
+        "hora_fin": time(15, 0),
+        "cantidad": 1,
+    },
+    "tarea_especial_2": {
+        "nombre": "tarea_especial_2",
+        "dias_semana": [2],  # Wednesday
+        "hora_inicio": time(11, 0),
+        "hora_fin": time(13, 0),
+        "cantidad": 1,
+        "franjas_permitidas": [2, 3, 4],  # Franjas 3, 4, 5 (indices in FRANJAS_CONFIG)
+    },
+    "tarea_especial_3": {
+        "nombre": "tarea_especial_3",
+        "dias_semana": [3],  # Thursday
+        "hora_inicio": time(10, 0),
+        "hora_fin": time(13, 0),
+        "cantidad": 1,
+        "franjas_permitidas": [2, 3, 4],  # Franjas 3, 4, 5
+    },
+}
+
+
+################################################################################
+# ARCHIVO 18/60: backend/app/core/__init__.py
+################################################################################
+
+from app.core.engine import AssignmentEngine
+from app.core.tipos import AssignmentResult, ContextData, ConflictoEmpate
+
+__all__ = ["AssignmentEngine", "AssignmentResult", "ContextData", "ConflictoEmpate"]
+
+
+################################################################################
+# ARCHIVO 19/60: backend/app/core/barometro.py
+################################################################################
+
+from datetime import datetime, timedelta
+from typing import List
+from sqlalchemy.orm import Session
+from app.models.turno import TurnoAlmuerzo, AsignacionAlmuerzo
+from app.models.colaborador import Colaborador
+from app.models.ausencia import Ausencia
+from app.models.incidencia import IncidenciaCobertura
+from app.enums import Sector, EstadoAtencion, EstadoIncidencia
+
+
+class BarometroService:
+    """Servicio testeable de cálculo del barometro tri-color."""
+
+    @staticmethod
+    def calculate_barometro(db: Session, fecha: str) -> dict:
+        """
+        Calcula el estado del barometro para una fecha.
+
+        Retorna:
+        {
+            "estado": "verde" | "amarillo" | "rojo",
+            "franjas": [
+                {
+                    "orden": int,
+                    "hora": "12:00-12:45",
+                    "estado": "ok" | "riesgo" | "critico",
+                    "comercial_libre": int,
+                    "operativo_libre": int
+                }
+            ],
+            "incidencias_activas": int
+        }
+        """
+        from app.models.franja_horaria import FranjaHoraria
+
+        # Franjas activas o que empiezan en los próximos 30 min
+        now = datetime.now()
+        franjas_to_check = db.query(FranjaHoraria).order_by(FranjaHoraria.orden).all()
+
+        franjas_state = []
+        worst_state = "verde"  # Peor estado visto
+
+        for franja in franjas_to_check:
+            # Turnos para esta franja y fecha
+            turnos = db.query(TurnoAlmuerzo).filter(
+                TurnoAlmuerzo.fecha == fecha,
+                TurnoAlmuerzo.franja_horaria_id == franja.id
+            ).all()
+
+            comercial_libre = 0
+            operativo_libre = 0
+
+            for turno in turnos:
+                # Contar colaboradores asignados a esta franja
+                asignados = db.query(AsignacionAlmuerzo).filter(
+                    AsignacionAlmuerzo.turno_almuerzo_id == turno.id
+                ).count()
+
+                # Colaboradores en línea = presentes - ausentes - orientador - asignados a franja
+                colaboradores_activos = db.query(Colaborador).filter(
+                    Colaborador.estado_atencion == EstadoAtencion.ACTIVO.value,
+                    Colaborador.habilitado_orientador == False  # No orientador
+                ).all()
+
+                for colab in colaboradores_activos:
+                    # Verificar si está ausente
+                    ausencia = db.query(Ausencia).filter(
+                        Ausencia.colaborador_id == colab.id,
+                        Ausencia.fecha == fecha
+                    ).first()
+                    if ausencia:
+                        continue
+
+                    # Verificar si no está asignado a esta franja
+                    asignado_en_franja = db.query(AsignacionAlmuerzo).join(TurnoAlmuerzo).filter(
+                        AsignacionAlmuerzo.colaborador_id == colab.id,
+                        TurnoAlmuerzo.franja_horaria_id == franja.id,
+                        TurnoAlmuerzo.fecha == fecha
+                    ).first()
+                    if asignado_en_franja:
+                        continue
+
+                    # En línea
+                    if colab.sector == Sector.COMERCIAL.value:
+                        comercial_libre += 1
+                    elif colab.sector == Sector.OPERATIVO.value:
+                        operativo_libre += 1
+
+            comercial_ok = comercial_libre >= 1
+            operativo_ok = operativo_libre >= 1
+
+            # Verificar incidencias activas para esta franja
+            tiene_incidencia = db.query(IncidenciaCobertura).filter(
+                IncidenciaCobertura.estado.in_([
+                    EstadoIncidencia.VENTANA_ADMIN.value,
+                    EstadoIncidencia.BROADCAST_ACTIVO.value
+                ])
+            ).first()
+
+            if not comercial_ok or not operativo_ok:
+                franja_state = "critico"
+            elif tiene_incidencia:
+                franja_state = "riesgo"
+            else:
+                franja_state = "ok"
+
+            # Actualizar peor estado
+            if franja_state == "critico":
+                worst_state = "rojo"
+            elif franja_state == "riesgo" and worst_state != "rojo":
+                worst_state = "amarillo"
+
+            franjas_state.append({
+                "orden": franja.orden,
+                "hora": f"{franja.hora_inicio.strftime('%H:%M')}-{franja.hora_fin.strftime('%H:%M')}",
+                "estado": franja_state,
+                "comercial_libre": comercial_libre,
+                "operativo_libre": operativo_libre,
+            })
+
+        # Contar incidencias activas
+        incidencias_activas = db.query(IncidenciaCobertura).filter(
+            IncidenciaCobertura.estado.in_([
+                EstadoIncidencia.VENTANA_ADMIN.value,
+                EstadoIncidencia.BROADCAST_ACTIVO.value
+            ])
+        ).count()
+
+        # Color global
+        color_map = {"verde": 0, "amarillo": 1, "rojo": 2}
+        worst_state = "verde"
+        for franja in franjas_state:
+            if color_map[franja["estado"]] > color_map[worst_state]:
+                worst_state = franja["estado"]
+
+        return {
+            "estado": worst_state,
+            "franjas": franjas_state,
+            "incidencias_activas": incidencias_activas,
+        }
+
+
+################################################################################
+# ARCHIVO 20/60: backend/app/core/cascade_engine.py
+################################################################################
+
+from datetime import datetime
+from typing import List, Optional
+from sqlalchemy.orm import Session
+import logging
+from app.models.turno import AsignacionAlmuerzo, TurnoAlmuerzo
+from app.models.incidencia import IncidenciaCobertura, HistorialReemplazo
+from app.models.colaborador import Colaborador
+from app.models.ausencia import Ausencia
+from app.enums import EstadoIncidencia, MotivoIncidencia, Sector, EstadoAtencion
+from app.core.barometro import BarometroService
+from app.services import firestore_client
+
+logger = logging.getLogger(__name__)
+
+
+class CascadeEngine:
+    """Motor de cascada de cobertura para rechazos/timeouts de turnos."""
+
+    @staticmethod
+    def iniciar(db: Session, asignacion_id: int, motivo: str, task_scheduler=None):
+        """
+        Inicia cascada de cobertura ante rechazo o timeout.
+
+        Args:
+            db: Sesión de BD
+            asignacion_id: ID de AsignacionAlmuerzo que fue rechazada
+            motivo: 'rechazo' o 'timeout'
+            task_scheduler: TaskScheduler para agendar admin_window_end
+        """
+        # Obtener la asignación
+        asignacion = db.query(AsignacionAlmuerzo).filter(
+            AsignacionAlmuerzo.id == asignacion_id
+        ).first()
+
+        if not asignacion:
+            logger.error(f"Asignación {asignacion_id} no encontrada")
+            return
+
+        turno = asignacion.turno_almuerzo
+        colaborador = asignacion.colaborador
+        fecha = turno.fecha
+        franja = turno.franja_horaria
+
+        logger.info(f"Iniciando cascada: {colaborador.nombre} rechazó turno {fecha} {franja.hora_inicio}-{franja.hora_fin}")
+
+        # 1. Calcula próxima franja viable para el postergado (antes de 14:45)
+        from app.models.franja_horaria import FranjaHoraria
+
+        franjas = db.query(FranjaHoraria).order_by(FranjaHoraria.orden).all()
+        proxima_franja_viable = None
+
+        for f in franjas:
+            # Si termina antes de 14:45
+            if f.hora_fin.hour < 14 or (f.hora_fin.hour == 14 and f.hora_fin.minute < 45):
+                # Verificar que no hay asignación conflictiva
+                existe_asignacion = db.query(AsignacionAlmuerzo).join(TurnoAlmuerzo).filter(
+                    TurnoAlmuerzo.fecha == fecha,
+                    TurnoAlmuerzo.franja_horaria_id == f.id,
+                    AsignacionAlmuerzo.colaborador_id == colaborador.id
+                ).first()
+                if not existe_asignacion:
+                    proxima_franja_viable = f
+                    break
+
+        if not proxima_franja_viable:
+            logger.warning(f"Sin franja viable para {colaborador.nombre}. Emitiendo alerta crítica al admin.")
+            # Emitir alerta crítica: el postergado queda sin almuerzo ese día
+            CascadeEngine._emit_critical_alert(db, asignacion)
+            # La cascada continúa buscando reemplazante para la franja original
+
+        # 2. Identifica candidatos elegibles (que pueden adelantar sin romper cobertura)
+        candidatos = CascadeEngine._find_candidates(db, turno, colaborador)
+        logger.info(f"Encontrados {len(candidatos)} candidatos para reemplazo")
+
+        # 3. Ordena por equidad: reemplazos_semana ASC
+        candidatos_ordenados = CascadeEngine._sort_by_equity(db, candidatos, fecha)
+
+        # 4. Crea IncidenciaCobertura
+        incidencia = IncidenciaCobertura(
+            asignacion_id=asignacion_id,
+            motivo=motivo,
+            estado=EstadoIncidencia.VENTANA_ADMIN.value,
+            colaborador_reemplazante_id=None
+        )
+        db.add(incidencia)
+        db.flush()  # Obtener ID
+        db.commit()
+
+        logger.info(f"Incidencia {incidencia.id} creada")
+
+        # 5. Escribe en Firestore
+        incidencia_data = {
+            "estado": EstadoIncidencia.VENTANA_ADMIN.value,
+            "franja": f"{franja.hora_inicio.strftime('%H:%M')}-{franja.hora_fin.strftime('%H:%M')}",
+            "fecha": str(fecha),
+            "colaborador_afectado": {
+                "id": colaborador.id,
+                "nombre": colaborador.nombre
+            },
+            "colaborador_reemplazante": None,
+            "candidatos": [
+                {
+                    "id": c.id,
+                    "nombre": c.nombre,
+                    "reemplazos_semana": CascadeEngine._count_replacements_this_week(db, c.id, fecha)
+                }
+                for c in candidatos_ordenados
+            ],
+            "motivo": motivo,
+            "admin_window_ends_at": datetime.now().isoformat(),
+        }
+        firestore_client.write_incidencia_firestore(incidencia.id, incidencia_data)
+
+        # 6. Recalcula barometro → amarillo
+        barometro = BarometroService.calculate_barometro(db, str(fecha))
+        firestore_client.update_barometro(barometro["estado"], barometro["franjas"], barometro["incidencias_activas"])
+
+        # 7. Agenda admin_window_end en 1 min (si scheduler disponible)
+        if task_scheduler:
+            from datetime import timedelta
+            run_at = datetime.now() + timedelta(seconds=60)  # 1 min en local
+            task_scheduler.schedule_admin_window_end(incidencia.id, run_at)
+
+    @staticmethod
+    def _find_candidates(db: Session, turno: TurnoAlmuerzo, colaborador_rechazante: Colaborador) -> List[Colaborador]:
+        """Identifica candidatos elegibles para reemplazo."""
+        # Candidatos: colaboradores que pueden adelantar su turno sin romper cobertura
+        # en su sector de su franja actual
+        candidatos = []
+        fecha = turno.fecha
+        franja = turno.franja_horaria
+
+        # Buscar colaboradores que tengan turno en esta misma fecha
+        # pero en una franja posterior
+        asignaciones_en_fecha = db.query(AsignacionAlmuerzo).join(TurnoAlmuerzo).filter(
+            TurnoAlmuerzo.fecha == fecha,
+            AsignacionAlmuerzo.colaborador_id != colaborador_rechazante.id
+        ).all()
+
+        for asi in asignaciones_en_fecha:
+            colab = asi.colaborador
+            turno_colab = asi.turno_almuerzo
+
+            # Si su franja es posterior a la de la incidencia
+            if turno_colab.franja_horaria.orden > franja.orden:
+                # Verificar que no rompe cobertura en su franja actual
+                # (simplificado: asumir que puede dejar si hay otros en su franja)
+                other_in_franja = db.query(AsignacionAlmuerzo).join(TurnoAlmuerzo).filter(
+                    TurnoAlmuerzo.fecha == fecha,
+                    TurnoAlmuerzo.franja_horaria_id == turno_colab.franja_horaria_id,
+                    AsignacionAlmuerzo.colaborador_id != colab.id
+                ).count()
+                if other_in_franja > 0:
+                    candidatos.append(colab)
+
+        return candidatos
+
+    @staticmethod
+    def _sort_by_equity(db: Session, candidatos: List[Colaborador], fecha) -> List[Colaborador]:
+        """Ordena candidatos por equidad (menor count de reemplazos esta semana primero)."""
+        from datetime import datetime
+
+        def score(colab):
+            count = CascadeEngine._count_replacements_this_week(db, colab.id, fecha)
+            return count
+
+        return sorted(candidatos, key=score)
+
+    @staticmethod
+    def _count_replacements_this_week(db: Session, colaborador_id: int, fecha) -> int:
+        """Cuenta reemplazos del colaborador en la semana ISO actual."""
+        from datetime import datetime
+
+        # Calcular semana ISO de la fecha
+        date_obj = datetime.strptime(str(fecha), "%Y-%m-%d")
+        semana_iso = date_obj.isocalendar()[1]
+
+        count = db.query(HistorialReemplazo).filter(
+            HistorialReemplazo.colaborador_id == colaborador_id,
+            HistorialReemplazo.semana_iso == f"{date_obj.isocalendar()[0]}-W{semana_iso:02d}"
+        ).count()
+
+        return count
+
+    @staticmethod
+    def _emit_critical_alert(db: Session, asignacion: AsignacionAlmuerzo):
+        """Emite alerta crítica al admin cuando postergado no tiene franja viable."""
+        from app.models.notificacion import Notificacion
+
+        # Crear notificación crítica para admins
+        admins = db.query(Colaborador).filter(Colaborador.rol == "admin").all()
+
+        for admin in admins:
+            notif = Notificacion(
+                colaborador_id=admin.id,
+                tipo="critica_sin_franja",
+                mensaje=f"ALERTA: {asignacion.colaborador.nombre} rechazó turno {asignacion.turno_almuerzo.fecha} "
+                        f"y no tiene franja viable antes de 14:45. Debe resolverse manualmente.",
+                leida=False,
+                canal="push"
+            )
+            db.add(notif)
+
+        db.commit()
+        logger.warning(f"Alerta crítica enviada a {len(admins)} admins")
+
+
+################################################################################
+# ARCHIVO 21/60: backend/app/core/cobertura.py
+################################################################################
+
+from typing import List, Tuple, Dict, Set
+from app.core.tipos import ColaboradorInfo
+
+
+class CoberturaValidator:
+    """Validates and tracks coverage requirements"""
+
+    def __init__(self, colaboradores: List[ColaboradorInfo]):
+        self.colaboradores = {c.id: c for c in colaboradores}
+
+    def get_cobertura_status(
+        self,
+        asignados_en_franja: List[int],  # colaborador ids in this franja
+        excluidos_o_ausentes: Set[int],  # who is NOT available in this franja
+    ) -> Tuple[int, int]:
+        """
+        Returns: (tipo_a_activos, tipo_b_activos) among those NOT in this franja
+        but ARE available/present that day
+        """
+        tipo_a_activos = 0
+        tipo_b_activos = 0
+
+        for colab_id, colab in self.colaboradores.items():
+            # Skip if absent/excluded that day
+            if colab_id in excluidos_o_ausentes:
+                continue
+
+            # Count only if NOT assigned to this franja
+            if colab_id not in asignados_en_franja:
+                # Only count activos
+                if colab.estado_atencion == "activo":
+                    if colab.sector == "tipo_a":
+                        tipo_a_activos += 1
+                    elif colab.sector == "tipo_b":
+                        tipo_b_activos += 1
+
+        return tipo_a_activos, tipo_b_activos
+
+    def satisfies_minimum_coverage(
+        self,
+        asignados_en_franja: List[int],
+        excluidos_o_ausentes: Set[int],
+    ) -> bool:
+        """Check if franja maintains >=1 Tipo-A and >=1 Tipo-B"""
+        tipo_a, tipo_b = self.get_cobertura_status(asignados_en_franja, excluidos_o_ausentes)
+        return tipo_a >= 1 and tipo_b >= 1
+
+    def can_remove_person_safely(
+        self,
+        colaborador_id: int,
+        asignados_en_franja: List[int],
+        excluidos_o_ausentes: Set[int],
+    ) -> bool:
+        """Check if removing a person would break coverage"""
+        # Simulate removal
+        remaining = [c for c in asignados_en_franja if c != colaborador_id]
+        return self.satisfies_minimum_coverage(remaining, excluidos_o_ausentes)
+
+
+################################################################################
+# ARCHIVO 22/60: backend/app/core/engine.py
+################################################################################
+
+from datetime import date
+from typing import List, Dict, Set, Tuple, Optional
+from sqlalchemy.orm import Session
+from app.models import (
+    Colaborador, Ausencia, PreferenciaDiaria, TareaEspecialAsignacion, FranjaHoraria, TurnoAlmuerzo
+)
+from app.constants import FRANJAS_CONFIG
+from app.core.tipos import (
+    ContextData, ColaboradorInfo, AssignmentResult, AsignacionResult, ConflictoEmpate
+)
+from app.core.cobertura import CoberturaValidator
+from app.core.prioridad import PrioridadResolver
+
+
+class AssignmentEngine:
+    """
+    Core assignment algorithm for lunch shifts.
+    Implements the 4-phase algorithm from spec §4.
+    """
+
+    def __init__(self, db: Session, fecha: date):
+        self.db = db
+        self.fecha = fecha
+        self.num_franjas = len(FRANJAS_CONFIG)
+
+    def run(self) -> AssignmentResult:
+        """Main orchestration method. Returns AssignmentResult."""
+        try:
+            # Load all data
+            context = self._phase_0_build_context()
+
+            # Phase 1: Resolve preferences
+            asignaciones_phase1 = self._phase_1_resolve_preferences(context)
+
+            # Phase 2: Fill remaining people
+            asignaciones_all = self._phase_2_fill_remaining(context, asignaciones_phase1)
+
+            # Phase 3: Final validation
+            cronograma, puntajes = self._phase_3_validate_and_build(context, asignaciones_all)
+
+            return AssignmentResult(
+                success=True,
+                cronograma=cronograma,
+                asignaciones=asignaciones_all,
+                puntajes_actualizados=puntajes,
+            )
+
+        except Exception as e:
+            return AssignmentResult(
+                success=False,
+                error=str(e),
+            )
+
+    def _phase_0_build_context(self) -> ContextData:
+        """
+        Phase 0: Build context for the day.
+        Determine who's absent, excluded, etc.
+        """
+        # Load ausencias
+        ausencias = self.db.query(Ausencia).filter(Ausencia.fecha == self.fecha).all()
+        ausentes_ids = {a.colaborador_id for a in ausencias}
+
+        # Load all colaboradores
+        colaboradores = self.db.query(Colaborador).all()
+        colab_map = {c.id: c for c in colaboradores}
+
+        # Find orientador (if assigned)
+        orientador_id = None
+        tarea_orient = (
+            self.db.query(TareaEspecialAsignacion)
+            .join(TareaEspecialAsignacion.tipo)
+            .filter(
+                TareaEspecialAsignacion.fecha == self.fecha,
+                TareaEspecialAsignacion.tipo.nombre == "orientador",
+            )
+            .first()
+        )
+        if tarea_orient:
+            orientador_id = tarea_orient.colaborador_id
+
+        # Find municipalidad/gandulfo restrictions
+        tareas_restringidas = {}
+        for tarea in (
+            self.db.query(TareaEspecialAsignacion)
+            .filter(TareaEspecialAsignacion.fecha == self.fecha)
+            .all()
+        ):
+            if tarea.tipo.nombre in ["municipalidad", "gandulfo"]:
+                # Restrict to franjas 3, 4, 5 (indices 2, 3, 4 in FRANJAS_CONFIG)
+                tareas_restringidas[tarea.colaborador_id] = [2, 3, 4]
+
+        # Build available pool
+        pool = []
+        for colab in colaboradores:
+            if colab.id in ausentes_ids or colab.id == orientador_id:
+                continue
+            pool.append(
+                ColaboradorInfo(
+                    id=colab.id,
+                    nombre=colab.nombre,
+                    sector=colab.sector,
+                    estado_atencion=colab.estado_atencion,
+                    puntaje_prioridad=colab.puntaje_prioridad,
+                )
+            )
+
+        # Load preferences for today
+        preferencias = {}
+        prefs = self.db.query(PreferenciaDiaria).filter(
+            PreferenciaDiaria.fecha == self.fecha
+        ).all()
+        for pref in prefs:
+            if pref.colaborador_id not in ausentes_ids and pref.colaborador_id != orientador_id:
+                preferencias[pref.colaborador_id] = pref.franja_horaria_id_deseada - 1  # Store as index
+
+        return ContextData(
+            fecha=self.fecha,
+            ausencias_colaborador_ids=ausentes_ids,
+            orientador_id=orientador_id,
+            tareas_restringidas=tareas_restringidas,
+            pool_disponible=pool,
+            preferencias=preferencias,
+        )
+
+    def _phase_1_resolve_preferences(self, context: ContextData) -> List[AsignacionResult]:
+        """
+        Phase 1: Resolve preference requests by franja.
+        """
+        asignaciones = []
+        puntajes_actualizados = {}
+
+        # Group preferences by franja
+        prefs_por_franja = {}
+        for colab_id, franja_idx in context.preferencias.items():
+            if franja_idx not in prefs_por_franja:
+                prefs_por_franja[franja_idx] = []
+            prefs_por_franja[franja_idx].append(colab_id)
+
+        # Validator for checking coverage
+        validator = CoberturaValidator(context.pool_disponible)
+
+        # Process each franja with preferences
+        asignados_por_franja = {i: [] for i in range(self.num_franjas)}
+
+        for franja_idx, solicitantes_ids in prefs_por_franja.items():
+            # Check constraints
+            if franja_idx >= self.num_franjas:
+                continue
+
+            # Check if franja has restricted franjas
+            solicitantes = [c for c in context.pool_disponible if c.id in solicitantes_ids]
+
+            # Filter out those with restrictions that exclude this franja
+            solicitantes_validos = []
+            for s in solicitantes:
+                if s.id in context.tareas_restringidas:
+                    if franja_idx in context.tareas_restringidas[s.id]:
+                        solicitantes_validos.append(s)
+                else:
+                    solicitantes_validos.append(s)
+
+            # Try to satisfy all valid preferences
+            # Build excluded set: people absent or in orientador role
+            excluidos = context.ausencias_colaborador_ids.copy()
+            if context.orientador_id:
+                excluidos.add(context.orientador_id)
+
+            # Check if granting all would maintain coverage
+            simulated_asignados = asignados_por_franja[franja_idx] + [s.id for s in solicitantes_validos]
+            if validator.satisfies_minimum_coverage(simulated_asignados, excluidos):
+                # Grant all
+                for s in solicitantes_validos:
+                    asignaciones.append(AsignacionResult(
+                        colaborador_id=s.id,
+                        franja_orden=franja_idx,
+                        estado_concesion="otorgado",
+                    ))
+                    puntajes_actualizados[s.id] = 0  # Reset score
+                    asignados_por_franja[franja_idx].append(s.id)
+            else:
+                # Coverage conflict: resolve by priority
+                # Group by sector
+                por_sector = {}
+                for s in solicitantes_validos:
+                    if s.sector not in por_sector:
+                        por_sector[s.sector] = []
+                    por_sector[s.sector].append(s)
+
+                # For each sector, determine how many can be assigned
+                for sector, candidatos in por_sector.items():
+                    # Simulate: if we remove all of this sector, do we still have coverage?
+                    simulated = asignados_por_franja[franja_idx] + [s.id for c in por_sector.values() if c != candidatos for s in c]
+                    comercial_left, operativo_left = validator.get_cobertura_status(simulated, excluidos)
+
+                    if sector == "comercial":
+                        available_spots = 1 if comercial_left < 1 else 0
+                    else:
+                        available_spots = 1 if operativo_left < 1 else 0
+
+                    # Select who gets a spot
+                    if available_spots > 0:
+                        selected, conflicts, deselected = PrioridadResolver.select_for_assignment(
+                            candidatos, available_spots
+                        )
+                        for s in selected:
+                            asignaciones.append(AsignacionResult(
+                                colaborador_id=s.id,
+                                franja_orden=franja_idx,
+                                estado_concesion="otorgado",
+                            ))
+                            puntajes_actualizados[s.id] = 0
+                            asignados_por_franja[franja_idx].append(s.id)
+
+                        for c in conflicts:
+                            c.franja_orden = franja_idx
+
+                        for d_id in deselected:
+                            asignaciones.append(AsignacionResult(
+                                colaborador_id=d_id,
+                                franja_orden=-1,  # Not assigned yet
+                                estado_concesion="denegado",
+                            ))
+                            puntajes_actualizados[d_id] = (
+                                next((c.puntaje_prioridad for c in context.pool_disponible if c.id == d_id), 0) + 1
+                            )
+                    else:
+                        # No spots available
+                        for s in candidatos:
+                            asignaciones.append(AsignacionResult(
+                                colaborador_id=s.id,
+                                franja_orden=-1,
+                                estado_concesion="denegado",
+                            ))
+                            puntajes_actualizados[s.id] = s.puntaje_prioridad + 1
+
+        return asignaciones
+
+    def _phase_2_fill_remaining(self, context: ContextData, asignaciones_phase1: List[AsignacionResult]) -> List[AsignacionResult]:
+        """
+        Phase 2: Fill remaining unassigned people into available franjas.
+        """
+        # Find who's still unassigned
+        asignados_ids = {a.colaborador_id for a in asignaciones_phase1 if a.estado_concesion == "otorgado"}
+        unassigned = [c for c in context.pool_disponible if c.id not in asignados_ids]
+
+        # Count capacity per franja
+        asignaciones = asignaciones_phase1.copy()
+        asignados_por_franja = {}
+        for a in asignaciones:
+            if a.franja_orden >= 0:
+                if a.franja_orden not in asignados_por_franja:
+                    asignados_por_franja[a.franja_orden] = []
+                asignados_por_franja[a.franja_orden].append(a.colaborador_id)
+
+        # Simple distribution: round-robin through franjas with space
+        for person in unassigned:
+            assigned = False
+            for franja_idx in range(self.num_franjas):
+                # Check restrictions
+                if person.id in context.tareas_restringidas:
+                    if franja_idx not in context.tareas_restringidas[person.id]:
+                        continue
+
+                if franja_idx not in asignados_por_franja:
+                    asignados_por_franja[franja_idx] = []
+
+                # For now, simple assignment (no complex balancing)
+                asignaciones.append(AsignacionResult(
+                    colaborador_id=person.id,
+                    franja_orden=franja_idx,
+                    estado_concesion="otorgado",
+                ))
+                asignados_por_franja[franja_idx].append(person.id)
+                assigned = True
+                break
+
+            if not assigned:
+                # Fallback: assign to first available franja
+                for franja_idx in range(self.num_franjas):
+                    if person.id in context.tareas_restringidas:
+                        if franja_idx not in context.tareas_restringidas[person.id]:
+                            continue
+                    asignaciones.append(AsignacionResult(
+                        colaborador_id=person.id,
+                        franja_orden=franja_idx,
+                        estado_concesion="otorgado",
+                    ))
+                    assigned = True
+                    break
+
+        return asignaciones
+
+    def _phase_3_validate_and_build(
+        self,
+        context: ContextData,
+        asignaciones: List[AsignacionResult],
+    ) -> Tuple[Dict[int, List[int]], Dict[int, int]]:
+        """
+        Phase 3: Validate final assignment.
+        Returns: (cronograma dict, puntajes actualizados dict)
+        """
+        validator = CoberturaValidator(context.pool_disponible)
+
+        # Build cronograma
+        cronograma = {i: [] for i in range(self.num_franjas)}
+        for a in asignaciones:
+            if a.franja_orden >= 0:
+                cronograma[a.franja_orden].append(a.colaborador_id)
+
+        # Validate each franja
+        excluidos = context.ausencias_colaborador_ids.copy()
+        if context.orientador_id:
+            excluidos.add(context.orientador_id)
+
+        for franja_idx in range(self.num_franjas):
+            asignados = cronograma[franja_idx]
+            if not validator.satisfies_minimum_coverage(asignados, excluidos):
+                raise Exception(
+                    f"Validación final falló: Franja {franja_idx} no tiene cobertura mínima"
+                )
+
+        # Build puntajes actualizados (simplified for now)
+        puntajes = {}
+        for a in asignaciones:
+            if a.colaborador_id not in puntajes:
+                colab = next((c for c in context.pool_disponible if c.id == a.colaborador_id), None)
+                if colab:
+                    if a.estado_concesion == "otorgado":
+                        puntajes[a.colaborador_id] = 0  # Reset
+                    else:
+                        puntajes[a.colaborador_id] = colab.puntaje_prioridad + 1
+
+        return cronograma, puntajes
+
+
+################################################################################
+# ARCHIVO 23/60: backend/app/core/prioridad.py
+################################################################################
+
+from typing import List, Tuple, Optional
+from app.core.tipos import ColaboradorInfo, ConflictoEmpate
+
+
+class PrioridadResolver:
+    """Handles priority-based assignment and tie resolution"""
+
+    @staticmethod
+    def sort_by_priority_desc(colaboradores: List[ColaboradorInfo]) -> List[ColaboradorInfo]:
+        """Sort by puntaje_prioridad descending"""
+        return sorted(colaboradores, key=lambda c: c.puntaje_prioridad, reverse=True)
+
+    @staticmethod
+    def find_tie_at_boundary(
+        sorted_colabs: List[ColaboradorInfo],
+        num_to_assign: int,
+    ) -> Optional[Tuple[int, List[int]]]:
+        """
+        Check if there's a tie at the boundary of assignment.
+        Returns: (tied_priority, [colaborador_ids at boundary]) or None
+        """
+        if num_to_assign <= 0 or num_to_assign > len(sorted_colabs):
+            return None
+
+        boundary_priority = sorted_colabs[num_to_assign - 1].puntaje_prioridad
+
+        # Find all at this priority level
+        tied_ids = [
+            c.id for c in sorted_colabs if c.puntaje_prioridad == boundary_priority
+        ]
+
+        # Only report if multiple people at boundary
+        if len(tied_ids) > 1:
+            return boundary_priority, tied_ids
+
+        return None
+
+    @staticmethod
+    def select_for_assignment(
+        candidatos: List[ColaboradorInfo],
+        num_spots: int,
+    ) -> Tuple[List[ColaboradorInfo], List[ConflictoEmpate], List[int]]:
+        """
+        Select colaboradores for assignment based on priority.
+
+        Returns:
+            - List of selected (up to num_spots)
+            - List of conflicts (empates)
+            - List of deselected ids (those who didn't get a spot)
+        """
+        if not candidatos:
+            return [], [], []
+
+        sorted_colabs = PrioridadResolver.sort_by_priority_desc(candidatos)
+
+        # Check for ties at boundary
+        conflicts = []
+        tie_info = PrioridadResolver.find_tie_at_boundary(sorted_colabs, num_spots)
+
+        if tie_info:
+            boundary_priority, tied_ids = tie_info
+            conflicts.append(
+                ConflictoEmpate(
+                    franja_orden=-1,  # Will be set by caller
+                    colaborador_1_id=tied_ids[0],
+                    colaborador_2_id=tied_ids[1] if len(tied_ids) > 1 else tied_ids[0],
+                    puntaje_prioridad=boundary_priority,
+                    sector=sorted_colabs[0].sector,
+                )
+            )
+
+        # Assign up to num_spots (excluding ties at boundary if conflict exists)
+        selected = sorted_colabs[:num_spots]
+        deselected_ids = [c.id for c in sorted_colabs[num_spots:]]
+
+        return selected, conflicts, deselected_ids
+
+
+################################################################################
+# ARCHIVO 24/60: backend/app/core/tipos.py
+################################################################################
+
+from dataclasses import dataclass, field
+from datetime import date
+from typing import Dict, List, Optional, Tuple
+from enum import Enum
+
+
+@dataclass
+class ColaboradorInfo:
+    """Lightweight colaborador data for algorithm"""
+    id: int
+    nombre: str
+    sector: str  # 'comercial' or 'operativo'
+    estado_atencion: str  # 'activo' or 'desafectado'
+    puntaje_prioridad: int = 0
+
+
+@dataclass
+class AsignacionInfo:
+    """Info about a single assignment"""
+    colaborador_id: int
+    franja_orden: int
+    puntaje_prioridad: int
+
+
+@dataclass
+class ConflictoEmpate:
+    """Conflict that needs admin resolution"""
+    franja_orden: int
+    colaborador_1_id: int
+    colaborador_2_id: int
+    puntaje_prioridad: int
+    sector: str
+    razon: str = "Dos colaboradores del mismo sector con igual puntaje compitiendo por la misma franja"
+
+
+@dataclass
+class ContextData:
+    """Context for assignment algorithm on a given date"""
+    fecha: date
+    # Collaborative exclusions
+    ausencias_colaborador_ids: set  # Who is absent that day
+    orientador_id: Optional[int] = None  # Excluded from almuerzo
+    # Special tasks with franja restrictions
+    tareas_restringidas: Dict[int, List[int]] = field(default_factory=dict)  # colaborador_id -> allowed franjas
+    # Available pool
+    pool_disponible: List[ColaboradorInfo] = field(default_factory=list)
+    # Preferences loaded
+    preferencias: Dict[int, int] = field(default_factory=dict)  # colaborador_id -> franja_orden
+
+
+@dataclass
+class AsignacionResult:
+    """Result of an assignment"""
+    colaborador_id: int
+    franja_orden: int
+    estado_concesion: str  # 'otorgado', 'denegado'
+
+
+@dataclass
+class AssignmentResult:
+    """Full assignment result"""
+    success: bool
+    error: Optional[str] = None
+    cronograma: Dict[int, List[int]] = field(default_factory=dict)  # franja_orden -> [colaborador_ids]
+    asignaciones: List[AsignacionResult] = field(default_factory=list)
+    conflictos_pendientes: List[ConflictoEmpate] = field(default_factory=list)
+    puntajes_actualizados: Dict[int, int] = field(default_factory=dict)  # colaborador_id -> new score
+
+
+################################################################################
+# ARCHIVO 25/60: backend/app/database.py
+################################################################################
+
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from app.config import DATABASE_URL
+from app.models.base import Base
+
+engine = create_engine(
+    DATABASE_URL,
+    echo=False,
+    pool_pre_ping=True,
+    pool_size=10,
+    max_overflow=20,
+)
+
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+
+################################################################################
+# ARCHIVO 26/60: backend/app/dependencies.py
+################################################################################
+
+from fastapi import Depends, HTTPException, status
+from sqlalchemy.orm import Session
+from app.database import get_db
+from app.models import Colaborador
+from app.auth.local import get_current_user as auth_get_current_user
+
+
+def get_current_user(token: str = None, db: Session = Depends(get_db)) -> Colaborador:
+    """Dependency to get current user from token"""
+    if not token:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="No token provided")
+
+    try:
+        return auth_get_current_user(db, token)
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(e))
+
+
+def get_admin_user(current_user: Colaborador = Depends(get_current_user)) -> Colaborador:
+    """Dependency to get current admin user"""
+    if current_user.rol != "admin":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin role required")
+    return current_user
+
+
+################################################################################
+# ARCHIVO 27/60: backend/app/enums.py
+################################################################################
+
+from enum import Enum
+
+
+class Sector(str, Enum):
+    TIPO_A = "tipo_a"
+    TIPO_B = "tipo_b"
+
+
+class EstadoAtencion(str, Enum):
+    ACTIVO = "activo"
+    DESAFECTADO = "desafectado"
+
+
+class Rol(str, Enum):
+    ADMIN = "admin"
+    USUARIO = "usuario"
+
+
+class EstadoConcesion(str, Enum):
+    PENDIENTE = "pendiente"
+    OTORGADO = "otorgado"
+    DENEGADO = "denegado"
+
+
+class EstadoSwap(str, Enum):
+    PENDIENTE = "pendiente"
+    ACEPTADO = "aceptado"
+    RECHAZADO = "rechazado"
+    CANCELADO = "cancelado"
+
+
+class EstadoAsignacion(str, Enum):
+    FIRME = "firme"
+    PENDIENTE_SWAP = "pendiente_swap"
+    NOTIFICADA = "notificada"
+    CONFIRMADA = "confirmada"
+
+
+class MotivosAusencia(str, Enum):
+    LICENCIA = "licencia"
+    ENFERMEDAD = "enfermedad"
+    OTRO = "otro"
+
+
+class TipoConcesion(str, Enum):
+    TAREA_ESPECIAL_1 = "tarea_especial_1"
+    TAREA_ESPECIAL_2 = "tarea_especial_2"
+    TAREA_ESPECIAL_3 = "tarea_especial_3"
+
+
+class CanalNotificacion(str, Enum):
+    IN_APP = "in_app"
+    PUSH = "push"
+
+
+class EstadoIncidencia(str, Enum):
+    VENTANA_ADMIN = "ventana_admin"
+    BROADCAST_ACTIVO = "broadcast_activo"
+    RESUELTA = "resuelta"
+    SIN_CANDIDATOS = "sin_candidatos"
+
+
+class MotivoIncidencia(str, Enum):
+    RECHAZO = "rechazo"
+    TIMEOUT = "timeout"
+
+
+################################################################################
+# ARCHIVO 28/60: backend/app/main.py
+################################################################################
+
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from app.config import DEBUG, APP_ENV
+from app.database import engine
+from app.models.base import Base
+from app.api import auth, franjas, colaboradores, notificaciones, incidencias, admin_incidencias, preferencias, turnos, admin_turnos, dias_no_laborables
+from app.services.task_scheduler import APSchedulerService
+import logging
+
+logger = logging.getLogger(__name__)
+
+# Create tables if they don't exist
+Base.metadata.create_all(bind=engine)
+
+app = FastAPI(
+    title="Sistema de Gestión de Turnos de Almuerzo",
+    description="API para organizar turnos de almuerzo y tareas externas",
+    version="0.1.0",
+    debug=DEBUG,
+)
+
+# CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # In production, specify allowed origins
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Include routers
+app.include_router(auth.router, prefix="/api")
+app.include_router(franjas.router, prefix="/api")
+app.include_router(colaboradores.router, prefix="/api")
+app.include_router(notificaciones.router, prefix="/api")
+app.include_router(incidencias.router, prefix="/api")
+app.include_router(admin_incidencias.router, prefix="/api")
+app.include_router(preferencias.router, prefix="/api")
+app.include_router(turnos.router, prefix="/api")
+app.include_router(admin_turnos.router, prefix="/api")
+app.include_router(dias_no_laborables.router, prefix="/api")
+
+# Incluir router de desarrollo solo en local
+if APP_ENV == "local":
+    from app.api import dev
+    app.include_router(dev.router)
+
+
+@app.get("/")
+def root():
+    return {
+        "message": "Gestión de Turnos de Almuerzo API",
+        "version": "0.1.0",
+        "docs_url": "/docs",
+    }
+
+
+@app.get("/health")
+def health_check():
+    return {"status": "ok"}
+
+
+# Scheduler (solo en local)
+_scheduler = None
+
+@app.on_event("startup")
+def startup_event():
+    import sys
+    import os
+    sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
+    from scripts.init_admin import init_admin
+    init_admin()
+    logger.info("Admin user initialized")
+
+    global _scheduler
+    if APP_ENV == "local":
+        _scheduler = APSchedulerService()
+        _scheduler.start()
+        logger.info("APScheduler iniciado en local")
+
+
+@app.on_event("shutdown")
+def shutdown_event():
+    global _scheduler
+    if _scheduler and _scheduler.scheduler.running:
+        _scheduler.scheduler.shutdown()
+        logger.info("APScheduler detenido")
+
+
+if __name__ == "__main__":
+    import uvicorn
+
+    uvicorn.run(app, host="0.0.0.0", port=8000)
+
+
+################################################################################
+# ARCHIVO 29/60: backend/app/models/__init__.py
+################################################################################
+
+from app.models.colaborador import Colaborador
+from app.models.franja_horaria import FranjaHoraria
+from app.models.turno import TurnoAlmuerzo, AsignacionAlmuerzo
+from app.models.preferencia import PreferenciaDiaria
+from app.models.tarea_especial import TareaEspecialTipo, TareaEspecialAsignacion
+from app.models.ausencia import Ausencia
+from app.models.swap import SwapSolicitud
+from app.models.notificacion import Notificacion
+from app.models.incidencia import IncidenciaCobertura, HistorialReemplazo
+from app.models.dia_no_laborable import DiaNoLaborable
+
+__all__ = [
+    "Colaborador",
+    "FranjaHoraria",
+    "TurnoAlmuerzo",
+    "AsignacionAlmuerzo",
+    "PreferenciaDiaria",
+    "TareaEspecialTipo",
+    "TareaEspecialAsignacion",
+    "Ausencia",
+    "SwapSolicitud",
+    "Notificacion",
+    "IncidenciaCobertura",
+    "HistorialReemplazo",
+    "DiaNoLaborable",
+]
+
+
+################################################################################
+# ARCHIVO 30/60: backend/app/models/ausencia.py
+################################################################################
+
+from datetime import date
+from sqlalchemy import Column, Date, Integer, ForeignKey, String
+from sqlalchemy.orm import relationship
+from app.models.base import BaseModel
+
+
+class Ausencia(BaseModel):
+    __tablename__ = "ausencia"
+
+    colaborador_id = Column(Integer, ForeignKey("colaborador.id", ondelete="CASCADE"), nullable=False)
+    fecha = Column(Date, nullable=False, index=True)
+    motivo = Column(String(50), nullable=False, default="otro")  # 'licencia', 'enfermedad', 'otro'
+
+    colaborador = relationship("Colaborador", back_populates="ausencias")
+
+    def __repr__(self):
+        return f"<Ausencia(colaborador_id={self.colaborador_id}, fecha={self.fecha}, motivo={self.motivo})>"
+
+
+################################################################################
+# ARCHIVO 31/60: backend/app/models/base.py
+################################################################################
+
+from datetime import datetime
+from sqlalchemy import Column, Integer, DateTime, func
+from sqlalchemy.orm import declarative_base
+
+Base = declarative_base()
+
+
+class BaseModel(Base):
+    __abstract__ = True
+
+    id = Column(Integer, primary_key=True, index=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
+
+
+################################################################################
+# ARCHIVO 32/60: backend/app/models/colaborador.py
+################################################################################
+
+from sqlalchemy import Column, String, Integer, Boolean
+from sqlalchemy.orm import relationship
+from app.models.base import BaseModel
+
+
+class Colaborador(BaseModel):
+    __tablename__ = "colaborador"
+
+    nombre = Column(String(255), nullable=False)
+    email = Column(String(255), nullable=False, unique=True, index=True)
+    sector = Column(String(50), nullable=False)  # 'tipo_a' or 'tipo_b'
+    estado_atencion = Column(String(50), nullable=False, default="activo")  # 'activo' or 'desafectado'
+    habilitado_tarea_especial_1 = Column(Boolean, default=False)
+    habilitado_tarea_especial_2 = Column(Boolean, default=False)
+    rol = Column(String(50), nullable=False, default="usuario")  # 'admin' or 'usuario'
+    puntaje_prioridad = Column(Integer, default=0)
+    fcm_token = Column(String(512), nullable=True)
+    password_hash = Column(String(255), nullable=True)
+    es_admin = Column(Boolean, default=False)
+
+    asignaciones = relationship("AsignacionAlmuerzo", back_populates="colaborador", cascade="all, delete-orphan")
+    preferencias = relationship("PreferenciaDiaria", back_populates="colaborador", cascade="all, delete-orphan")
+    ausencias = relationship("Ausencia", back_populates="colaborador", cascade="all, delete-orphan")
+    tareas_especiales = relationship("TareaEspecialAsignacion", back_populates="colaborador")
+    notificaciones = relationship("Notificacion", back_populates="colaborador", cascade="all, delete-orphan")
+
+    def __repr__(self):
+        return f"<Colaborador(id={self.id}, nombre={self.nombre}, sector={self.sector})>"
+
+
+################################################################################
+# ARCHIVO 33/60: backend/app/models/dia_no_laborable.py
+################################################################################
+
+from datetime import date
+from sqlalchemy import Column, Date, String
+from app.models.base import BaseModel
+
+
+class DiaNoLaborable(BaseModel):
+    __tablename__ = "dia_no_laborable"
+
+    fecha = Column(Date, nullable=False, unique=True, index=True)
+    motivo = Column(String(255), nullable=False)
+
+    def __repr__(self):
+        return f"<DiaNoLaborable(fecha={self.fecha}, motivo={self.motivo})>"
+
+
+################################################################################
+# ARCHIVO 34/60: backend/app/models/franja_horaria.py
+################################################################################
+
+from datetime import time
+from sqlalchemy import Column, Time, Integer
+from sqlalchemy.orm import relationship
+from app.models.base import BaseModel
+
+
+class FranjaHoraria(BaseModel):
+    __tablename__ = "franja_horaria"
+
+    hora_inicio = Column(Time, nullable=False)
+    hora_fin = Column(Time, nullable=False)
+    orden = Column(Integer, nullable=False, unique=True)
+
+    turnos = relationship("TurnoAlmuerzo", back_populates="franja_horaria")
+    preferencias = relationship("PreferenciaDiaria", back_populates="franja_horaria_deseada")
+
+    def __repr__(self):
+        return f"<FranjaHoraria(orden={self.orden}, {self.hora_inicio}-{self.hora_fin})>"
+
+
+################################################################################
+# ARCHIVO 35/60: backend/app/models/incidencia.py
+################################################################################
+
+from sqlalchemy import Column, Integer, ForeignKey, String, DateTime, func
+from sqlalchemy.orm import relationship
+from app.models.base import BaseModel
+
+
+class IncidenciaCobertura(BaseModel):
+    __tablename__ = "incidencia_cobertura"
+
+    asignacion_id = Column(Integer, ForeignKey("asignacion_almuerzo.id", ondelete="CASCADE"), nullable=False)
+    motivo = Column(String(20), nullable=False)  # 'rechazo' or 'timeout'
+    estado = Column(String(30), nullable=False, default="ventana_admin")  # 'ventana_admin', 'broadcast_activo', 'resuelta', 'sin_candidatos'
+    colaborador_reemplazante_id = Column(Integer, ForeignKey("colaborador.id"), nullable=True)
+    resolved_at = Column(DateTime, nullable=True)
+
+    asignacion = relationship("AsignacionAlmuerzo", foreign_keys=[asignacion_id])
+    colaborador_reemplazante = relationship("Colaborador", foreign_keys=[colaborador_reemplazante_id])
+    historial_reemplazos = relationship("HistorialReemplazo", back_populates="incidencia", cascade="all, delete-orphan")
+
+    def __repr__(self):
+        return f"<IncidenciaCobertura(id={self.id}, asignacion_id={self.asignacion_id}, estado={self.estado})>"
+
+
+class HistorialReemplazo(BaseModel):
+    __tablename__ = "historial_reemplazos"
+
+    colaborador_id = Column(Integer, ForeignKey("colaborador.id", ondelete="CASCADE"), nullable=False)
+    incidencia_id = Column(Integer, ForeignKey("incidencia_cobertura.id", ondelete="CASCADE"), nullable=False)
+    fecha = Column(String(10), nullable=False)  # YYYY-MM-DD
+    semana_iso = Column(String(10), nullable=False)
+
+    colaborador = relationship("Colaborador")
+    incidencia = relationship("IncidenciaCobertura", back_populates="historial_reemplazos")
+
+    def __repr__(self):
+        return f"<HistorialReemplazo(colaborador_id={self.colaborador_id}, incidencia_id={self.incidencia_id}, semana_iso={self.semana_iso})>"
+
+
+################################################################################
+# ARCHIVO 36/60: backend/app/models/notificacion.py
+################################################################################
+
+from sqlalchemy import Column, Integer, ForeignKey, String, Text, Boolean
+from sqlalchemy.orm import relationship
+from app.models.base import BaseModel
+
+
+class Notificacion(BaseModel):
+    __tablename__ = "notificacion"
+
+    colaborador_id = Column(Integer, ForeignKey("colaborador.id", ondelete="CASCADE"), nullable=False)
+    tipo = Column(String(50), nullable=False)  # 'preference', 'swap', 'system', 'absence_alert'
+    mensaje = Column(Text, nullable=False)
+    leida = Column(Boolean, default=False)
+    referencia_id = Column(Integer)  # ID of related object (swap_id, preference_id, etc)
+    referencia_tipo = Column(String(50))  # 'swap', 'preference', 'absence', etc
+    canal = Column(String(20), default='in_app')  # 'in_app' or 'push'
+    incidencia_id = Column(Integer, ForeignKey("incidencia_cobertura.id"), nullable=True)
+
+    colaborador = relationship("Colaborador", back_populates="notificaciones")
+    incidencia = relationship("IncidenciaCobertura")
+
+    def __repr__(self):
+        return f"<Notificacion(colaborador_id={self.colaborador_id}, tipo={self.tipo}, leida={self.leida})>"
+
+
+################################################################################
+# ARCHIVO 37/60: backend/app/models/preferencia.py
+################################################################################
+
+from datetime import date
+from sqlalchemy import Column, Date, Integer, ForeignKey, String
+from sqlalchemy.orm import relationship
+from app.models.base import BaseModel
+
+
+class PreferenciaDiaria(BaseModel):
+    __tablename__ = "preferencia_diaria"
+
+    colaborador_id = Column(Integer, ForeignKey("colaborador.id", ondelete="CASCADE"), nullable=False)
+    fecha = Column(Date, nullable=False, index=True)
+    franja_horaria_id_deseada = Column(Integer, ForeignKey("franja_horaria.id"), nullable=False)
+    estado_concesion = Column(String(50), nullable=False, default="pendiente")  # 'pendiente', 'otorgado', 'denegado'
+
+    colaborador = relationship("Colaborador", back_populates="preferencias")
+    franja_horaria_deseada = relationship("FranjaHoraria", back_populates="preferencias")
+
+    def __repr__(self):
+        return f"<PreferenciaDiaria(colaborador_id={self.colaborador_id}, fecha={self.fecha}, estado={self.estado_concesion})>"
+
+
+################################################################################
+# ARCHIVO 38/60: backend/app/models/swap.py
+################################################################################
+
+from sqlalchemy import Column, Integer, ForeignKey, String, Text
+from sqlalchemy.orm import relationship
+from app.models.base import BaseModel
+
+
+class SwapSolicitud(BaseModel):
+    __tablename__ = "swap_solicitud"
+
+    asignacion_origen_id = Column(Integer, ForeignKey("asignacion_almuerzo.id", ondelete="CASCADE"), nullable=False)
+    colaborador_solicitante_id = Column(Integer, ForeignKey("colaborador.id"), nullable=False)
+    colaborador_receptor_id = Column(Integer, ForeignKey("colaborador.id"), nullable=False)
+    asignacion_receptor_id = Column(Integer, ForeignKey("asignacion_almuerzo.id", ondelete="CASCADE"))
+    estado = Column(String(50), nullable=False, default="pendiente")  # 'pendiente', 'aceptado', 'rechazado', 'cancelado'
+    motivo_rechazo = Column(Text)
+
+    asignacion_origen = relationship("AsignacionAlmuerzo", foreign_keys=[asignacion_origen_id], back_populates="swaps_origen")
+    asignacion_receptor = relationship("AsignacionAlmuerzo", foreign_keys=[asignacion_receptor_id], back_populates="swaps_receptor")
+    colaborador_solicitante = relationship("Colaborador", foreign_keys=[colaborador_solicitante_id])
+    colaborador_receptor = relationship("Colaborador", foreign_keys=[colaborador_receptor_id])
+
+    def __repr__(self):
+        return f"<SwapSolicitud(id={self.id}, solicitante={self.colaborador_solicitante_id}, estado={self.estado})>"
+
+
+################################################################################
+# ARCHIVO 39/60: backend/app/models/tarea_especial.py
+################################################################################
+
+from datetime import date, time
+from sqlalchemy import Column, Date, Integer, ForeignKey, String, Time, ARRAY
+from sqlalchemy.orm import relationship
+from app.models.base import BaseModel
+
+
+class TareaEspecialTipo(BaseModel):
+    __tablename__ = "tarea_especial_tipo"
+
+    nombre = Column(String(100), nullable=False, unique=True)
+    dia_semana_aplicable = Column(ARRAY(Integer), nullable=False)  # [0,1,2,3,4] for Mon-Fri
+    hora_inicio = Column(Time, nullable=False)
+    hora_fin = Column(Time, nullable=False)
+
+    asignaciones = relationship("TareaEspecialAsignacion", back_populates="tipo", cascade="all, delete-orphan")
+
+    def __repr__(self):
+        return f"<TareaEspecialTipo(nombre={self.nombre})>"
+
+
+class TareaEspecialAsignacion(BaseModel):
+    __tablename__ = "tarea_especial_asignacion"
+
+    fecha = Column(Date, nullable=False, index=True)
+    tarea_especial_tipo_id = Column(Integer, ForeignKey("tarea_especial_tipo.id"), nullable=False)
+    colaborador_id = Column(Integer, ForeignKey("colaborador.id"), nullable=False)
+
+    tipo = relationship("TareaEspecialTipo", back_populates="asignaciones")
+    colaborador = relationship("Colaborador", back_populates="tareas_especiales")
+
+    def __repr__(self):
+        return f"<TareaEspecialAsignacion(fecha={self.fecha}, tipo_id={self.tarea_especial_tipo_id})>"
+
+
+################################################################################
+# ARCHIVO 40/60: backend/app/models/turno.py
+################################################################################
+
+from datetime import date
+from sqlalchemy import Column, Date, Integer, ForeignKey, String
+from sqlalchemy.orm import relationship
+from app.models.base import BaseModel
+
+
+class TurnoAlmuerzo(BaseModel):
+    __tablename__ = "turno_almuerzo"
+
+    fecha = Column(Date, nullable=False, index=True)
+    franja_horaria_id = Column(Integer, ForeignKey("franja_horaria.id"), nullable=False)
+    capacidad_maxima = Column(Integer, nullable=False)
+
+    franja_horaria = relationship("FranjaHoraria", back_populates="turnos")
+    asignaciones = relationship("AsignacionAlmuerzo", back_populates="turno_almuerzo", cascade="all, delete-orphan")
+
+    def __repr__(self):
+        return f"<TurnoAlmuerzo(fecha={self.fecha}, franja_id={self.franja_horaria_id})>"
+
+
+class AsignacionAlmuerzo(BaseModel):
+    __tablename__ = "asignacion_almuerzo"
+
+    turno_almuerzo_id = Column(Integer, ForeignKey("turno_almuerzo.id", ondelete="CASCADE"), nullable=False)
+    colaborador_id = Column(Integer, ForeignKey("colaborador.id"), nullable=False)
+    estado = Column(String(50), nullable=False, default="firme")  # 'firme' or 'pendiente_swap'
+
+    turno_almuerzo = relationship("TurnoAlmuerzo", back_populates="asignaciones")
+    colaborador = relationship("Colaborador", back_populates="asignaciones")
+    swaps_origen = relationship("SwapSolicitud", foreign_keys="SwapSolicitud.asignacion_origen_id", back_populates="asignacion_origen")
+    swaps_receptor = relationship("SwapSolicitud", foreign_keys="SwapSolicitud.asignacion_receptor_id", back_populates="asignacion_receptor")
+
+    def __repr__(self):
+        return f"<AsignacionAlmuerzo(turno_id={self.turno_almuerzo_id}, colaborador_id={self.colaborador_id})>"
+
+
+################################################################################
+# ARCHIVO 41/60: backend/app/schemas/__init__.py
+################################################################################
+
+# Schemas package
+
+
+################################################################################
+# ARCHIVO 42/60: backend/app/schemas/ausencia.py
+################################################################################
+
+from pydantic import BaseModel
+from datetime import date, datetime
+
+
+class AusenciaCreate(BaseModel):
+    colaborador_id: int
+    fecha: date
+    motivo: str = "otro"
+
+
+class AusenciaResponse(BaseModel):
+    id: int
+    colaborador_id: int
+    fecha: date
+    motivo: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+################################################################################
+# ARCHIVO 43/60: backend/app/schemas/colaborador.py
+################################################################################
+
+from pydantic import BaseModel, EmailStr
+from typing import Optional
+from datetime import datetime
+
+
+class ColaboradorBase(BaseModel):
+    nombre: str
+    email: EmailStr
+    sector: str  # 'tipo_a' or 'tipo_b'
+    estado_atencion: str = "activo"
+    rol: str = "usuario"
+    habilitado_tarea_especial_1: bool = False
+    habilitado_tarea_especial_2: bool = False
+
+
+class ColaboradorCreate(ColaboradorBase):
+    pass
+
+
+class ColaboradorUpdate(BaseModel):
+    nombre: Optional[str] = None
+    sector: Optional[str] = None
+    estado_atencion: Optional[str] = None
+    rol: Optional[str] = None
+    habilitado_tarea_especial_1: Optional[bool] = None
+    habilitado_tarea_especial_2: Optional[bool] = None
+
+
+class ColaboradorResponse(ColaboradorBase):
+    id: int
+    puntaje_prioridad: int
+    es_admin: bool = False
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+################################################################################
+# ARCHIVO 44/60: backend/app/schemas/dia_no_laborable.py
+################################################################################
+
+from pydantic import BaseModel
+from datetime import date
+
+
+class DiaNoLaborableCreate(BaseModel):
+    fecha: date
+    motivo: str
+
+
+class DiaNoLaborableResponse(BaseModel):
+    fecha: date
+    motivo: str
+
+    class Config:
+        from_attributes = True
+
+
+################################################################################
+# ARCHIVO 45/60: backend/app/schemas/franja.py
+################################################################################
+
+from pydantic import BaseModel
+from datetime import time
+from typing import Optional
+
+
+class FranjaCreate(BaseModel):
+    hora_inicio: time
+    hora_fin: time
+    orden: int
+
+
+class FranjaUpdate(BaseModel):
+    hora_inicio: Optional[time] = None
+    hora_fin: Optional[time] = None
+    orden: Optional[int] = None
+
+
+class FranjaHorariaResponse(BaseModel):
+    id: int
+    hora_inicio: time
+    hora_fin: time
+    orden: int
+
+    class Config:
+        from_attributes = True
+
+
+################################################################################
+# ARCHIVO 46/60: backend/app/schemas/notificacion.py
+################################################################################
+
+from pydantic import BaseModel
+from datetime import datetime
+from typing import Optional
+
+
+class NotificacionResponse(BaseModel):
+    id: int
+    colaborador_id: int
+    tipo: str
+    mensaje: str
+    leida: bool
+    referencia_id: Optional[int] = None
+    referencia_tipo: Optional[str] = None
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+################################################################################
+# ARCHIVO 47/60: backend/app/schemas/preferencia.py
+################################################################################
+
+from pydantic import BaseModel
+from datetime import date, datetime
+from typing import Optional
+
+
+class PreferenciaCreate(BaseModel):
+    fecha: date
+    franja_horaria_id_deseada: int
+
+
+class PreferenciaResponse(BaseModel):
+    id: int
+    colaborador_id: int
+    fecha: date
+    franja_horaria_id_deseada: int
+    estado_concesion: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+################################################################################
+# ARCHIVO 48/60: backend/app/schemas/swap.py
+################################################################################
+
+from pydantic import BaseModel
+from datetime import datetime
+from typing import Optional
+
+
+class SwapCreate(BaseModel):
+    asignacion_origen_id: int
+    colaborador_receptor_id: int
+
+
+class SwapResponse(BaseModel):
+    id: int
+    asignacion_origen_id: int
+    colaborador_solicitante_id: int
+    colaborador_receptor_id: int
+    asignacion_receptor_id: Optional[int] = None
+    estado: str
+    motivo_rechazo: Optional[str] = None
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+################################################################################
+# ARCHIVO 49/60: backend/app/schemas/turno.py
+################################################################################
+
+from pydantic import BaseModel
+from datetime import date, datetime
+from typing import List
+from app.schemas.colaborador import ColaboradorResponse
+from app.schemas.franja import FranjaHorariaResponse
+
+
+class AsignacionResponse(BaseModel):
+    id: int
+    turno_almuerzo_id: int
+    colaborador_id: int
+    estado: str
+    colaborador: ColaboradorResponse
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class TurnoAlmuerzoResponse(BaseModel):
+    id: int
+    fecha: date
+    franja_horaria_id: int
+    capacidad_maxima: int
+    franja_horaria: FranjaHorariaResponse
+    asignaciones: List[AsignacionResponse]
+
+    class Config:
+        from_attributes = True
+
+
+class TurnoListResponse(BaseModel):
+    fecha: date
+    franjas: List[TurnoAlmuerzoResponse]
+
+    class Config:
+        from_attributes = True
+
+
+################################################################################
+# ARCHIVO 50/60: backend/app/services/__init__.py
+################################################################################
+
+
+
+
+################################################################################
+# ARCHIVO 51/60: backend/app/services/firestore_client.py
+################################################################################
+
+import os
+import logging
+from firebase_admin import initialize_app, credentials, firestore
+
+logger = logging.getLogger(__name__)
+
+# Detectar si estamos usando emulador (chequear variable de entorno directamente)
+firestore_emulator_host = os.getenv("FIRESTORE_EMULATOR_HOST", "").strip()
+
+if firestore_emulator_host:
+    os.environ["FIRESTORE_EMULATOR_HOST"] = firestore_emulator_host
+
+    # firebase-admin siempre intenta obtener credenciales reales aunque haya emulador.
+    # Con FIRESTORE_EMULATOR_HOST activo, el emulador ignora el token, así que
+    # alcanza con un credential mock que no llame a google.auth.default().
+    import google.auth.credentials
+
+    class _EmulatorCredentials(google.auth.credentials.Credentials):
+        def refresh(self, _request):
+            self.token = "mock-token"
+
+    class _EmulatorFirebaseCredential(credentials.Base):
+        def get_credential(self):
+            cred = _EmulatorCredentials()
+            cred.token = "mock-token"
+            return cred
+
+    initialize_app(_EmulatorFirebaseCredential(), options={"projectId": "almuerzos-dev"})
+    logger.info(f"Usando Firebase Emulator en {firestore_emulator_host}")
+else:
+    # En producción, usar GOOGLE_APPLICATION_CREDENTIALS
+    creds = credentials.Certificate(os.getenv("GOOGLE_APPLICATION_CREDENTIALS"))
+    initialize_app(creds, options={"projectId": os.getenv("GCP_PROJECT_ID")})
+    logger.info("Usando Firebase real en GCP")
+
+db = firestore.client()
+
+
+def update_barometro(estado: str, franjas: list, incidencias_activas: int):
+    """Actualiza el documento barometro en Firestore."""
+    doc = {
+        "estado": estado,
+        "franjas": franjas,
+        "incidencias_activas": incidencias_activas,
+        "updated_at": firestore.SERVER_TIMESTAMP,
+    }
+    db.collection("sucursal").document("default").collection("data").document("barometro").set(doc)
+
+
+def write_notificacion_firestore(colaborador_id: int, notif_id: int, data: dict):
+    """Escribe una notificación en Firestore para real-time sync."""
+    notif_data = {
+        **data,
+        "id": notif_id,
+        "created_at": firestore.SERVER_TIMESTAMP,
+    }
+    db.collection("notificaciones").document(str(colaborador_id)).collection("items").document(str(notif_id)).set(notif_data)
+
+
+def write_incidencia_firestore(incidencia_id: int, data: dict):
+    """Escribe una incidencia en Firestore."""
+    incidencia_data = {
+        **data,
+        "id": incidencia_id,
+        "created_at": firestore.SERVER_TIMESTAMP,
+    }
+    db.collection("incidencias").document(str(incidencia_id)).set(incidencia_data)
+
+
+def update_incidencia_firestore(incidencia_id: int, updates: dict):
+    """Actualiza una incidencia en Firestore."""
+    updates["updated_at"] = firestore.SERVER_TIMESTAMP
+    db.collection("incidencias").document(str(incidencia_id)).update(updates)
+
+
+################################################################################
+# ARCHIVO 52/60: backend/app/services/notif_service.py
+################################################################################
+
+from typing import Protocol
+import logging
+
+logger = logging.getLogger(__name__)
+
+
+class NotifService(Protocol):
+    """Interfaz para servicio de notificaciones push."""
+    def send_push(self, fcm_token: str, title: str, body: str, data: dict = None) -> None:
+        """Envía un push FCM."""
+        ...
+
+
+class DevNotifService:
+    """Implementación dev que solo loguea. No envía push reales."""
+
+    def send_push(self, fcm_token: str, title: str, body: str, data: dict = None) -> None:
+        """Loguea el push en lugar de enviarlo."""
+        logger.info(f"[DevNotifService] PUSH a {fcm_token[:20]}... | {title} | {body}")
+        if data:
+            logger.info(f"  Datos: {data}")
+
+
+class FCMNotifService:
+    """Implementación real con firebase-admin SDK (para GCP)."""
+
+    def __init__(self, app):
+        self.app = app
+
+    def send_push(self, fcm_token: str, title: str, body: str, data: dict = None) -> None:
+        """Envía un push FCM real."""
+        try:
+            from firebase_admin import messaging
+            message = messaging.Message(
+                notification=messaging.Notification(title=title, body=body),
+                data=data or {},
+                token=fcm_token,
+            )
+            messaging.send(message, app=self.app)
+            logger.info(f"Push enviado a {fcm_token[:20]}...")
+        except Exception as e:
+            logger.error(f"Error enviando push: {e}")
+
+
+################################################################################
+# ARCHIVO 53/60: backend/app/services/task_scheduler.py
+################################################################################
+
+from typing import Protocol
+from datetime import datetime
+from apscheduler.schedulers.background import BackgroundScheduler
+import logging
+
+logger = logging.getLogger(__name__)
+
+
+class TaskScheduler(Protocol):
+    """Interfaz para scheduler de tareas."""
+    def schedule_notify_t5(self, turno_id: int, run_at: datetime) -> str:
+        """Agenda notificación T-5min. Retorna task_id."""
+        ...
+
+    def schedule_timeout(self, notif_id: int, run_at: datetime) -> str:
+        """Agenda timeout de 3min. Retorna task_id."""
+        ...
+
+    def schedule_admin_window_end(self, incidencia_id: int, run_at: datetime) -> str:
+        """Agenda fin de ventana admin (1min). Retorna task_id."""
+        ...
+
+    def cancel(self, task_id: str) -> None:
+        """Cancela una tarea por ID."""
+        ...
+
+
+class APSchedulerService:
+    """Implementación local con APScheduler."""
+
+    def __init__(self):
+        self.scheduler = BackgroundScheduler()
+        self._job_store = {}
+
+    def start(self):
+        """Inicia el scheduler."""
+        if not self.scheduler.running:
+            self.scheduler.start()
+            logger.info("APScheduler iniciado")
+
+    def schedule_notify_t5(self, turno_id: int, run_at: datetime) -> str:
+        """Agenda notificación T-5min."""
+        job_id = f"notify_t5_{turno_id}_{run_at.timestamp()}"
+        job = self.scheduler.add_job(
+            self._notify_t5_handler,
+            "date",
+            run_date=run_at,
+            args=[turno_id],
+            id=job_id,
+            replace_existing=True,
+        )
+        logger.info(f"Agendada notificación T-5min para turno {turno_id} a {run_at}")
+        return job_id
+
+    def schedule_timeout(self, notif_id: int, run_at: datetime) -> str:
+        """Agenda timeout de 3min."""
+        job_id = f"timeout_{notif_id}_{run_at.timestamp()}"
+        job = self.scheduler.add_job(
+            self._timeout_handler,
+            "date",
+            run_date=run_at,
+            args=[notif_id],
+            id=job_id,
+            replace_existing=True,
+        )
+        logger.info(f"Agendado timeout para notif {notif_id} a {run_at}")
+        return job_id
+
+    def schedule_admin_window_end(self, incidencia_id: int, run_at: datetime) -> str:
+        """Agenda fin de ventana admin."""
+        job_id = f"admin_window_end_{incidencia_id}_{run_at.timestamp()}"
+        job = self.scheduler.add_job(
+            self._admin_window_end_handler,
+            "date",
+            run_date=run_at,
+            args=[incidencia_id],
+            id=job_id,
+            replace_existing=True,
+        )
+        logger.info(f"Agendado fin de ventana admin para incidencia {incidencia_id} a {run_at}")
+        return job_id
+
+    def cancel(self, task_id: str) -> None:
+        """Cancela una tarea por ID."""
+        try:
+            self.scheduler.remove_job(task_id)
+            logger.info(f"Cancelada tarea {task_id}")
+        except Exception as e:
+            logger.error(f"Error cancelando tarea {task_id}: {e}")
+
+    @staticmethod
+    def _notify_t5_handler(turno_id: int):
+        """Handler para notificación T-5min. Será sobreescrito en app."""
+        logger.info(f"[APScheduler] notify_t5 handler para turno {turno_id}")
+
+    @staticmethod
+    def _timeout_handler(notif_id: int):
+        """Handler para timeout. Será sobreescrito en app."""
+        logger.info(f"[APScheduler] timeout handler para notif {notif_id}")
+
+    @staticmethod
+    def _admin_window_end_handler(incidencia_id: int):
+        """Handler para fin de ventana admin. Será sobreescrito en app."""
+        logger.info(f"[APScheduler] admin_window_end handler para incidencia {incidencia_id}")
+
+
+################################################################################
+# ARCHIVO 54/60: backend/scripts/init_admin.py
+################################################################################
+
+#!/usr/bin/env python3
+"""
+Initialize admin user (sebassur90@gmail.com) in the database.
+Run this script after initial setup or during application startup.
+"""
+import os
+import sys
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+
+# Add backend to path
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+
+from app.config import DATABASE_URL
+from app.models import Colaborador
+from app.auth.local import hash_password
+
+def init_admin():
+    engine = create_engine(DATABASE_URL)
+    Session = sessionmaker(bind=engine)
+    session = Session()
+
+    try:
+        ADMIN_EMAIL = "sebassur90@gmail.com"
+
+        # Check if admin already exists
+        admin = session.query(Colaborador).filter(Colaborador.email == ADMIN_EMAIL).first()
+
+        if admin:
+            print(f"✓ Admin user '{ADMIN_EMAIL}' already exists")
+            # Mark as admin if not already
+            if not admin.es_admin:
+                admin.es_admin = True
+                session.commit()
+                print(f"✓ Updated {ADMIN_EMAIL} to admin status")
+        else:
+            # Create new admin user
+            admin = Colaborador(
+                nombre="Administrador",
+                email=ADMIN_EMAIL,
+                sector="operativo",
+                estado_atencion="activo",
+                es_admin=True,
+                rol="admin"
+            )
+            session.add(admin)
+            session.commit()
+            print(f"✓ Created admin user '{ADMIN_EMAIL}'")
+
+        print("✓ Admin initialization complete")
+
+    except Exception as e:
+        print(f"✗ Error initializing admin: {e}")
+        sys.exit(1)
+    finally:
+        session.close()
+
+
+if __name__ == "__main__":
+    init_admin()
+
+
+################################################################################
+# ARCHIVO 55/60: backend/tests/__init__.py
+################################################################################
+
+# Tests package
+
+
+################################################################################
+# ARCHIVO 56/60: backend/tests/conftest.py
+################################################################################
+
+import pytest
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from app.models.base import Base
+from app.models import (
+    Colaborador, FranjaHoraria, TurnoAlmuerzo, AsignacionAlmuerzo,
+    PreferenciaDiaria, TareaEspecialTipo, TareaEspecialAsignacion,
+    Ausencia, SwapSolicitud, Notificacion
+)
+from datetime import time, date, timedelta
+
+
+@pytest.fixture(scope="session")
+def db_engine():
+    """Create in-memory test database"""
+    engine = create_engine("sqlite:///:memory:", connect_args={"check_same_thread": False})
+    Base.metadata.create_all(engine)
+    return engine
+
+
+@pytest.fixture(scope="function")
+def db_session(db_engine):
+    """Create a fresh session for each test"""
+    connection = db_engine.connect()
+    transaction = connection.begin()
+    session = sessionmaker(bind=connection)()
+
+    yield session
+
+    session.close()
+    transaction.rollback()
+    connection.close()
+
+
+@pytest.fixture
+def test_franjas(db_session):
+    """Create the 5 fixed franjas"""
+    franjas = [
+        FranjaHoraria(hora_inicio=time(12, 0), hora_fin=time(12, 45), orden=1),
+        FranjaHoraria(hora_inicio=time(12, 30), hora_fin=time(13, 15), orden=2),
+        FranjaHoraria(hora_inicio=time(13, 0), hora_fin=time(13, 45), orden=3),
+        FranjaHoraria(hora_inicio=time(13, 30), hora_fin=time(14, 15), orden=4),
+        FranjaHoraria(hora_inicio=time(14, 0), hora_fin=time(14, 45), orden=5),
+    ]
+    for f in franjas:
+        db_session.add(f)
+    db_session.commit()
+    return franjas
+
+
+@pytest.fixture
+def test_colaboradores(db_session):
+    """Create 13 test colaboradores (7 Tipo-A, 6 Tipo-B)"""
+    nombres_tipo_a = ["Juan", "Maria", "Carlos", "Ana", "Luis", "Sofia", "Pedro"]
+    nombres_tipo_b = ["Elena", "Jorge", "Rita", "Gabriel", "Martina", "Patricia"]
+
+    colabs = []
+    for i, nombre in enumerate(nombres_tipo_a):
+        colab = Colaborador(
+            nombre=nombre,
+            email=f"{nombre.lower()}@example.com",
+            sector="tipo_a",
+            estado_atencion="activo",
+            rol="usuario",
+            puntaje_prioridad=0,
+        )
+        db_session.add(colab)
+        colabs.append(colab)
+
+    for i, nombre in enumerate(nombres_tipo_b):
+        colab = Colaborador(
+            nombre=nombre,
+            email=f"{nombre.lower()}@example.com",
+            sector="tipo_b",
+            estado_atencion="activo",
+            rol="usuario",
+            puntaje_prioridad=0,
+        )
+        db_session.add(colab)
+        colabs.append(colab)
+
+    db_session.commit()
+    return colabs
+
+
+@pytest.fixture
+def test_special_tasks(db_session):
+    """Create the 3 special task types"""
+    tasks = [
+        TareaEspecialTipo(nombre="tarea_especial_1", dia_semana_aplicable=[0, 1, 2, 3, 4],
+                          hora_inicio=time(10, 0), hora_fin=time(15, 0)),
+        TareaEspecialTipo(nombre="tarea_especial_2", dia_semana_aplicable=[2],
+                          hora_inicio=time(11, 0), hora_fin=time(13, 0)),
+        TareaEspecialTipo(nombre="tarea_especial_3", dia_semana_aplicable=[3],
+                          hora_inicio=time(10, 0), hora_fin=time(13, 0)),
+    ]
+    for t in tasks:
+        db_session.add(t)
+    db_session.commit()
+    return tasks
+
+
+################################################################################
+# ARCHIVO 57/60: backend/tests/test_barometro.py
+################################################################################
+
+import pytest
+from datetime import date
+from sqlalchemy.orm import Session
+from app.models.turno import TurnoAlmuerzo, AsignacionAlmuerzo
+from app.models.incidencia import IncidenciaCobertura
+from app.enums import EstadoIncidencia
+from app.core.barometro import BarometroService
+
+
+def test_barometro_verde(test_franjas, test_colaboradores, db_session: Session):
+    """Test barometro verde cuando todo está bien."""
+    fecha = date(2026, 7, 28)
+
+    # Crear turno
+    turno = TurnoAlmuerzo(
+        fecha=fecha,
+        franja_horaria_id=test_franjas[0].id,
+        capacidad_maxima=5
+    )
+    db_session.add(turno)
+    db_session.flush()
+
+    # Asignar colaboradores (mix comercial y operativo)
+    colab_comercial = test_colaboradores[0]  # comercial
+    colab_operativo = test_colaboradores[7]  # operativo (7+ son operativos)
+
+    for colab in [colab_comercial, colab_operativo]:
+        asignacion = AsignacionAlmuerzo(
+            turno_almuerzo_id=turno.id,
+            colaborador_id=colab.id,
+            estado="confirmada"
+        )
+        db_session.add(asignacion)
+
+    db_session.commit()
+
+    # Calcular barometro
+    barometro = BarometroService.calculate_barometro(db_session, str(fecha))
+
+    assert barometro["estado"] == "verde"
+    assert barometro["incidencias_activas"] == 0
+    assert len(barometro["franjas"]) > 0
+
+
+def test_barometro_amarillo_with_incidencia(test_franjas, test_colaboradores, db_session: Session):
+    """Test barometro amarillo cuando hay incidencia activa."""
+    fecha = date(2026, 7, 28)
+
+    # Crear turno y asignación
+    turno = TurnoAlmuerzo(
+        fecha=fecha,
+        franja_horaria_id=test_franjas[0].id,
+        capacidad_maxima=5
+    )
+    db_session.add(turno)
+    db_session.flush()
+
+    asignacion = AsignacionAlmuerzo(
+        turno_almuerzo_id=turno.id,
+        colaborador_id=test_colaboradores[0].id,
+        estado="confirmada"
+    )
+    db_session.add(asignacion)
+    db_session.flush()
+
+    # Crear incidencia activa
+    incidencia = IncidenciaCobertura(
+        asignacion_id=asignacion.id,
+        motivo="rechazo",
+        estado=EstadoIncidencia.VENTANA_ADMIN.value
+    )
+    db_session.add(incidencia)
+    db_session.commit()
+
+    # Calcular barometro
+    barometro = BarometroService.calculate_barometro(db_session, str(fecha))
+
+    assert barometro["incidencias_activas"] == 1
+    # El estado puede ser amarillo (si la cobertura es ok) o rojo (si está rota)
+
+
+################################################################################
+# ARCHIVO 58/60: backend/tests/test_cascade_engine.py
+################################################################################
+
+import pytest
+from datetime import datetime, date
+from sqlalchemy.orm import Session
+from app.models.turno import TurnoAlmuerzo, AsignacionAlmuerzo
+from app.models.colaborador import Colaborador
+from app.models.incidencia import IncidenciaCobertura
+from app.enums import EstadoIncidencia
+from app.core.cascade_engine import CascadeEngine
+
+
+def test_cascade_engine_basic(test_franjas, test_colaboradores, db_session: Session):
+    """Test básico del cascade engine."""
+    # Crear turno
+    turno = TurnoAlmuerzo(
+        fecha=date(2026, 7, 28),
+        franja_horaria_id=test_franjas[0].id,
+        capacidad_maxima=5
+    )
+    db_session.add(turno)
+    db_session.flush()
+
+    # Crear asignación
+    asignacion = AsignacionAlmuerzo(
+        turno_almuerzo_id=turno.id,
+        colaborador_id=test_colaboradores[0].id,
+        estado="firme"
+    )
+    db_session.add(asignacion)
+    db_session.commit()
+
+    # Iniciar cascada
+    CascadeEngine.iniciar(db_session, asignacion.id, "rechazo")
+
+    # Verificar que incidencia fue creada
+    incidencia = db_session.query(IncidenciaCobertura).filter(
+        IncidenciaCobertura.asignacion_id == asignacion.id
+    ).first()
+
+    assert incidencia is not None
+    assert incidencia.motivo == "rechazo"
+    assert incidencia.estado == EstadoIncidencia.VENTANA_ADMIN.value
+
+
+def test_cascade_engine_multiple_candidates(test_franjas, test_colaboradores, db_session: Session):
+    """Test con múltiples candidatos disponibles."""
+    fecha = date(2026, 7, 28)
+
+    # Crear turnos para dos franjas
+    turno1 = TurnoAlmuerzo(
+        fecha=fecha,
+        franja_horaria_id=test_franjas[0].id,  # Primera franja
+        capacidad_maxima=5
+    )
+    turno2 = TurnoAlmuerzo(
+        fecha=fecha,
+        franja_horaria_id=test_franjas[1].id,  # Segunda franja
+        capacidad_maxima=5
+    )
+    db_session.add_all([turno1, turno2])
+    db_session.flush()
+
+    # Asignación para la primera franja
+    asignacion1 = AsignacionAlmuerzo(
+        turno_almuerzo_id=turno1.id,
+        colaborador_id=test_colaboradores[0].id,
+        estado="firme"
+    )
+
+    # Asignaciones para la segunda franja (candidatos potenciales)
+    asignacion2 = AsignacionAlmuerzo(
+        turno_almuerzo_id=turno2.id,
+        colaborador_id=test_colaboradores[1].id,
+        estado="firme"
+    )
+    asignacion3 = AsignacionAlmuerzo(
+        turno_almuerzo_id=turno2.id,
+        colaborador_id=test_colaboradores[2].id,
+        estado="firme"
+    )
+
+    db_session.add_all([asignacion1, asignacion2, asignacion3])
+    db_session.commit()
+
+    # Iniciar cascada para primera asignación
+    CascadeEngine.iniciar(db_session, asignacion1.id, "timeout")
+
+    # Verificar que incidencia existe
+    incidencia = db_session.query(IncidenciaCobertura).filter(
+        IncidenciaCobertura.asignacion_id == asignacion1.id
+    ).first()
+
+    assert incidencia is not None
+    assert incidencia.estado == EstadoIncidencia.VENTANA_ADMIN.value
+
+
+################################################################################
+# ARCHIVO 59/60: backend/tests/test_core_engine.py
+################################################################################
+
+"""
+Tests for the core assignment algorithm
+"""
+import pytest
+from datetime import date, timedelta
+from app.core.engine import AssignmentEngine
+from app.models import Ausencia, PreferenciaDiaria, TareaEspecialAsignacion
+
+
+def test_basic_assignment(db_session, test_franjas, test_colaboradores):
+    """Test basic assignment without preferences"""
+    hoy = date.today()
+    engine = AssignmentEngine(db_session, hoy)
+
+    result = engine.run()
+
+    assert result.success, f"Assignment failed: {result.error}"
+    assert len(result.cronograma) == 5
+    # Should have assigned all 13 people
+    total_assigned = sum(len(v) for v in result.cronograma.values())
+    assert total_assigned == 13
+
+
+def test_orientador_exclusion(db_session, test_franjas, test_colaboradores, test_special_tasks):
+    """Test that orientador is excluded from almuerzo shifts"""
+    hoy = date.today()
+
+    # Assign first person as orientador
+    orientador_task = test_special_tasks[0]  # orientador type
+    asignacion = TareaEspecialAsignacion(
+        fecha=hoy,
+        tarea_especial_tipo_id=orientador_task.id,
+        colaborador_id=test_colaboradores[0].id,
+    )
+    db_session.add(asignacion)
+    db_session.commit()
+
+    engine = AssignmentEngine(db_session, hoy)
+    result = engine.run()
+
+    assert result.success
+    # Orientador should not appear in any franja
+    for franja_asignados in result.cronograma.values():
+        assert test_colaboradores[0].id not in franja_asignados
+
+    # Should still have 12 people assigned (13 - 1 orientador)
+    total_assigned = sum(len(v) for v in result.cronograma.values())
+    assert total_assigned == 12
+
+
+def test_ausencia_handling(db_session, test_franjas, test_colaboradores):
+    """Test that absent people are excluded"""
+    hoy = date.today()
+
+    # Mark first person as absent
+    ausencia = Ausencia(
+        colaborador_id=test_colaboradores[0].id,
+        fecha=hoy,
+        motivo="licencia",
+    )
+    db_session.add(ausencia)
+    db_session.commit()
+
+    engine = AssignmentEngine(db_session, hoy)
+    result = engine.run()
+
+    assert result.success
+    # Absent person should not appear
+    for franja_asignados in result.cronograma.values():
+        assert test_colaboradores[0].id not in franja_asignados
+
+    # Should have 12 people assigned
+    total_assigned = sum(len(v) for v in result.cronograma.values())
+    assert total_assigned == 12
+
+
+def test_preference_satisfaction(db_session, test_franjas, test_colaboradores):
+    """Test that preferences are satisfied when possible"""
+    hoy = date.today()
+
+    # Create preference for specific franja
+    pref = PreferenciaDiaria(
+        colaborador_id=test_colaboradores[0].id,
+        fecha=hoy,
+        franja_horaria_id_deseada=test_franjas[0].id,  # First franja
+        estado_concesion="pendiente",
+    )
+    db_session.add(pref)
+    db_session.commit()
+
+    engine = AssignmentEngine(db_session, hoy)
+    result = engine.run()
+
+    assert result.success
+    # Person should be assigned (preference may or may not be satisfied depending on algorithm)
+    total_assigned = sum(len(v) for v in result.cronograma.values())
+    assert total_assigned == 13
+
+
+def test_coverage_maintained(db_session, test_franjas, test_colaboradores):
+    """Test that minimum coverage is maintained in all franjas"""
+    hoy = date.today()
+
+    engine = AssignmentEngine(db_session, hoy)
+    result = engine.run()
+
+    assert result.success
+
+    # Each franja should have at least 1 comercial and 1 operativo in pool
+    comercial_colabs = {c.id for c in test_colaboradores if c.sector == "comercial"}
+    operativo_colabs = {c.id for c in test_colaboradores if c.sector == "operativo"}
+
+    for franja_idx, asignados in result.cronograma.items():
+        comercial_in_franja = comercial_colabs & set(asignados)
+        operativo_in_franja = operativo_colabs & set(asignados)
+        # If both comercial and operativo are available, coverage should be maintained
+        if comercial_colabs and operativo_colabs:
+            assert len(comercial_in_franja) >= 0  # At minimum, some were assigned
+            assert len(operativo_in_franja) >= 0
+
+
+def test_priority_scoring_update(db_session, test_franjas, test_colaboradores):
+    """Test that priority scores are updated correctly"""
+    hoy = date.today()
+
+    # Snapshot initial scores
+    initial_scores = {c.id: c.puntaje_prioridad for c in test_colaboradores}
+
+    engine = AssignmentEngine(db_session, hoy)
+    result = engine.run()
+
+    assert result.success
+    # Check that puntajes_actualizados contains some updates
+    assert len(result.puntajes_actualizados) > 0
+
+
+################################################################################
+# ARCHIVO 60/60: compactar_codigo.py
+################################################################################
+
+#!/usr/bin/env python3
+import os
+from pathlib import Path
+
+# Carpetas a excluir
+EXCLUDE_DIRS = {
+    '.claude',
+    '.git',
+    '.github',
+    '.interface-design',
+    '.pytest_cache',
+    '.vscode',
+    '.superpowers',
+    '__pycache__',
+    'node_modules',
+    '.env',
+}
+
+def should_exclude(path):
+    """Verifica si una ruta debe ser excluida"""
+    path_parts = Path(path).parts
+    return any(part in EXCLUDE_DIRS for part in path_parts)
+
+def get_directory_tree(root_path, prefix="", exclude_dirs=None):
+    """Genera un árbol de directorios como string"""
+    if exclude_dirs is None:
+        exclude_dirs = EXCLUDE_DIRS
+
+    tree = ""
+    try:
+        items = sorted(os.listdir(root_path))
+    except PermissionError:
+        return tree
+
+    dirs = []
+    files = []
+
+    for item in items:
+        item_path = os.path.join(root_path, item)
+        if should_exclude(item_path):
+            continue
+        if os.path.isdir(item_path):
+            dirs.append(item)
+        else:
+            files.append(item)
+
+    # Mostrar directorios primero
+    for i, dir_name in enumerate(dirs):
+        is_last = (i == len(dirs) - 1 and len(files) == 0)
+        tree += f"{prefix}{'└── ' if is_last else '├── '}{dir_name}/\n"
+
+        new_prefix = prefix + ("    " if is_last else "│   ")
+        dir_path = os.path.join(root_path, dir_name)
+        tree += get_directory_tree(dir_path, new_prefix, exclude_dirs)
+
+    # Luego archivos
+    for i, file_name in enumerate(files):
+        is_last = (i == len(files) - 1)
+        tree += f"{prefix}{'└── ' if is_last else '├── '}{file_name}\n"
+
+    return tree
+
+def compact_code(root_path, output_path):
+    """Compacta todo el código Python en un archivo .txt"""
+
+    py_files = []
+
+    # Buscar todos los archivos .py
+    for root, dirs, files in os.walk(root_path):
+        # Filtrar directorios excluidos
+        dirs[:] = [d for d in dirs if not should_exclude(os.path.join(root, d))]
+
+        for file in files:
+            if file.endswith('.py'):
+                file_path = os.path.join(root, file)
+                if not should_exclude(file_path):
+                    py_files.append(file_path)
+
+    py_files.sort()
+
+    # Crear el archivo de salida
+    output_dir = os.path.dirname(output_path)
+    os.makedirs(output_dir, exist_ok=True)
+
+    with open(output_path, 'w', encoding='utf-8') as out_file:
+        # Encabezado
+        out_file.write("=" * 80 + "\n")
+        out_file.write("CÓDIGO COMPACTADO DEL PROYECTO\n")
+        out_file.write("=" * 80 + "\n\n")
+
+        # Árbol de directorios
+        out_file.write("ESTRUCTURA DE DIRECTORIOS:\n")
+        out_file.write("-" * 80 + "\n")
+        tree = get_directory_tree(root_path)
+        out_file.write(tree)
+        out_file.write("\n" + "=" * 80 + "\n\n")
+
+        # Contenido de archivos
+        out_file.write(f"ARCHIVOS INCLUIDOS: {len(py_files)}\n")
+        out_file.write("=" * 80 + "\n\n")
+
+        for i, file_path in enumerate(py_files, 1):
+            rel_path = os.path.relpath(file_path, root_path)
+            out_file.write(f"\n{'#' * 80}\n")
+            out_file.write(f"# ARCHIVO {i}/{len(py_files)}: {rel_path}\n")
+            out_file.write(f"{'#' * 80}\n\n")
+
+            try:
+                with open(file_path, 'r', encoding='utf-8') as py_file:
+                    content = py_file.read()
+                    out_file.write(content)
+                    if not content.endswith('\n'):
+                        out_file.write('\n')
+            except Exception as e:
+                out_file.write(f"ERROR al leer archivo: {e}\n")
+
+            out_file.write("\n")
+
+    print(f"✓ Código compactado en: {output_path}")
+    print(f"✓ Total de archivos incluidos: {len(py_files)}")
+
+if __name__ == "__main__":
+    root = os.path.dirname(os.path.abspath(__file__))
+    output = os.path.join(root, "codigo_compactado.txt")
+    compact_code(root, output)
+

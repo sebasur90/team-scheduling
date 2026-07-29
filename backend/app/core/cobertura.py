@@ -5,8 +5,10 @@ from app.core.tipos import ColaboradorInfo
 class CoberturaValidator:
     """Validates and tracks coverage requirements"""
 
-    def __init__(self, colaboradores: List[ColaboradorInfo]):
+    def __init__(self, colaboradores: List[ColaboradorInfo], minimos: Dict[str, int] = None):
         self.colaboradores = {c.id: c for c in colaboradores}
+        # Default to current hardcoded behavior if not provided
+        self.minimos = minimos or {"tipo_a": 1, "tipo_b": 1}
 
     def get_cobertura_status(
         self,
@@ -41,9 +43,9 @@ class CoberturaValidator:
         asignados_en_franja: List[int],
         excluidos_o_ausentes: Set[int],
     ) -> bool:
-        """Check if franja maintains >=1 Tipo-A and >=1 Tipo-B"""
+        """Check if franja meets configured minimum coverage"""
         tipo_a, tipo_b = self.get_cobertura_status(asignados_en_franja, excluidos_o_ausentes)
-        return tipo_a >= 1 and tipo_b >= 1
+        return tipo_a >= self.minimos["tipo_a"] and tipo_b >= self.minimos["tipo_b"]
 
     def can_remove_person_safely(
         self,

@@ -4,8 +4,8 @@ from pydantic import BaseModel
 from app.database import get_db
 from app.models import Colaborador
 from app.schemas.colaborador import ColaboradorResponse, ColaboradorCreate, ColaboradorUpdate
-from app.dependencies import get_admin_user
-from typing import List
+from app.dependencies import get_admin_user, get_current_user
+from typing import List, Optional
 
 router = APIRouter(prefix="/colaboradores", tags=["colaboradores"], redirect_slashes=False)
 
@@ -88,3 +88,20 @@ def update_fcm_token(
     db.refresh(colab)
 
     return {"status": "fcm_token_actualizado", "colaborador_id": colaborador_id}
+
+
+class PreferenciaRequest(BaseModel):
+    franja_horaria_id: Optional[int] = None
+
+
+@router.patch("/me/preferencia", response_model=ColaboradorResponse)
+def update_mi_preferencia(
+    request: PreferenciaRequest,
+    current_user: Colaborador = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Update logged-in user's general preferred franja."""
+    current_user.franja_preferida_id = request.franja_horaria_id
+    db.commit()
+    db.refresh(current_user)
+    return ColaboradorResponse.model_validate(current_user)

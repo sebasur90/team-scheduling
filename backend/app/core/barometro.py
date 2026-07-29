@@ -5,6 +5,7 @@ from app.models.turno import TurnoAlmuerzo, AsignacionAlmuerzo
 from app.models.colaborador import Colaborador
 from app.models.ausencia import Ausencia
 from app.models.incidencia import IncidenciaCobertura
+from app.models.configuracion_cobertura import ConfiguracionCobertura
 from app.enums import Sector, EstadoAtencion, EstadoIncidencia
 
 
@@ -33,8 +34,11 @@ class BarometroService:
         """
         from app.models.franja_horaria import FranjaHoraria
 
-        # Franjas activas o que empiezan en los próximos 30 min
-        now = datetime.now()
+        # Load coverage minimums once
+        config = db.query(ConfiguracionCobertura).first()
+        minimo_tipo_a = config.minimo_tipo_a if config else 1
+        minimo_tipo_b = config.minimo_tipo_b if config else 1
+
         franjas_to_check = db.query(FranjaHoraria).order_by(FranjaHoraria.orden).all()
 
         franjas_state = []
@@ -56,10 +60,9 @@ class BarometroService:
                     AsignacionAlmuerzo.turno_almuerzo_id == turno.id
                 ).count()
 
-                # Colaboradores en línea = presentes - ausentes - orientador - asignados a franja
+                # Colaboradores en línea = presentes - ausentes - asignados a franja
                 colaboradores_activos = db.query(Colaborador).filter(
-                    Colaborador.estado_atencion == EstadoAtencion.ACTIVO.value,
-                    Colaborador.habilitado_orientador == False  # No orientador
+                    Colaborador.estado_atencion == EstadoAtencion.ACTIVO.value
                 ).all()
 
                 for colab in colaboradores_activos:
@@ -81,13 +84,13 @@ class BarometroService:
                         continue
 
                     # En línea
-                    if colab.sector == Sector.COMERCIAL.value:
+                    if colab.sector == Sector.TIPO_A.value:
                         comercial_libre += 1
-                    elif colab.sector == Sector.OPERATIVO.value:
+                    elif colab.sector == Sector.TIPO_B.value:
                         operativo_libre += 1
 
-            comercial_ok = comercial_libre >= 1
-            operativo_ok = operativo_libre >= 1
+            comercial_ok = comercial_libre >= minimo_tipo_a
+            operativo_ok = operativo_libre >= minimo_tipo_b
 
             # Verificar incidencias activas para esta franja
             tiene_incidencia = db.query(IncidenciaCobertura).filter(

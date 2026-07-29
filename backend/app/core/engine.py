@@ -2,7 +2,7 @@ from datetime import date
 from typing import List, Dict, Set, Tuple, Optional
 from sqlalchemy.orm import Session
 from app.models import (
-    Colaborador, Ausencia, PreferenciaDiaria, TareaEspecialAsignacion, TareaEspecialTipo, FranjaHoraria, TurnoAlmuerzo
+    Colaborador, Ausencia, TareaEspecialAsignacion, TareaEspecialTipo, FranjaHoraria, TurnoAlmuerzo, ConfiguracionCobertura
 )
 from app.constants import FRANJAS_CONFIG
 from app.core.tipos import (
@@ -37,13 +37,14 @@ class AssignmentEngine:
             asignaciones_all = self._phase_2_fill_remaining(context, asignaciones_phase1)
 
             # Phase 3: Final validation
-            cronograma, puntajes = self._phase_3_validate_and_build(context, asignaciones_all)
+            cronograma, puntajes, advertencias = self._phase_3_validate_and_build(context, asignaciones_all)
 
             return AssignmentResult(
                 success=True,
                 cronograma=cronograma,
                 asignaciones=asignaciones_all,
                 puntajes_actualizados=puntajes,
+                advertencias=advertencias,
             )
 
         except Exception as e:
@@ -57,6 +58,13 @@ class AssignmentEngine:
         Phase 0: Build context for the day.
         Determine who's absent, excluded, etc.
         """
+        # Load configuracion cobertura (read once, reuse in Phases 1 & 3)
+        config = self.db.query(ConfiguracionCobertura).first()
+        minimos_cobertura = {
+            "tipo_a": config.minimo_tipo_a if config else 1,
+            "tipo_b": config.minimo_tipo_b if config else 1,
+        }
+
         # Load ausencias
         ausencias = self.db.query(Ausencia).filter(Ausencia.fecha == self.fecha).all()
         ausentes_ids = {a.colaborador_id for a in ausencias}
@@ -105,14 +113,11 @@ class AssignmentEngine:
                 )
             )
 
-        # Load preferences for today
+        # Load preferences from colaborador.franja_preferida_id (general preference, not per-date)
         preferencias = {}
-        prefs = self.db.query(PreferenciaDiaria).filter(
-            PreferenciaDiaria.fecha == self.fecha
-        ).all()
-        for pref in prefs:
-            if pref.colaborador_id not in ausentes_ids and pref.colaborador_id != orientador_id:
-                preferencias[pref.colaborador_id] = pref.franja_horaria_id_deseada - 1  # Store as index
+        for colab in colaboradores:
+            if colab.id not in ausentes_ids and colab.id != orientador_id and colab.franja_preferida_id is not None:
+                preferencias[colab.id] = colab.franja_preferida_id - 1  # Store as 0-indexed
 
         return ContextData(
             fecha=self.fecha,
@@ -121,6 +126,7 @@ class AssignmentEngine:
             tareas_restringidas=tareas_restringidas,
             pool_disponible=pool,
             preferencias=preferencias,
+            minimos_cobertura=minimos_cobertura,
         )
 
     def _phase_1_resolve_preferences(self, context: ContextData) -> List[AsignacionResult]:
@@ -138,7 +144,7 @@ class AssignmentEngine:
             prefs_por_franja[franja_idx].append(colab_id)
 
         # Validator for checking coverage
-        validator = CoberturaValidator(context.pool_disponible)
+        validator = CoberturaValidator(context.pool_disponible, context.minimos_cobertura)
 
         # Process each franja with preferences
         asignados_por_franja = {i: [] for i in range(self.num_franjas)}
@@ -306,12 +312,13 @@ class AssignmentEngine:
         self,
         context: ContextData,
         asignaciones: List[AsignacionResult],
-    ) -> Tuple[Dict[int, List[int]], Dict[int, int]]:
+    ) -> Tuple[Dict[int, List[int]], Dict[int, int], List[str]]:
         """
-        Phase 3: Validate final assignment.
-        Returns: (cronograma dict, puntajes actualizados dict)
+        Phase 3: Validate final assignment and build cronograma with warnings.
+        Returns: (cronograma dict, puntajes actualizados dict, advertencias list)
         """
-        validator = CoberturaValidator(context.pool_disponible)
+        validator = CoberturaValidator(context.pool_disponible, context.minimos_cobertura)
+        advertencias = []
 
         # Build cronograma
         cronograma = {i: [] for i in range(self.num_franjas)}
@@ -324,12 +331,30 @@ class AssignmentEngine:
         if context.orientador_id:
             excluidos.add(context.orientador_id)
 
+        # Get franja info for readable output
+        franjas_info = self.db.query(FranjaHoraria).order_by(FranjaHoraria.orden).all()
+        franja_map = {f.orden - 1: f for f in franjas_info}  # orden is 1-indexed
+
         for franja_idx in range(self.num_franjas):
             asignados = cronograma[franja_idx]
             if not validator.satisfies_minimum_coverage(asignados, excluidos):
-                raise Exception(
-                    f"Validación final falló: Franja {franja_idx} no tiene cobertura mínima"
-                )
+                # Get coverage status for warning message
+                tipo_a, tipo_b = validator.get_cobertura_status(asignados, excluidos)
+                franja_info = franja_map.get(franja_idx)
+                if franja_info:
+                    hora_str = f"{franja_info.hora_inicio.strftime('%H:%M')}-{franja_info.hora_fin.strftime('%H:%M')}"
+                else:
+                    hora_str = f"Franja {franja_idx + 1}"
+
+                # Build warning message
+                problemas = []
+                if tipo_a < context.minimos_cobertura["tipo_a"]:
+                    problemas.append(f"tipo_a: {tipo_a}/{context.minimos_cobertura['tipo_a']}")
+                if tipo_b < context.minimos_cobertura["tipo_b"]:
+                    problemas.append(f"tipo_b: {tipo_b}/{context.minimos_cobertura['tipo_b']}")
+
+                advertencia = f"Franja {franja_idx + 1} ({hora_str}): cobertura mínima no alcanzada ({', '.join(problemas)})"
+                advertencias.append(advertencia)
 
         # Build puntajes actualizados (simplified for now)
         puntajes = {}
@@ -342,4 +367,4 @@ class AssignmentEngine:
                     else:
                         puntajes[a.colaborador_id] = colab.puntaje_prioridad + 1
 
-        return cronograma, puntajes
+        return cronograma, puntajes, advertencias

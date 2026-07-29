@@ -23,4 +23,9 @@ export const colaboradoresApi = {
 
   update: (id: number, data: Partial<Colaborador>) =>
     client.patch<Colaborador>(`/colaboradores/${id}`, data),
+
+  updatePreference: (franjaId: number | null) =>
+    client.patch<Colaborador>('/colaboradores/me/preferencia', {
+      franja_horaria_id: franjaId,
+    }),
 }

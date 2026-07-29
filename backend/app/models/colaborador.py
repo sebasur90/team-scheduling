@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Integer, Boolean
+from sqlalchemy import Column, String, Integer, Boolean, ForeignKey
 from sqlalchemy.orm import relationship
 from app.models.base import BaseModel
 
@@ -17,12 +17,13 @@ class Colaborador(BaseModel):
     fcm_token = Column(String(512), nullable=True)
     password_hash = Column(String(255), nullable=True)
     es_admin = Column(Boolean, default=False)
+    franja_preferida_id = Column(Integer, ForeignKey("franja_horaria.id"), nullable=True)
 
     asignaciones = relationship("AsignacionAlmuerzo", back_populates="colaborador", cascade="all, delete-orphan")
-    preferencias = relationship("PreferenciaDiaria", back_populates="colaborador", cascade="all, delete-orphan")
     ausencias = relationship("Ausencia", back_populates="colaborador", cascade="all, delete-orphan")
     tareas_especiales = relationship("TareaEspecialAsignacion", back_populates="colaborador")
     notificaciones = relationship("Notificacion", back_populates="colaborador", cascade="all, delete-orphan")
+    franja_preferida = relationship("FranjaHoraria")
 
     def __repr__(self):
         return f"<Colaborador(id={self.id}, nombre={self.nombre}, sector={self.sector})>"

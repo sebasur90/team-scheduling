@@ -5,6 +5,7 @@ import { colaboradoresApi, type ColaboradorCreate } from '../api/colaboradores';
 import { franjasApi, type FranjaHoraria, type FranjaCreate } from '../api/franjas';
 import { turnosApi, type TurnoListResponse, type TurnoAlmuerzoResponse } from '../api/turnos';
 import { diasNolaborablesApi, type DiaNoLaborable, type DiaNoLaborableCreate } from '../api/diasNolaborables';
+import { ConfiguracionCobertura } from './ConfiguracionCobertura';
 import { Vacaciones } from './Vacaciones';
 import { Colaborador } from '../api/auth';
 import client from '../api/client';
@@ -12,7 +13,7 @@ import './AdminPanel.css';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-type Tab = 'colaboradores' | 'franjas' | 'asignacion' | 'dias-no-laborables' | 'vacaciones' | 'incidencias';
+type Tab = 'colaboradores' | 'franjas' | 'asignacion' | 'dias-no-laborables' | 'vacaciones' | 'configuracion' | 'incidencias' | 'preferencias';
 type ChipState = 'assigned' | 'available' | 'conflict' | 'disabled';
 
 interface OverrideModalState {
@@ -78,6 +79,16 @@ export function AdminPanel() {
   const [overrideModal, setOverrideModal] = useState<OverrideModalState | null>(null);
   const [deleteTurnoModal, setDeleteTurnoModal] = useState<DeleteTurnoModalState | null>(null);
   const [operationLoading, setOperationLoading] = useState(false);
+
+  // Generation result modal state
+  interface GenerationResult {
+    status: string;
+    message: string;
+    dias_con_advertencia: Array<{ fecha: string; advertencias: string[] }>;
+    dias_con_error: Array<{ fecha: string; error: string }>;
+    dias_salteados: Array<{ fecha: string; motivo: string }>;
+  }
+  const [generationResult, setGenerationResult] = useState<GenerationResult | null>(null);
 
   // Días no laborables state
   const [diasNoLaborables, setDiasNoLaborables] = useState<DiaNoLaborable[]>([]);
@@ -436,14 +447,31 @@ export function AdminPanel() {
       lunes.setDate(lunes.getDate() - diasAlunes);
       const lunesStr = lunes.toISOString().split('T')[0];
 
-      await client.post(`/admin/turnos/generar-semana?semana=${lunesStr}`);
+      const response = await turnosApi.generateWeek(lunesStr);
+
+      // Show result modal
+      setGenerationResult({
+        status: response.data.status,
+        message: response.data.mensaje,
+        dias_con_advertencia: response.data.dias_con_advertencia || [],
+        dias_con_error: response.data.dias_con_error || [],
+        dias_salteados: response.data.dias_salteados || [],
+      });
+
+      // Reload turnos data
       turnosApi
         .list(asignacionFecha)
         .then((res) => setTurnosData(res.data))
         .catch((err) => setTurnosError(err.message));
     } catch (err: any) {
       const errorMessage = err.response?.data?.detail || err.message || 'Error al generar turnos';
-      alert(`Error: ${errorMessage}`);
+      setGenerationResult({
+        status: 'error',
+        message: `Error: ${errorMessage}`,
+        dias_con_advertencia: [],
+        dias_con_error: [{ fecha: '', error: errorMessage }],
+        dias_salteados: [],
+      });
     } finally {
       setTurnosLoading(false);
     }
@@ -547,6 +575,18 @@ export function AdminPanel() {
           onClick={() => setActiveTab('vacaciones')}
         >
           🏖️ Vacaciones
+        </button>
+        <button
+          className={`tab-button ${activeTab === 'preferencias' ? 'active' : ''}`}
+          onClick={() => setActiveTab('preferencias')}
+        >
+          Preferencias
+        </button>
+        <button
+          className={`tab-button ${activeTab === 'configuracion' ? 'active' : ''}`}
+          onClick={() => setActiveTab('configuracion')}
+        >
+          ⚙️ Configuración
         </button>
         <button
           className={`tab-button ${activeTab === 'incidencias' ? 'active' : ''}`}
@@ -1135,6 +1175,72 @@ export function AdminPanel() {
         </div>
       )}
 
+      {/* PREFERENCIAS TAB */}
+      {activeTab === 'preferencias' && (
+        <div className="admin-tab-content">
+          <div className="tab-header">
+            <h3>Preferencias de Franja</h3>
+          </div>
+          {colabLoading ? (
+            <div>Cargando...</div>
+          ) : (
+            <>
+              <div style={{ marginBottom: '20px', padding: '10px', backgroundColor: '#f5f5f5', borderRadius: '4px' }}>
+                {(() => {
+                  const activos = colaboradores.filter((c) => c.estado_atencion === 'activo');
+                  const conPreferencia = activos.filter((c) => c.franja_preferida_id);
+                  const sinPreferencia = activos.length - conPreferencia.length;
+                  return (
+                    <p>
+                      <strong>
+                        {conPreferencia.length} de {activos.length}
+                      </strong>{' '}
+                      colaboradores han configurado su preferencia
+                      {sinPreferencia > 0 && ` (${sinPreferencia} sin configurar)`}
+                    </p>
+                  );
+                })()}
+              </div>
+              <table className="admin-table">
+                <thead>
+                  <tr>
+                    <th>Nombre</th>
+                    <th>Sector</th>
+                    <th>Franja Preferida</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {(() => {
+                    const activos = colaboradores.filter((c) => c.estado_atencion === 'activo');
+                    return activos.map((colab) => {
+                      const franjaPreferida = franjas.find((f) => f.id === colab.franja_preferida_id);
+                      return (
+                        <tr key={colab.id}>
+                          <td>{colab.nombre}</td>
+                          <td>{colab.sector}</td>
+                          <td>
+                            {franjaPreferida
+                              ? `${franjaPreferida.hora_inicio.slice(0, 5)} – ${franjaPreferida.hora_fin.slice(0, 5)}`
+                              : 'Sin configurar'}
+                          </td>
+                        </tr>
+                      );
+                    });
+                  })()}
+                </tbody>
+              </table>
+            </>
+          )}
+        </div>
+      )}
+
+      {/* CONFIGURACION TAB */}
+      {activeTab === 'configuracion' && (
+        <div className="admin-tab-content">
+          <ConfiguracionCobertura />
+        </div>
+      )}
+
       {/* INCIDENCIAS TAB */}
       {activeTab === 'incidencias' && (
         <div className="admin-tab-content">
@@ -1215,6 +1321,80 @@ export function AdminPanel() {
               ))}
             </div>
           )}
+        </div>
+      )}
+
+      {/* GENERATION RESULT MODAL */}
+      {generationResult && (
+        <div className="modal-overlay" onClick={() => setGenerationResult(null)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Resultado de Generación</h3>
+              <button
+                className="modal-close"
+                onClick={() => setGenerationResult(null)}
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="modal-body">
+              <p className="modal-message">{generationResult.message}</p>
+
+              {generationResult.dias_salteados.length > 0 && (
+                <div className="result-section">
+                  <h4>Días Saltados ({generationResult.dias_salteados.length})</h4>
+                  <ul>
+                    {generationResult.dias_salteados.map((d) => (
+                      <li key={d.fecha}>
+                        <strong>{d.fecha}</strong>: {d.motivo}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {generationResult.dias_con_advertencia.length > 0 && (
+                <div className="result-section warning">
+                  <h4>Días con Advertencia ⚠️ ({generationResult.dias_con_advertencia.length})</h4>
+                  <ul>
+                    {generationResult.dias_con_advertencia.map((d) => (
+                      <li key={d.fecha}>
+                        <strong>{d.fecha}</strong>:
+                        <ul>
+                          {d.advertencias.map((adv, idx) => (
+                            <li key={`${d.fecha}-adv-${idx}`}>{adv}</li>
+                          ))}
+                        </ul>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {generationResult.dias_con_error.length > 0 && (
+                <div className="result-section error">
+                  <h4>Días con Error ❌ ({generationResult.dias_con_error.length})</h4>
+                  <ul>
+                    {generationResult.dias_con_error.map((d) => (
+                      <li key={d.fecha}>
+                        <strong>{d.fecha}</strong>: {d.error}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+
+            <div className="modal-footer">
+              <button
+                className="btn btn-secondary"
+                onClick={() => setGenerationResult(null)}
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

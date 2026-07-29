@@ -11,6 +11,7 @@ export interface Colaborador {
   habilitado_gestion_externa: boolean
   puntaje_prioridad: number
   es_admin: boolean
+  franja_preferida_id?: number | null
   created_at: string
   updated_at: string
 }

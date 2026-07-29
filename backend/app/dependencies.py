@@ -21,3 +21,13 @@ def get_admin_user(current_user: Colaborador = Depends(get_current_user)) -> Col
     if current_user.rol != "admin":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin role required")
     return current_user
+
+
+def require_non_viewer(current_user: Colaborador = Depends(get_current_user)) -> Colaborador:
+    """Dependency to block viewer role from write operations. Allows: admin, usuario. Blocks: viewer"""
+    if current_user.rol == "viewer":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Acceso de solo lectura"
+        )
+    return current_user

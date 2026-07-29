@@ -1,0 +1,25 @@
+.viewer-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  gap: 1rem;
+}
+
+.viewer-banner {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 1rem;
+  border-radius: 8px;
+  text-align: center;
+  font-weight: 600;
+  font-size: 1rem;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.viewer-calendar-container {
+  flex: 1;
+  overflow: auto;
+  background: white;
+  border-radius: 8px;
+  padding: 1rem;
+}

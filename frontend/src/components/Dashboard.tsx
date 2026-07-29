@@ -7,6 +7,8 @@ import { Preferences } from './Preferences'
 import { NotificationCenter } from './NotificationCenter'
 import { Vacaciones } from './Vacaciones'
 import { AdminPanel } from './AdminPanel'
+import { AdminDashboard } from './AdminDashboard'
+import { ViewerPanel } from './ViewerPanel'
 import './Dashboard.css'
 
 type TabType = 'calendar' | 'preferences' | 'vacaciones' | 'notifications'
@@ -17,6 +19,24 @@ export const Dashboard: React.FC = () => {
 
   if (!user) {
     return <div>Cargando...</div>
+  }
+
+  if (user.rol === 'viewer') {
+    return (
+      <div className="dashboard">
+        <Header user={user} isAdmin={false} onLogout={logout} />
+        <ViewerPanel />
+      </div>
+    )
+  }
+
+  if (user.rol === 'admin') {
+    return (
+      <div className="dashboard">
+        <Header user={user} isAdmin={true} onLogout={logout} />
+        <AdminDashboard />
+      </div>
+    )
   }
 
   const isAdmin = user.rol === 'admin'
