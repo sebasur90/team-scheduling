@@ -498,8 +498,8 @@ export function AdminPanel() {
     const isFull = turno.asignaciones.length >= turno.capacidad_maxima;
     if (isFull) return 'disabled';
 
-    const sectoresOcupados = new Set(turno.asignaciones.map((a) => a.colaborador.sector));
-    if (sectoresOcupados.has(colab.sector)) return 'conflict';
+    const sectoresOcupados = new Set(turno.asignaciones.map((a) => a.colaborador.sector_id));
+    if (sectoresOcupados.has(colab.sector_id)) return 'conflict';
 
     return 'available';
   };
@@ -538,7 +538,7 @@ export function AdminPanel() {
         setOperationLoading(false);
       }
     } else if (state === 'conflict') {
-      const conflictingAsignacion = turno.asignaciones.find((a) => a.colaborador.sector === colab.sector);
+      const conflictingAsignacion = turno.asignaciones.find((a) => a.colaborador.sector_id === colab.sector_id);
       if (conflictingAsignacion) {
         setOverrideModal({
           turnoId: turno.id,
@@ -921,7 +921,7 @@ export function AdminPanel() {
                     return (
                       <tr key={colab.id}>
                         <td>{colab.nombre}</td>
-                        <td>{colab.sector}</td>
+                        <td>{getSectorName(colab.sector_id)}</td>
                         <td>{colab.rol}</td>
                         <td>{colab.estado_atencion}</td>
                         <td>{tareasHabilitadas || '–'}</td>
@@ -1327,7 +1327,7 @@ export function AdminPanel() {
                             className={`chip chip--${state}`}
                             onClick={() => handleChipClick(colab, turno)}
                             disabled={operationLoading || state === 'disabled'}
-                            title={`${colab.nombre} - ${colab.sector}`}
+                            title={`${colab.nombre} - ${getSectorName(colab.sector_id)}`}
                           >
                             <span className="chip__icon">
                               {state === 'assigned' && '✓'}
@@ -1336,7 +1336,7 @@ export function AdminPanel() {
                             </span>
                             <span className="chip__text">
                               <span className="chip__name">{colab.nombre}</span>
-                              <span className="chip__sector">{colab.sector}</span>
+                              <span className="chip__sector">{getSectorName(colab.sector_id)}</span>
                             </span>
                           </button>
                         );
@@ -1359,12 +1359,12 @@ export function AdminPanel() {
               <div className="modal" onClick={(e) => e.stopPropagation()}>
                 <h3>⚠️ Superposición de funciones</h3>
                 <p>
-                  <strong>{overrideModal.colaborador.nombre}</strong> es <strong>{overrideModal.colaborador.sector}</strong> y ya hay un{' '}
-                  <strong>{overrideModal.colaborador.sector}</strong> asignado en esta franja (
+                  <strong>{overrideModal.colaborador.nombre}</strong> es <strong>{getSectorName(overrideModal.colaborador.sector_id)}</strong> y ya hay un{' '}
+                  <strong>{getSectorName(overrideModal.colaborador.sector_id)}</strong> asignado en esta franja (
                   <strong>{overrideModal.conflictingColaborador.nombre}</strong>).
                   <br />
                   <br />
-                  La función <strong>{overrideModal.colaborador.sector}</strong> quedaría sin cobertura durante el almuerzo. ¿Igualmente asignar?
+                  La función <strong>{getSectorName(overrideModal.colaborador.sector_id)}</strong> quedaría sin cobertura durante el almuerzo. ¿Igualmente asignar?
                 </p>
                 <div className="modal-actions">
                   <button
@@ -1563,7 +1563,7 @@ export function AdminPanel() {
                       return (
                         <tr key={colab.id}>
                           <td>{colab.nombre}</td>
-                          <td>{colab.sector}</td>
+                          <td>{getSectorName(colab.sector_id)}</td>
                           <td>
                             {franjaPreferida
                               ? `${franjaPreferida.hora_inicio.slice(0, 5)} – ${franjaPreferida.hora_fin.slice(0, 5)}`

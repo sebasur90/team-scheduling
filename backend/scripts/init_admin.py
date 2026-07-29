@@ -12,7 +12,7 @@ from sqlalchemy.orm import sessionmaker
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
 from app.config import DATABASE_URL
-from app.models import Colaborador
+from app.models import Colaborador, Sector
 from app.auth.local import hash_password
 
 def init_admin():
@@ -22,6 +22,14 @@ def init_admin():
 
     try:
         ADMIN_EMAIL = "sebassur90@gmail.com"
+
+        # Get or create "operativo" sector
+        sector = session.query(Sector).filter(Sector.nombre == "operativo").first()
+        if not sector:
+            sector = Sector(nombre="operativo", capacidad_maxima=10)
+            session.add(sector)
+            session.commit()
+            print(f"✓ Created 'operativo' sector")
 
         # Check if admin already exists
         admin = session.query(Colaborador).filter(Colaborador.email == ADMIN_EMAIL).first()
@@ -38,7 +46,7 @@ def init_admin():
             admin = Colaborador(
                 nombre="Administrador",
                 email=ADMIN_EMAIL,
-                sector="operativo",
+                sector_id=sector.id,
                 estado_atencion="activo",
                 es_admin=True,
                 rol="admin"
