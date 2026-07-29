@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from app.database import get_db
-from app.models import Colaborador, ColaboradorTareaTipo
+from app.models import Colaborador, ColaboradorTareaTipo, Sector
 from app.schemas.colaborador import ColaboradorResponse, ColaboradorCreate, ColaboradorUpdate
 from app.dependencies import get_admin_user, get_current_user
 from typing import List, Optional
@@ -36,6 +36,18 @@ def create_colaborador(
     existing = db.query(Colaborador).filter(Colaborador.email == colab.email).first()
     if existing:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="El email ya existe")
+
+    # Check if sector exists and verify capacity
+    sector = db.query(Sector).filter_by(id=colab.sector_id).first()
+    if not sector:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Sector {colab.sector_id} no encontrado")
+
+    colaboradores_in_sector = db.query(Colaborador).filter_by(sector_id=colab.sector_id).count()
+    if colaboradores_in_sector >= sector.capacidad_maxima:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"Sector '{sector.nombre}' ha alcanzado capacidad máxima de {sector.capacidad_maxima}"
+        )
 
     colab_data = colab.model_dump(exclude={"tarea_tipo_ids"})
     new_colab = Colaborador(**colab_data)
@@ -77,6 +89,19 @@ def update_colaborador(
     colab = db.query(Colaborador).filter(Colaborador.id == colaborador_id).first()
     if not colab:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Colaborador no encontrado")
+
+    # Validate sector_id if being changed
+    if update_data.sector_id is not None and update_data.sector_id != colab.sector_id:
+        sector = db.query(Sector).filter_by(id=update_data.sector_id).first()
+        if not sector:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Sector {update_data.sector_id} no encontrado")
+
+        colaboradores_in_sector = db.query(Colaborador).filter_by(sector_id=update_data.sector_id).count()
+        if colaboradores_in_sector >= sector.capacidad_maxima:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f"Sector '{sector.nombre}' ha alcanzado capacidad máxima de {sector.capacidad_maxima}"
+            )
 
     update_dict = update_data.model_dump(exclude_unset=True, exclude={"tarea_tipo_ids"})
     for key, value in update_dict.items():

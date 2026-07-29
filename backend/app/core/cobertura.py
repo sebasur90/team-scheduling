@@ -1,26 +1,25 @@
-from typing import List, Tuple, Dict, Set
+from typing import List, Dict, Set
 from app.core.tipos import ColaboradorInfo
 
 
 class CoberturaValidator:
     """Validates and tracks coverage requirements"""
 
-    def __init__(self, colaboradores: List[ColaboradorInfo], minimos: Dict[str, int] = None):
+    def __init__(self, colaboradores: List[ColaboradorInfo], minimos: Dict[int, int] = None):
         self.colaboradores = {c.id: c for c in colaboradores}
-        # Default to current hardcoded behavior if not provided
-        self.minimos = minimos or {"tipo_a": 1, "tipo_b": 1}
+        # Default to 1 minimum per sector if not provided
+        self.minimos = minimos or {}
 
     def get_cobertura_status(
         self,
         asignados_en_franja: List[int],  # colaborador ids in this franja
         excluidos_o_ausentes: Set[int],  # who is NOT available in this franja
-    ) -> Tuple[int, int]:
+    ) -> Dict[int, int]:
         """
-        Returns: (tipo_a_activos, tipo_b_activos) among those NOT in this franja
+        Returns: Dict mapping sector_id -> count of active colaboradores NOT in this franja
         but ARE available/present that day
         """
-        tipo_a_activos = 0
-        tipo_b_activos = 0
+        cobertura_por_sector = {}
 
         for colab_id, colab in self.colaboradores.items():
             # Skip if absent/excluded that day
@@ -31,12 +30,10 @@ class CoberturaValidator:
             if colab_id not in asignados_en_franja:
                 # Only count activos
                 if colab.estado_atencion == "activo":
-                    if colab.sector == "tipo_a":
-                        tipo_a_activos += 1
-                    elif colab.sector == "tipo_b":
-                        tipo_b_activos += 1
+                    sector_id = colab.sector_id
+                    cobertura_por_sector[sector_id] = cobertura_por_sector.get(sector_id, 0) + 1
 
-        return tipo_a_activos, tipo_b_activos
+        return cobertura_por_sector
 
     def satisfies_minimum_coverage(
         self,
@@ -44,8 +41,12 @@ class CoberturaValidator:
         excluidos_o_ausentes: Set[int],
     ) -> bool:
         """Check if franja meets configured minimum coverage"""
-        tipo_a, tipo_b = self.get_cobertura_status(asignados_en_franja, excluidos_o_ausentes)
-        return tipo_a >= self.minimos["tipo_a"] and tipo_b >= self.minimos["tipo_b"]
+        cobertura = self.get_cobertura_status(asignados_en_franja, excluidos_o_ausentes)
+        # Check each sector's minimum
+        for sector_id, minimo in self.minimos.items():
+            if cobertura.get(sector_id, 0) < minimo:
+                return False
+        return True
 
     def can_remove_person_safely(
         self,

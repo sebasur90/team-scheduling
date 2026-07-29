@@ -1,3 +1,4 @@
+from app.models.sector import Sector
 from app.models.colaborador import Colaborador
 from app.models.franja_horaria import FranjaHoraria
 from app.models.turno import TurnoAlmuerzo, AsignacionAlmuerzo
@@ -11,6 +12,7 @@ from app.models.configuracion_cobertura import ConfiguracionCobertura
 from app.models.configuracion_notificaciones import ConfiguracionNotificaciones
 
 __all__ = [
+    "Sector",
     "Colaborador",
     "FranjaHoraria",
     "TurnoAlmuerzo",

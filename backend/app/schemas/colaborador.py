@@ -6,7 +6,7 @@ from datetime import datetime
 class ColaboradorBase(BaseModel):
     nombre: str
     email: EmailStr
-    sector: str  # 'tipo_a' or 'tipo_b'
+    sector_id: int
     estado_atencion: str = "activo"
     rol: str = "usuario"
     tarea_tipo_ids: List[int] = []
@@ -18,7 +18,7 @@ class ColaboradorCreate(ColaboradorBase):
 
 class ColaboradorUpdate(BaseModel):
     nombre: Optional[str] = None
-    sector: Optional[str] = None
+    sector_id: Optional[int] = None
     estado_atencion: Optional[str] = None
     rol: Optional[str] = None
     tarea_tipo_ids: Optional[List[int]] = None

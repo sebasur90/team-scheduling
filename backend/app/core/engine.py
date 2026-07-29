@@ -2,7 +2,7 @@ from datetime import date
 from typing import List, Dict, Set, Tuple, Optional
 from sqlalchemy.orm import Session
 from app.models import (
-    Colaborador, Ausencia, TareaEspecialAsignacion, TareaEspecialTipo, FranjaHoraria, TurnoAlmuerzo, ConfiguracionCobertura
+    Colaborador, Ausencia, TareaEspecialAsignacion, TareaEspecialTipo, FranjaHoraria, TurnoAlmuerzo, Sector
 )
 from app.constants import FRANJAS_CONFIG
 from app.core.tipos import (
@@ -58,12 +58,9 @@ class AssignmentEngine:
         Phase 0: Build context for the day.
         Determine who's absent, excluded, etc.
         """
-        # Load configuracion cobertura (read once, reuse in Phases 1 & 3)
-        config = self.db.query(ConfiguracionCobertura).first()
-        minimos_cobertura = {
-            "tipo_a": config.minimo_tipo_a if config else 1,
-            "tipo_b": config.minimo_tipo_b if config else 1,
-        }
+        # Load minimos_cobertura from sectors table
+        sectores = self.db.query(Sector).all()
+        minimos_cobertura = {s.id: s.minimo_cobertura for s in sectores}
 
         # Load ausencias
         ausencias = self.db.query(Ausencia).filter(Ausencia.fecha == self.fecha).all()
@@ -100,15 +97,19 @@ class AssignmentEngine:
 
         # Build available pool
         pool = []
+        sector_map = {s.id: s for s in sectores}
         for colab in colaboradores:
             if colab.id in ausentes_ids or colab.id == orientador_id:
                 continue
             tarea_tipos_ids = [t.tarea_tipo_id for t in colab.tareas_habilitadas]
+            sector = sector_map.get(colab.sector_id)
             pool.append(
                 ColaboradorInfo(
                     id=colab.id,
                     nombre=colab.nombre,
-                    sector=colab.sector,
+                    sector_id=colab.sector_id,
+                    sector_nombre=sector.nombre if sector else "unknown",
+                    participa_almuerzo=sector.participa_almuerzo if sector else True,
                     estado_atencion=colab.estado_atencion,
                     puntaje_prioridad=colab.puntaje_prioridad,
                     tarea_tipos_ids=tarea_tipos_ids,
@@ -129,6 +130,7 @@ class AssignmentEngine:
             pool_disponible=pool,
             preferencias=preferencias,
             minimos_cobertura=minimos_cobertura,
+            sector_map=sector_map,
         )
 
     def _phase_1_resolve_preferences(self, context: ContextData) -> List[AsignacionResult]:
@@ -188,23 +190,23 @@ class AssignmentEngine:
                     asignados_por_franja[franja_idx].append(s.id)
             else:
                 # Coverage conflict: resolve by priority
-                # Group by sector
+                # Group by sector_id
                 por_sector = {}
                 for s in solicitantes_validos:
-                    if s.sector not in por_sector:
-                        por_sector[s.sector] = []
-                    por_sector[s.sector].append(s)
+                    if s.sector_id not in por_sector:
+                        por_sector[s.sector_id] = []
+                    por_sector[s.sector_id].append(s)
 
                 # For each sector, determine how many can be assigned
-                for sector, candidatos in por_sector.items():
+                for sector_id, candidatos in por_sector.items():
                     # Simulate: if we remove all of this sector, do we still have coverage?
                     simulated = asignados_por_franja[franja_idx] + [s.id for c in por_sector.values() if c != candidatos for s in c]
-                    comercial_left, operativo_left = validator.get_cobertura_status(simulated, excluidos)
+                    cobertura_status = validator.get_cobertura_status(simulated, excluidos)
 
-                    if sector == "comercial":
-                        available_spots = 1 if comercial_left < 1 else 0
-                    else:
-                        available_spots = 1 if operativo_left < 1 else 0
+                    # Check if this sector can accept more people
+                    sector_minimo = context.minimos_cobertura.get(sector_id, 1)
+                    sector_disponible = cobertura_status.get(sector_id, 0)
+                    available_spots = 1 if sector_disponible < sector_minimo else 0
 
                     # Select who gets a spot
                     if available_spots > 0:
@@ -341,7 +343,7 @@ class AssignmentEngine:
             asignados = cronograma[franja_idx]
             if not validator.satisfies_minimum_coverage(asignados, excluidos):
                 # Get coverage status for warning message
-                tipo_a, tipo_b = validator.get_cobertura_status(asignados, excluidos)
+                cobertura_status = validator.get_cobertura_status(asignados, excluidos)
                 franja_info = franja_map.get(franja_idx)
                 if franja_info:
                     hora_str = f"{franja_info.hora_inicio.strftime('%H:%M')}-{franja_info.hora_fin.strftime('%H:%M')}"
@@ -350,10 +352,12 @@ class AssignmentEngine:
 
                 # Build warning message
                 problemas = []
-                if tipo_a < context.minimos_cobertura["tipo_a"]:
-                    problemas.append(f"tipo_a: {tipo_a}/{context.minimos_cobertura['tipo_a']}")
-                if tipo_b < context.minimos_cobertura["tipo_b"]:
-                    problemas.append(f"tipo_b: {tipo_b}/{context.minimos_cobertura['tipo_b']}")
+                for sector_id, minimo in context.minimos_cobertura.items():
+                    actual = cobertura_status.get(sector_id, 0)
+                    if actual < minimo:
+                        sector = context.sector_map.get(sector_id)
+                        sector_nombre = sector.nombre if sector else f"Sector {sector_id}"
+                        problemas.append(f"{sector_nombre}: {actual}/{minimo}")
 
                 advertencia = f"Franja {franja_idx + 1} ({hora_str}): cobertura mínima no alcanzada ({', '.join(problemas)})"
                 advertencias.append(advertencia)

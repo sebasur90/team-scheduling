@@ -8,7 +8,7 @@ class Colaborador(BaseModel):
 
     nombre = Column(String(255), nullable=False)
     email = Column(String(255), nullable=False, unique=True, index=True)
-    sector = Column(String(50), nullable=False)  # 'tipo_a' or 'tipo_b'
+    sector_id = Column(Integer, ForeignKey("sector.id"), nullable=False, index=True)
     estado_atencion = Column(String(50), nullable=False, default="activo")  # 'activo' or 'desafectado'
     rol = Column(String(50), nullable=False, default="usuario")  # 'admin', 'usuario', or 'viewer'
     puntaje_prioridad = Column(Integer, default=0)
@@ -23,6 +23,7 @@ class Colaborador(BaseModel):
     tareas_habilitadas = relationship("ColaboradorTareaTipo", back_populates="colaborador", cascade="all, delete-orphan")
     notificaciones = relationship("Notificacion", back_populates="colaborador", cascade="all, delete-orphan")
     franja_preferida = relationship("FranjaHoraria")
+    sector_obj = relationship("Sector", back_populates="colaboradores")
 
     def __repr__(self):
-        return f"<Colaborador(id={self.id}, nombre={self.nombre}, sector={self.sector})>"
+        return f"<Colaborador(id={self.id}, nombre={self.nombre}, sector_id={self.sector_id})>"

@@ -9,7 +9,9 @@ class ColaboradorInfo:
     """Lightweight colaborador data for algorithm"""
     id: int
     nombre: str
-    sector: str  # 'tipo_a' or 'tipo_b'
+    sector_id: int
+    sector_nombre: str
+    participa_almuerzo: bool
     estado_atencion: str  # 'activo' or 'desafectado'
     puntaje_prioridad: int = 0
     tarea_tipos_ids: List[int] = field(default_factory=list)
@@ -30,7 +32,7 @@ class ConflictoEmpate:
     colaborador_1_id: int
     colaborador_2_id: int
     puntaje_prioridad: int
-    sector: str
+    sector_id: int
     razon: str = "Dos colaboradores del mismo sector con igual puntaje compitiendo por la misma franja"
 
 
@@ -47,8 +49,10 @@ class ContextData:
     pool_disponible: List[ColaboradorInfo] = field(default_factory=list)
     # Preferences loaded
     preferencias: Dict[int, int] = field(default_factory=dict)  # colaborador_id -> franja_orden
-    # Coverage minimums
-    minimos_cobertura: Dict[str, int] = field(default_factory=lambda: {"tipo_a": 1, "tipo_b": 1})
+    # Coverage minimums (sector_id -> minimum count)
+    minimos_cobertura: Dict[int, int] = field(default_factory=dict)
+    # Sector reference (sector_id -> Sector object) - for readable output
+    sector_map: Dict[int, object] = field(default_factory=dict)
 
 
 @dataclass
