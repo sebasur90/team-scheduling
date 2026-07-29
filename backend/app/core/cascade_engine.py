@@ -72,8 +72,8 @@ class CascadeEngine:
         candidatos = CascadeEngine._find_candidates(db, turno, colaborador)
         logger.info(f"Encontrados {len(candidatos)} candidatos para reemplazo")
 
-        # 3. Ordena por equidad: reemplazos_semana ASC
-        candidatos_ordenados = CascadeEngine._sort_by_equity(db, candidatos, fecha)
+        # 3. Ordena por: preferencia coincidente, luego equidad (reemplazos_semana ASC)
+        candidatos_ordenados = CascadeEngine._sort_by_equity(db, candidatos, fecha, franja.id)
 
         # 4. Crea IncidenciaCobertura
         incidencia = IncidenciaCobertura(
@@ -156,13 +156,19 @@ class CascadeEngine:
         return candidatos
 
     @staticmethod
-    def _sort_by_equity(db: Session, candidatos: List[Colaborador], fecha) -> List[Colaborador]:
-        """Ordena candidatos por equidad (menor count de reemplazos esta semana primero)."""
+    def _sort_by_equity(db: Session, candidatos: List[Colaborador], fecha, franja_id: int) -> List[Colaborador]:
+        """
+        Ordena candidatos por:
+        1. Primero: aquellos cuya franja_preferida_id == franja_id (la franja vacante)
+        2. Luego: equidad (menor count de reemplazos esta semana primero)
+        """
         from datetime import datetime
 
         def score(colab):
+            # Group 0: preference matches vacant franja, Group 1: no preference or different
+            preference_matches = 0 if colab.franja_preferida_id == franja_id else 1
             count = CascadeEngine._count_replacements_this_week(db, colab.id, fecha)
-            return count
+            return (preference_matches, count)
 
         return sorted(candidatos, key=score)
 

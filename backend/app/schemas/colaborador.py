@@ -30,6 +30,7 @@ class ColaboradorResponse(ColaboradorBase):
     id: int
     puntaje_prioridad: int
     es_admin: bool = False
+    franja_preferida_id: Optional[int] = None
     created_at: datetime
     updated_at: datetime
 
