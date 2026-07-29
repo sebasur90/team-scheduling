@@ -25,11 +25,30 @@ export interface TurnoListResponse {
   franjas: TurnoAlmuerzoResponse[]
 }
 
+export interface GenerarSemanaResponse {
+  status: string
+  semana: string
+  turnos_generados: TurnoAlmuerzoResponse[]
+  conflictos: Array<{ fecha: string; conflicto: string }>
+  dias_salteados: Array<{ fecha: string; motivo: string }>
+  dias_con_error: Array<{ fecha: string; error: string }>
+  mensaje: string
+}
+
+export interface ConfirmarSemanaResponse {
+  status: string
+  semana: string
+  turnos_confirmados: TurnoAlmuerzoResponse[]
+  mensaje: string
+}
+
 export const turnosApi = {
   list: (fecha: string) =>
     client.get<TurnoListResponse>(`/turnos?fecha=${fecha}`),
   generateWeek: (semana: string) =>
-    client.post(`/admin/turnos/generar-semana?semana=${semana}`),
+    client.post<GenerarSemanaResponse>(`/admin/turnos/generar-semana?semana=${semana}`),
+  confirmWeek: (semana: string) =>
+    client.post<ConfirmarSemanaResponse>(`/admin/turnos/confirmar-semana?semana=${semana}`),
   updateAsignacion: (asignacionId: number, colaboradorId: number) =>
     client.patch(`/admin/turnos/asignaciones/${asignacionId}?colaborador_id=${colaboradorId}`),
   createAsignacion: (turnoId: number, colaboradorId: number) =>
