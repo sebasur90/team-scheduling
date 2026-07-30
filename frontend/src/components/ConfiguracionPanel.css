@@ -1,0 +1,92 @@
+.configuracion-panel {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.configuracion-panel h2 {
+  margin-top: 0;
+  margin-bottom: 30px;
+  color: #1f2937;
+  font-size: 24px;
+}
+
+.config-tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 30px;
+  border-bottom: 2px solid #e5e7eb;
+  padding-bottom: 0;
+  flex-wrap: wrap;
+}
+
+.tab-button {
+  padding: 12px 20px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: #6b7280;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.tab-button:hover {
+  color: #1f2937;
+}
+
+.tab-button.active {
+  color: #6366f1;
+  border-bottom-color: #6366f1;
+}
+
+.config-content {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 20px;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.config-section {
+  min-height: 400px;
+}
+
+@media (max-width: 768px) {
+  .configuracion-panel {
+    padding: 15px;
+  }
+
+  .config-tabs {
+    flex-direction: column;
+  }
+
+  .tab-button {
+    padding: 10px 15px;
+    font-size: 13px;
+    width: 100%;
+    text-align: left;
+  }
+
+  .tab-button.active {
+    border-bottom-color: #6366f1;
+  }
+
+  .config-content {
+    padding: 15px;
+  }
+}

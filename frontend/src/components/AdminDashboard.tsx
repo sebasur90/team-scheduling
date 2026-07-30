@@ -6,6 +6,7 @@ import { SectoresPanel } from './SectoresPanel'
 import { TareasEspecialesPanel } from './TareasEspecialesPanel'
 import { Preferences } from './Preferences'
 import { Vacaciones } from './Vacaciones'
+import { ConfiguracionPanel } from './ConfiguracionPanel'
 import './AdminDashboard.css'
 
 type TabType = 'inicio' | 'colaboradores' | 'tareas' | 'sectores' | 'calendario' | 'preferencias' | 'vacaciones' | 'notificaciones' | 'configuracion'
@@ -85,7 +86,7 @@ export const AdminDashboard: React.FC = () => {
       case 'configuracion':
         return (
           <div className="dashboard-section">
-            <AdminPanel />
+            <ConfiguracionPanel />
           </div>
         )
       default:
