@@ -19,7 +19,7 @@ export const Header: React.FC<HeaderProps> = ({ user, isAdmin, onLogout }) => {
           <div className="user-info">
             <span className="user-name">{user.nombre}</span>
             <span className={`user-role badge badge-${user.sector_id}`}>
-              Sector {user.sector_id}
+              {user.sector_nombre || `Sector ${user.sector_id}`}
             </span>
             {isAdmin && <span className="admin-badge">Administrador</span>}
           </div>

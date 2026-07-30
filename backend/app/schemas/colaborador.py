@@ -24,11 +24,17 @@ class ColaboradorUpdate(BaseModel):
     tarea_tipo_ids: Optional[List[int]] = None
 
 
+class SectorInfo(BaseModel):
+    id: int
+    nombre: str
+
+
 class ColaboradorResponse(ColaboradorBase):
     id: int
     puntaje_prioridad: int
     es_admin: bool = False
     franja_preferida_id: Optional[int] = None
+    sector_nombre: Optional[str] = None
     created_at: datetime
     updated_at: datetime
 

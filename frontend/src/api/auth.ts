@@ -5,6 +5,7 @@ export interface Colaborador {
   nombre: string
   email: string
   sector_id: number
+  sector_nombre?: string | null
   estado_atencion: 'activo' | 'desafectado'
   rol: 'admin' | 'usuario' | 'viewer'
   puntaje_prioridad: number

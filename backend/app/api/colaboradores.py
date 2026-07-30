@@ -10,6 +10,27 @@ from typing import List, Optional
 router = APIRouter(prefix="/colaboradores", tags=["colaboradores"], redirect_slashes=False)
 
 
+def _add_sector_nombre(colab: Colaborador, db: Session) -> dict:
+  """Helper to get colaborador data with sector name"""
+  sector = db.query(Sector).filter_by(id=colab.sector_id).first()
+  colab_dict = {
+    'id': colab.id,
+    'nombre': colab.nombre,
+    'email': colab.email,
+    'sector_id': colab.sector_id,
+    'sector_nombre': sector.nombre if sector else None,
+    'estado_atencion': colab.estado_atencion,
+    'rol': colab.rol,
+    'tarea_tipo_ids': [t.tarea_tipo_id for t in colab.tareas_habilitadas],
+    'puntaje_prioridad': colab.puntaje_prioridad,
+    'es_admin': colab.es_admin,
+    'franja_preferida_id': colab.franja_preferida_id,
+    'created_at': colab.created_at,
+    'updated_at': colab.updated_at,
+  }
+  return colab_dict
+
+
 class FCMTokenRequest(BaseModel):
     fcm_token: str
 
@@ -20,7 +41,13 @@ def list_colaboradores(token: str = "", db: Session = Depends(get_db)):
     """Get all colaboradores (admin only)"""
     # TODO: Add proper admin check
     colaboradores = db.query(Colaborador).all()
-    return [ColaboradorResponse.model_validate(c) for c in colaboradores]
+
+    result = []
+    for c in colaboradores:
+        colab_data = _add_sector_nombre(c, db)
+        result.append(ColaboradorResponse.model_validate(colab_data))
+
+    return result
 
 
 @router.post("", response_model=ColaboradorResponse)
@@ -65,7 +92,8 @@ def create_colaborador(
     db.commit()
     db.refresh(new_colab)
 
-    return ColaboradorResponse.model_validate(new_colab)
+    colab_dict = _add_sector_nombre(new_colab, db)
+    return ColaboradorResponse.model_validate(colab_dict)
 
 
 @router.get("/{colaborador_id}", response_model=ColaboradorResponse)
@@ -74,7 +102,8 @@ def get_colaborador(colaborador_id: int, db: Session = Depends(get_db)):
     colab = db.query(Colaborador).filter(Colaborador.id == colaborador_id).first()
     if not colab:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Colaborador no encontrado")
-    return ColaboradorResponse.model_validate(colab)
+    colab_dict = _add_sector_nombre(colab, db)
+    return ColaboradorResponse.model_validate(colab_dict)
 
 
 @router.patch("/{colaborador_id}", response_model=ColaboradorResponse)
@@ -122,7 +151,8 @@ def update_colaborador(
     db.commit()
     db.refresh(colab)
 
-    return ColaboradorResponse.model_validate(colab)
+    colab_dict = _add_sector_nombre(colab, db)
+    return ColaboradorResponse.model_validate(colab_dict)
 
 
 @router.patch("/{colaborador_id}/fcm-token")
