@@ -3,9 +3,12 @@ import { AdminPanel } from './AdminPanel'
 import { CalendarView } from './CalendarView'
 import { NotificacionesConfig } from './NotificacionesConfig'
 import { SectoresPanel } from './SectoresPanel'
+import { TareasEspecialesPanel } from './TareasEspecialesPanel'
+import { Preferences } from './Preferences'
+import { Vacaciones } from './Vacaciones'
 import './AdminDashboard.css'
 
-type TabType = 'inicio' | 'colaboradores' | 'tareas' | 'sectores' | 'calendario' | 'notificaciones' | 'configuracion'
+type TabType = 'inicio' | 'colaboradores' | 'tareas' | 'sectores' | 'calendario' | 'preferencias' | 'vacaciones' | 'notificaciones' | 'configuracion'
 
 export const AdminDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabType>('inicio')
@@ -46,8 +49,7 @@ export const AdminDashboard: React.FC = () => {
       case 'tareas':
         return (
           <div className="dashboard-section">
-            <h2>Tareas Especiales</h2>
-            <p className="placeholder-text">Próximamente en Fase 2</p>
+            <TareasEspecialesPanel />
           </div>
         )
       case 'sectores':
@@ -60,6 +62,18 @@ export const AdminDashboard: React.FC = () => {
         return (
           <div className="dashboard-section">
             <CalendarView />
+          </div>
+        )
+      case 'preferencias':
+        return (
+          <div className="dashboard-section">
+            <Preferences />
+          </div>
+        )
+      case 'vacaciones':
+        return (
+          <div className="dashboard-section">
+            <Vacaciones mode="admin" />
           </div>
         )
       case 'notificaciones':
@@ -122,6 +136,20 @@ export const AdminDashboard: React.FC = () => {
             >
               <span className="nav-icon">📅</span>
               Calendario
+            </button>
+            <button
+              className={`nav-item ${activeTab === 'preferencias' ? 'active' : ''}`}
+              onClick={() => setActiveTab('preferencias')}
+            >
+              <span className="nav-icon">❤️</span>
+              Preferencias
+            </button>
+            <button
+              className={`nav-item ${activeTab === 'vacaciones' ? 'active' : ''}`}
+              onClick={() => setActiveTab('vacaciones')}
+            >
+              <span className="nav-icon">🏖️</span>
+              Vacaciones
             </button>
             <button
               className={`nav-item ${activeTab === 'notificaciones' ? 'active' : ''}`}

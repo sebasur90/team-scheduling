@@ -24,7 +24,15 @@ export interface TareaEspecialTipoUpdate {
   hora_fin?: string
 }
 
+export interface TareaEspecialAsignacion {
+  fecha: string
+  tarea_especial_tipo_id: number
+  colaborador_id: number
+}
+
 export const tareasEspecialesApi = {
+  getTipos: () =>
+    client.get<TareaEspecialTipo[]>('/tareas-especiales/tipos'),
   listTipos: () =>
     client.get<TareaEspecialTipo[]>('/tareas-especiales/tipos'),
   createTipo: (data: TareaEspecialTipoCreate) =>
@@ -33,4 +41,8 @@ export const tareasEspecialesApi = {
     client.put<TareaEspecialTipo>(`/tareas-especiales/tipos/${id}`, data),
   deleteTipo: (id: number) =>
     client.delete(`/tareas-especiales/tipos/${id}`),
+  asignar: (data: TareaEspecialAsignacion) =>
+    client.post('/tareas-especiales/asignaciones', data),
+  desasignar: (tarea_id: number, fecha: string) =>
+    client.delete(`/tareas-especiales/asignaciones/${tarea_id}/${fecha}`),
 }
