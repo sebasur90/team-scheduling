@@ -221,10 +221,11 @@ export const CalendarView: React.FC = () => {
       <div className="turno-pills">
         {turno.asignaciones.map((a, idx) => {
           const sector = sectores.get(a.colaborador.sector_id)
+          const isCurrentUser = user && a.colaborador.id === user.id
           return (
             <span
               key={idx}
-              className="pill"
+              className={`pill ${isCurrentUser ? 'current-user' : ''}`}
               style={{
                 backgroundColor: sector?.color || '#999',
                 color: 'white'
@@ -251,8 +252,9 @@ export const CalendarView: React.FC = () => {
         {Array.from(colabIds).map((colabId, idx) => {
           const colab = colaboradores.get(colabId)
           const nombre = colab ? colab.nombre.split(' ')[0] : `Col. ${colabId}`
+          const isCurrentUser = user && colabId === user.id
           return (
-            <span key={idx} className="pill pill-vacation" title={colab?.nombre}>
+            <span key={idx} className={`pill pill-vacation ${isCurrentUser ? 'current-user' : ''}`} title={colab?.nombre}>
               {nombre}
             </span>
           )
