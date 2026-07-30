@@ -8,6 +8,7 @@ import { turnosApi, type TurnoListResponse, type TurnoAlmuerzoResponse } from '.
 import { diasNolaborablesApi, type DiaNoLaborable, type DiaNoLaborableCreate } from '../api/diasNolaborables';
 import { tareasEspecialesApi, type TareaEspecialTipo } from '../api/tareasEspeciales';
 import { ConfiguracionCobertura } from './ConfiguracionCobertura';
+import { NotificacionesConfig } from './NotificacionesConfig';
 import { Vacaciones } from './Vacaciones';
 import { Colaborador } from '../api/auth';
 import client from '../api/client';
@@ -27,10 +28,14 @@ interface DeleteTurnoModalState {
   turno: TurnoAlmuerzoResponse;
 }
 
-export function AdminPanel() {
+interface AdminPanelProps {
+  activeTab?: Tab;
+}
+
+export function AdminPanel({ activeTab = 'colaboradores' }: AdminPanelProps) {
   const { user } = useAuthContext();
   const { incidencias, loading: incidenciasLoading, error: incidenciasError } = useIncidencias();
-  const [activeTab, setActiveTab] = useState<Tab>('colaboradores');
+  const setActiveTab = () => {};
   const [selectedIncidencia, setSelectedIncidencia] = useState<IncidenciaData | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
 
@@ -82,6 +87,7 @@ export function AdminPanel() {
   const [editingFranjaData, setEditingFranjaData] = useState<Partial<FranjaCreate> | null>(null);
 
   // Tareas Especiales state
+  const [tareasLoading, setTareasLoading] = useState(true);
   const [showTareaForm, setShowTareaForm] = useState(false);
   const [tareaFormError, setTareaFormError] = useState<string | null>(null);
   const [tareaFormLoading, setTareaFormLoading] = useState(false);
@@ -134,20 +140,26 @@ export function AdminPanel() {
     return null;
   }
 
-  // Load colaboradores and tareas especiales
+  // Load colaboradores
   useEffect(() => {
-    if (activeTab === 'colaboradores' || activeTab === 'asignacion') {
+    if (activeTab === 'colaboradores' || activeTab === 'asignacion' || activeTab === 'preferencias') {
       colaboradoresApi
         .list()
         .then((res) => setColaboradores(res.data))
         .catch(() => setColaboradores([]))
         .finally(() => setColabLoading(false));
+    }
+  }, [activeTab]);
 
-      // Load tareas especiales
+  // Load tareas especiales
+  useEffect(() => {
+    if (activeTab === 'colaboradores' || activeTab === 'tareas-especiales' || activeTab === 'asignacion') {
+      setTareasLoading(true);
       tareasEspecialesApi
         .listTipos()
         .then((res) => setTareasEspeciales(res.data))
-        .catch(() => setTareasEspeciales([]));
+        .catch(() => setTareasEspeciales([]))
+        .finally(() => setTareasLoading(false));
     }
   }, [activeTab]);
 
@@ -164,7 +176,7 @@ export function AdminPanel() {
 
   // Load franjas
   useEffect(() => {
-    if (activeTab === 'franjas') {
+    if (activeTab === 'franjas' || activeTab === 'preferencias') {
       franjasApi
         .list()
         .then((res) => setFranjas(res.data.sort((a, b) => a.orden - b.orden)))
@@ -804,71 +816,6 @@ export function AdminPanel() {
 
   return (
     <div className="admin-panel">
-      <h2>Panel de Admin</h2>
-
-      <div className="admin-tabs">
-        <button
-          className={`tab-button ${activeTab === 'colaboradores' ? 'active' : ''}`}
-          onClick={() => setActiveTab('colaboradores')}
-        >
-          Colaboradores
-        </button>
-        <button
-          className={`tab-button ${activeTab === 'sectores' ? 'active' : ''}`}
-          onClick={() => setActiveTab('sectores')}
-        >
-          Sectores
-        </button>
-        <button
-          className={`tab-button ${activeTab === 'franjas' ? 'active' : ''}`}
-          onClick={() => setActiveTab('franjas')}
-        >
-          Franjas
-        </button>
-        <button
-          className={`tab-button ${activeTab === 'tareas-especiales' ? 'active' : ''}`}
-          onClick={() => setActiveTab('tareas-especiales')}
-        >
-          Tareas Especiales
-        </button>
-        <button
-          className={`tab-button ${activeTab === 'asignacion' ? 'active' : ''}`}
-          onClick={() => setActiveTab('asignacion')}
-        >
-          Asignación de Turnos
-        </button>
-        <button
-          className={`tab-button ${activeTab === 'dias-no-laborables' ? 'active' : ''}`}
-          onClick={() => setActiveTab('dias-no-laborables')}
-        >
-          Días no laborables
-        </button>
-        <button
-          className={`tab-button ${activeTab === 'vacaciones' ? 'active' : ''}`}
-          onClick={() => setActiveTab('vacaciones')}
-        >
-          🏖️ Vacaciones
-        </button>
-        <button
-          className={`tab-button ${activeTab === 'preferencias' ? 'active' : ''}`}
-          onClick={() => setActiveTab('preferencias')}
-        >
-          Preferencias
-        </button>
-        <button
-          className={`tab-button ${activeTab === 'configuracion' ? 'active' : ''}`}
-          onClick={() => setActiveTab('configuracion')}
-        >
-          ⚙️ Configuración
-        </button>
-        <button
-          className={`tab-button ${activeTab === 'incidencias' ? 'active' : ''}`}
-          onClick={() => setActiveTab('incidencias')}
-        >
-          Incidencias
-        </button>
-      </div>
-
       {/* COLABORADORES TAB */}
       {activeTab === 'colaboradores' && (
         <div className="admin-tab-content">
@@ -1038,7 +985,7 @@ export function AdminPanel() {
                     return (
                       <tr key={colab.id}>
                         <td>{colab.nombre}</td>
-                        <td>{getSectorName(colab.sector_id)}</td>
+                        <td>{colab.sector_nombre || getSectorName(colab.sector_id)}</td>
                         <td>{colab.rol}</td>
                         <td>{colab.estado_atencion}</td>
                         <td>{tareasHabilitadas || '–'}</td>
@@ -1481,7 +1428,7 @@ export function AdminPanel() {
             </form>
           )}
 
-          {colabLoading ? (
+          {tareasLoading ? (
             <div className="loading">Cargando tareas especiales...</div>
           ) : tareasEspeciales.length === 0 ? (
             <div className="empty-state">No hay tareas especiales creadas</div>
@@ -1600,7 +1547,7 @@ export function AdminPanel() {
                             className={`chip chip--${state}`}
                             onClick={() => handleChipClick(colab, turno)}
                             disabled={operationLoading || state === 'disabled'}
-                            title={`${colab.nombre} - ${getSectorName(colab.sector_id)}`}
+                            title={`${colab.nombre} - ${colab.sector_nombre || getSectorName(colab.sector_id)}`}
                           >
                             <span className="chip__icon">
                               {state === 'assigned' && '✓'}
@@ -1609,7 +1556,7 @@ export function AdminPanel() {
                             </span>
                             <span className="chip__text">
                               <span className="chip__name">{colab.nombre}</span>
-                              <span className="chip__sector">{getSectorName(colab.sector_id)}</span>
+                              <span className="chip__sector">{colab.sector_nombre || getSectorName(colab.sector_id)}</span>
                             </span>
                           </button>
                         );
@@ -1632,12 +1579,12 @@ export function AdminPanel() {
               <div className="modal" onClick={(e) => e.stopPropagation()}>
                 <h3>⚠️ Superposición de funciones</h3>
                 <p>
-                  <strong>{overrideModal.colaborador.nombre}</strong> es <strong>{getSectorName(overrideModal.colaborador.sector_id)}</strong> y ya hay un{' '}
-                  <strong>{getSectorName(overrideModal.colaborador.sector_id)}</strong> asignado en esta franja (
+                  <strong>{overrideModal.colaborador.nombre}</strong> es <strong>{overrideModal.colaborador.sector_nombre || getSectorName(overrideModal.colaborador.sector_id)}</strong> y ya hay un{' '}
+                  <strong>{overrideModal.colaborador.sector_nombre || getSectorName(overrideModal.colaborador.sector_id)}</strong> asignado en esta franja (
                   <strong>{overrideModal.conflictingColaborador.nombre}</strong>).
                   <br />
                   <br />
-                  La función <strong>{getSectorName(overrideModal.colaborador.sector_id)}</strong> quedaría sin cobertura durante este turno. ¿Igualmente asignar?
+                  La función <strong>{overrideModal.colaborador.sector_nombre || getSectorName(overrideModal.colaborador.sector_id)}</strong> quedaría sin cobertura durante este turno. ¿Igualmente asignar?
                 </p>
                 <div className="modal-actions">
                   <button
@@ -1800,7 +1747,7 @@ export function AdminPanel() {
           <div className="tab-header">
             <h3>Preferencias de Franja</h3>
           </div>
-          {colabLoading ? (
+          {colabLoading || franjasLoading ? (
             <div>Cargando...</div>
           ) : (
             <>
@@ -1836,7 +1783,7 @@ export function AdminPanel() {
                       return (
                         <tr key={colab.id}>
                           <td>{colab.nombre}</td>
-                          <td>{getSectorName(colab.sector_id)}</td>
+                          <td>{colab.sector_nombre || getSectorName(colab.sector_id)}</td>
                           <td>
                             {franjaPreferida
                               ? `${franjaPreferida.hora_inicio.slice(0, 5)} – ${franjaPreferida.hora_fin.slice(0, 5)}`
@@ -1856,7 +1803,14 @@ export function AdminPanel() {
       {/* CONFIGURACION TAB */}
       {activeTab === 'configuracion' && (
         <div className="admin-tab-content">
-          <ConfiguracionCobertura />
+          <div style={{ marginBottom: '40px' }}>
+            <h3>Configuración de Cobertura</h3>
+            <ConfiguracionCobertura />
+          </div>
+          <div style={{ borderTop: '1px solid #ddd', paddingTop: '40px' }}>
+            <h3>Configuración de Notificaciones</h3>
+            <NotificacionesConfig />
+          </div>
         </div>
       )}
 
