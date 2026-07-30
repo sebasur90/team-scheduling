@@ -247,9 +247,10 @@ def _persist_day_assignments(
         cronograma: Dict mapping franja_orden (int) -> [colaborador_ids]
         puntajes_actualizados: Dict mapping colaborador_id -> new puntaje
     """
-    # Get all franjas to map orden to franja_id
+    # Get all franjas to map orden to franja_id and capacidad
     franjas = db.query(FranjaHoraria).all()
     franja_map = {f.orden - 1: f.id for f in franjas}  # Convert orden to 0-based index
+    franja_capacity_map = {f.orden - 1: f.capacidad_maxima for f in franjas}
 
     # Clean any existing turnos for this date (in case of re-generation)
     _clean_orphaned_shifts(db, fecha)
@@ -260,12 +261,13 @@ def _persist_day_assignments(
             continue
 
         franja_id = franja_map[franja_orden]
+        capacidad = franja_capacity_map.get(franja_orden, 2)
 
         # Create turno
         turno = TurnoAlmuerzo(
             fecha=fecha,
             franja_horaria_id=franja_id,
-            capacidad_maxima=2,
+            capacidad_maxima=capacidad,
         )
         db.add(turno)
         db.flush()

@@ -251,11 +251,15 @@ class AssignmentEngine:
         Phase 2: Fill remaining unassigned people into available franjas with slot rotation.
         Uses franja history to assign each person to the slot they haven't eaten in most recently.
         """
+        # Load franja capacities
+        franjas_info = self.db.query(FranjaHoraria).order_by(FranjaHoraria.orden).all()
+        franja_capacities = {f.orden - 1: f.capacidad_maxima for f in franjas_info}
+
         # Find who's still unassigned
         asignados_ids = {a.colaborador_id for a in asignaciones_phase1 if a.estado_concesion == "otorgado"}
         unassigned = [c for c in context.pool_disponible if c.id not in asignados_ids]
 
-        # Count capacity per franja (assume max 2 per slot)
+        # Count capacity per franja
         asignaciones = asignaciones_phase1.copy()
         asignados_por_franja = {}
         for a in asignaciones:
@@ -278,10 +282,11 @@ class AssignmentEngine:
             if not allowed_franjas:
                 continue  # Skip if no allowed franjas
 
-            # Filter to only franjas with capacity (max 2 per slot)
+            # Filter to only franjas with capacity
+            capacity_map = franja_capacities
             available_with_capacity = [
                 f for f in allowed_franjas
-                if f not in asignados_por_franja or len(asignados_por_franja[f]) < 2
+                if f not in asignados_por_franja or len(asignados_por_franja[f]) < capacity_map.get(f, 2)
             ]
 
             if available_with_capacity:

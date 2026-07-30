@@ -23,13 +23,15 @@ def init_admin():
     try:
         ADMIN_EMAIL = "sebassur90@gmail.com"
 
-        # Get or create "operativo" sector
-        sector = session.query(Sector).filter(Sector.nombre == "operativo").first()
+        # Get or create "Operativo" sector (case-insensitive)
+        sector = session.query(Sector).filter(
+            Sector.nombre.ilike("operativo")
+        ).first()
         if not sector:
-            sector = Sector(nombre="operativo", capacidad_maxima=10)
+            sector = Sector(nombre="Operativo", capacidad_maxima=10)
             session.add(sector)
             session.commit()
-            print(f"✓ Created 'operativo' sector")
+            print(f"✓ Created 'Operativo' sector")
 
         # Check if admin already exists
         admin = session.query(Colaborador).filter(Colaborador.email == ADMIN_EMAIL).first()
