@@ -5,11 +5,12 @@ import { NotificacionesConfig } from './NotificacionesConfig'
 import { SectoresPanel } from './SectoresPanel'
 import { TareasEspecialesPanel } from './TareasEspecialesPanel'
 import { Preferences } from './Preferences'
+import { PreferenciasUsuarios } from './PreferenciasUsuarios'
 import { Vacaciones } from './Vacaciones'
 import { ConfiguracionPanel } from './ConfiguracionPanel'
 import './AdminDashboard.css'
 
-type TabType = 'inicio' | 'colaboradores' | 'tareas' | 'sectores' | 'calendario' | 'preferencias' | 'vacaciones' | 'notificaciones' | 'configuracion'
+type TabType = 'inicio' | 'colaboradores' | 'tareas' | 'sectores' | 'calendario' | 'preferencias' | 'preferencias-usuarios' | 'vacaciones' | 'notificaciones' | 'configuracion'
 
 export const AdminDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabType>('inicio')
@@ -69,6 +70,12 @@ export const AdminDashboard: React.FC = () => {
         return (
           <div className="dashboard-section">
             <Preferences />
+          </div>
+        )
+      case 'preferencias-usuarios':
+        return (
+          <div className="dashboard-section">
+            <PreferenciasUsuarios />
           </div>
         )
       case 'vacaciones':
@@ -143,7 +150,14 @@ export const AdminDashboard: React.FC = () => {
               onClick={() => setActiveTab('preferencias')}
             >
               <span className="nav-icon">❤️</span>
-              Preferencias
+              Mi Preferencia
+            </button>
+            <button
+              className={`nav-item ${activeTab === 'preferencias-usuarios' ? 'active' : ''}`}
+              onClick={() => setActiveTab('preferencias-usuarios')}
+            >
+              <span className="nav-icon">📋</span>
+              Preferencias de Usuarios
             </button>
             <button
               className={`nav-item ${activeTab === 'vacaciones' ? 'active' : ''}`}

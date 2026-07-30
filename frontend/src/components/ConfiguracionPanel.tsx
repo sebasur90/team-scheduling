@@ -1,10 +1,9 @@
 import React, { useState } from 'react'
 import { ConfiguracionCobertura } from './ConfiguracionCobertura'
 import { NotificacionesConfig } from './NotificacionesConfig'
-import { PreferenciasUsuarios } from './PreferenciasUsuarios'
 import './ConfiguracionPanel.css'
 
-type ConfigTab = 'cobertura' | 'notificaciones' | 'preferencias'
+type ConfigTab = 'cobertura' | 'notificaciones'
 
 export const ConfiguracionPanel: React.FC = () => {
   const [activeTab, setActiveTab] = useState<ConfigTab>('cobertura')
@@ -26,12 +25,6 @@ export const ConfiguracionPanel: React.FC = () => {
         >
           🔔 Notificaciones
         </button>
-        <button
-          className={`tab-button ${activeTab === 'preferencias' ? 'active' : ''}`}
-          onClick={() => setActiveTab('preferencias')}
-        >
-          ❤️ Preferencias de Usuarios
-        </button>
       </div>
 
       <div className="config-content">
@@ -43,11 +36,6 @@ export const ConfiguracionPanel: React.FC = () => {
         {activeTab === 'notificaciones' && (
           <div className="config-section">
             <NotificacionesConfig />
-          </div>
-        )}
-        {activeTab === 'preferencias' && (
-          <div className="config-section">
-            <PreferenciasUsuarios />
           </div>
         )}
       </div>
