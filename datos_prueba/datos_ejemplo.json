@@ -1,0 +1,279 @@
+{
+  "sectores": [
+    {
+      "nombre": "Operativo",
+      "capacidad_maxima": 10,
+      "minimo_cobertura": 2,
+      "participa_almuerzo": true,
+      "color": "#22c55e",
+      "acceso_rol": "gestion"
+    },
+    {
+      "nombre": "Comercial",
+      "capacidad_maxima": 10,
+      "minimo_cobertura": 3,
+      "participa_almuerzo": true,
+      "color": "#f97316",
+      "acceso_rol": "gestion"
+    },
+    {
+      "nombre": "Gerencial",
+      "capacidad_maxima": 10,
+      "minimo_cobertura": 1,
+      "participa_almuerzo": false,
+      "color": "#3b82f6",
+      "acceso_rol": "viewer"
+    }
+  ],
+  "franjas_horarias": [
+    {
+      "orden": 1,
+      "hora_inicio": "12:00",
+      "hora_fin": "12:45",
+      "capacidad_maxima": 3
+    },
+    {
+      "orden": 2,
+      "hora_inicio": "12:30",
+      "hora_fin": "13:15",
+      "capacidad_maxima": 3
+    },
+    {
+      "orden": 3,
+      "hora_inicio": "13:00",
+      "hora_fin": "13:45",
+      "capacidad_maxima": 3
+    },
+    {
+      "orden": 4,
+      "hora_inicio": "13:30",
+      "hora_fin": "14:15",
+      "capacidad_maxima": 3
+    },
+    {
+      "orden": 5,
+      "hora_inicio": "14:00",
+      "hora_fin": "14:45",
+      "capacidad_maxima": 3
+    }
+  ],
+  "colaboradores": [
+    {
+      "nombre": "Juan García",
+      "email": "operativo.colaborador1@company.com",
+      "sector": "Operativo",
+      "rol": "usuario",
+      "estado_atencion": "activo",
+      "puntaje_prioridad": 0,
+      "franja_preferida": 2
+    },
+    {
+      "nombre": "María López",
+      "email": "operativo.colaborador2@company.com",
+      "sector": "Operativo",
+      "rol": "usuario",
+      "estado_atencion": "activo",
+      "puntaje_prioridad": 0,
+      "franja_preferida": 4
+    },
+    {
+      "nombre": "Carlos Rodríguez",
+      "email": "operativo.colaborador3@company.com",
+      "sector": "Operativo",
+      "rol": "usuario",
+      "estado_atencion": "activo",
+      "puntaje_prioridad": 0,
+      "franja_preferida": 3
+    },
+    {
+      "nombre": "Ana Martínez",
+      "email": "operativo.colaborador4@company.com",
+      "sector": "Operativo",
+      "rol": "usuario",
+      "estado_atencion": "activo",
+      "puntaje_prioridad": 0,
+      "franja_preferida": 4
+    },
+    {
+      "nombre": "Pedro Fernández",
+      "email": "operativo.colaborador5@company.com",
+      "sector": "Operativo",
+      "rol": "usuario",
+      "estado_atencion": "activo",
+      "puntaje_prioridad": 0,
+      "franja_preferida": 1
+    },
+    {
+      "nombre": "Laura Sánchez",
+      "email": "operativo.colaborador6@company.com",
+      "sector": "Operativo",
+      "rol": "usuario",
+      "estado_atencion": "activo",
+      "puntaje_prioridad": 0,
+      "franja_preferida": 4
+    },
+    {
+      "nombre": "Roberto Díaz",
+      "email": "operativo.colaborador7@company.com",
+      "sector": "Operativo",
+      "rol": "usuario",
+      "estado_atencion": "activo",
+      "puntaje_prioridad": 0,
+      "franja_preferida": 3
+    },
+    {
+      "nombre": "Andrea Gutiérrez",
+      "email": "comercial.colaborador1@company.com",
+      "sector": "Comercial",
+      "rol": "usuario",
+      "estado_atencion": "activo",
+      "puntaje_prioridad": 0,
+      "franja_preferida": 4
+    },
+    {
+      "nombre": "Diego Morales",
+      "email": "comercial.colaborador2@company.com",
+      "sector": "Comercial",
+      "rol": "usuario",
+      "estado_atencion": "activo",
+      "puntaje_prioridad": 0,
+      "franja_preferida": 4
+    },
+    {
+      "nombre": "Sofia Reyes",
+      "email": "comercial.colaborador3@company.com",
+      "sector": "Comercial",
+      "rol": "usuario",
+      "estado_atencion": "activo",
+      "puntaje_prioridad": 0,
+      "franja_preferida": 1
+    },
+    {
+      "nombre": "Alejandro Peña",
+      "email": "comercial.colaborador4@company.com",
+      "sector": "Comercial",
+      "rol": "usuario",
+      "estado_atencion": "activo",
+      "puntaje_prioridad": 0,
+      "franja_preferida": 1
+    },
+    {
+      "nombre": "Catalina Torres",
+      "email": "comercial.colaborador5@company.com",
+      "sector": "Comercial",
+      "rol": "usuario",
+      "estado_atencion": "activo",
+      "puntaje_prioridad": 0,
+      "franja_preferida": 3
+    },
+    {
+      "nombre": "Miguel Castro",
+      "email": "comercial.colaborador6@company.com",
+      "sector": "Comercial",
+      "rol": "usuario",
+      "estado_atencion": "activo",
+      "puntaje_prioridad": 0,
+      "franja_preferida": 2
+    },
+    {
+      "nombre": "Valentina Ruiz",
+      "email": "comercial.colaborador7@company.com",
+      "sector": "Comercial",
+      "rol": "usuario",
+      "estado_atencion": "activo",
+      "puntaje_prioridad": 0,
+      "franja_preferida": 2
+    },
+    {
+      "nombre": "Fernando Molina",
+      "email": "gerencial.colaborador1@company.com",
+      "sector": "Gerencial",
+      "rol": "usuario",
+      "estado_atencion": "activo",
+      "puntaje_prioridad": 0,
+      "franja_preferida": 2
+    },
+    {
+      "nombre": "Isabel Navarro",
+      "email": "gerencial.colaborador2@company.com",
+      "sector": "Gerencial",
+      "rol": "usuario",
+      "estado_atencion": "activo",
+      "puntaje_prioridad": 0,
+      "franja_preferida": 1
+    },
+    {
+      "nombre": "Gonzalo Flores",
+      "email": "gerencial.colaborador3@company.com",
+      "sector": "Gerencial",
+      "rol": "usuario",
+      "estado_atencion": "activo",
+      "puntaje_prioridad": 0,
+      "franja_preferida": 3
+    },
+    {
+      "nombre": "Roxana Acosta",
+      "email": "gerencial.colaborador4@company.com",
+      "sector": "Gerencial",
+      "rol": "usuario",
+      "estado_atencion": "activo",
+      "puntaje_prioridad": 0,
+      "franja_preferida": 4
+    },
+    {
+      "nombre": "Eduardo Rojas",
+      "email": "gerencial.colaborador5@company.com",
+      "sector": "Gerencial",
+      "rol": "usuario",
+      "estado_atencion": "activo",
+      "puntaje_prioridad": 0,
+      "franja_preferida": 2
+    },
+    {
+      "nombre": "Marcela Vargas",
+      "email": "gerencial.colaborador6@company.com",
+      "sector": "Gerencial",
+      "rol": "usuario",
+      "estado_atencion": "activo",
+      "puntaje_prioridad": 0,
+      "franja_preferida": 1
+    },
+    {
+      "nombre": "Cristian Bravo",
+      "email": "gerencial.colaborador7@company.com",
+      "sector": "Gerencial",
+      "rol": "usuario",
+      "estado_atencion": "activo",
+      "puntaje_prioridad": 0,
+      "franja_preferida": 4
+    }
+  ],
+  "tareas_especiales": [
+    {
+      "nombre": "Gandulfo",
+      "dias_semana": [
+        0,
+        2
+      ],
+      "hora_inicio": "09:00",
+      "hora_fin": "13:00",
+      "descripcion": "Tarea especial de Gandulfo"
+    },
+    {
+      "nombre": "Municipalidad",
+      "dias_semana": [
+        1
+      ],
+      "hora_inicio": "10:00",
+      "hora_fin": "14:00",
+      "descripcion": "Tarea especial de Municipalidad"
+    }
+  ],
+  "metadata": {
+    "fecha_generacion": "2026-07-30T11:34:23.812604",
+    "descripcion": "Datos de prueba generados automáticamente para el sistema de planificación de almuerzos",
+    "total_colaboradores": 21,
+    "total_sectores": 3,
+    "franjas_por_dia": 4
+  }
+}

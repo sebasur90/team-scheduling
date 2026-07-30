@@ -1,0 +1,13 @@
+[project]
+name = "datos-prueba-loader"
+version = "1.0.0"
+description = "Data loader para el sistema de planificación de almuerzos"
+requires-python = ">=3.9"
+dependencies = [
+    "sqlalchemy==2.0.23",
+    "psycopg2-binary==2.9.9",
+    "python-dotenv==1.0.0",
+]
+
+[tool.uv]
+# Configuración para uv

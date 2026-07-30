@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { AdminPanel } from './AdminPanel'
 import { CalendarView } from './CalendarView'
 import { NotificacionesConfig } from './NotificacionesConfig'
+import { SectoresPanel } from './SectoresPanel'
 import './AdminDashboard.css'
 
 type TabType = 'inicio' | 'colaboradores' | 'tareas' | 'sectores' | 'calendario' | 'notificaciones' | 'configuracion'
@@ -52,8 +53,7 @@ export const AdminDashboard: React.FC = () => {
       case 'sectores':
         return (
           <div className="dashboard-section">
-            <h2>Sectores</h2>
-            <p className="placeholder-text">Próximamente en Fase 3</p>
+            <SectoresPanel />
           </div>
         )
       case 'calendario':
