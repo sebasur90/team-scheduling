@@ -3,6 +3,7 @@ import { turnosApi, TurnoAlmuerzoResponse } from '../api/turnos'
 import { franjasApi, FranjaHoraria } from '../api/franjas'
 import { diasNolaborablesApi } from '../api/diasNolaborables'
 import { ausenciasApi, Ausencia } from '../api/ausencias'
+import { sectoresApi, type Sector } from '../api/sectores'
 import { useAuthContext } from '../contexts/AuthContext'
 import './CalendarView.css'
 
@@ -24,6 +25,7 @@ export const CalendarView: React.FC = () => {
   const [diasNoLaborables, setDiasNoLaborables] = useState<Set<string>>(new Set())
   const [vacaciones, setVacaciones] = useState<Map<string, Ausencia[]>>(new Map())
   const [colaboradores, setColaboradores] = useState<Map<number, Colaborador>>(new Map())
+  const [sectores, setSectores] = useState<Map<number, Sector>>(new Map())
   const [isLoading, setIsLoading] = useState(true)
   const [showDiaNoLaborableModal, setShowDiaNoLaborableModal] = useState<string | null>(null)
   const [diaNoLaborableMotivo, setDiaNoLaborableMotivo] = useState('')
@@ -56,6 +58,12 @@ export const CalendarView: React.FC = () => {
       try {
         const franjasRes = await franjasApi.list()
         setFranjas(franjasRes.data.sort((a, b) => a.orden - b.orden))
+
+        // Load sectores for color mapping
+        const sectoresRes = await sectoresApi.list()
+        const sectoresMap = new Map<number, Sector>()
+        sectoresRes.data.forEach(s => sectoresMap.set(s.id, s))
+        setSectores(sectoresMap)
 
         // Load colaboradores for name mapping
         const colabsRes = await colaboradoresApi.list()
@@ -126,24 +134,19 @@ export const CalendarView: React.FC = () => {
 
   const handleGenerarSemana = async () => {
     try {
-      setIsLoading(true)
+      setIsGenerating(true)
       const monday = getMonday(new Date(selectedWeekMonday))
       const mondayFormatted = formatDate(monday)
-      console.log('📅 Generando semana para:', mondayFormatted)
-      console.log('   Día de semana:', monday.getDay(), '(0=dom, 1=lun)')
-      console.log('   selectedWeekMonday:', selectedWeekMonday)
 
       const response = await turnosApi.generateWeek(mondayFormatted)
-      console.log('✅ Respuesta de generación:', response.data)
-      console.log('   Turnos generados:', response.data.turnos_generados?.length || 0)
-      console.log('   Días con error:', response.data.dias_con_error)
-      console.log('   Mensaje:', response.data.mensaje)
 
-      if (response.data.dias_con_error?.length > 0) {
-        alert('⚠️ Generación con errores:\n' + JSON.stringify(response.data.dias_con_error, null, 2))
-      } else {
-        alert('✅ Semana generada: ' + response.data.mensaje)
-      }
+      setGenerationResult({
+        status: response.data.status,
+        message: response.data.mensaje,
+        dias_con_advertencia: response.data.dias_con_advertencia || [],
+        dias_con_error: response.data.dias_con_error || [],
+        dias_salteados: response.data.dias_salteados || [],
+      })
 
       // Reload calendar after generation
       const turnosMap = new Map<string, TurnoAlmuerzoResponse>()
@@ -154,30 +157,28 @@ export const CalendarView: React.FC = () => {
         weekDays.push(date)
       }
 
-      console.log('📥 Recargando datos para:', weekDays.map(d => formatDate(d)))
-
       await Promise.all(
         weekDays.map(async (date) => {
           const dateStr = formatDate(date)
-          console.log('  Leyendo turnos para:', dateStr)
           const res = await turnosApi.list(dateStr)
-          console.log('    Respuesta:', res.data.franjas.length, 'franjas')
           res.data.franjas.forEach((turno) => {
             turnosMap.set(`${dateStr}-${turno.franja_horaria_id}`, turno)
-            console.log(`      Turno: ${dateStr}-${turno.franja_horaria_id} = ${turno.asignaciones.length} asignaciones`)
           })
         })
       )
 
-      console.log('Total turnos en mapa:', turnosMap.size)
       setTurnos(turnosMap)
     } catch (error: any) {
-      console.error('❌ Error generating week:', error)
-      console.error('Response data:', error.response?.data)
-      console.error('Message:', error.message)
-      alert('❌ Error: ' + (error.response?.data?.detail || error.message || 'Error desconocido'))
+      console.error('Error generating week:', error)
+      setGenerationResult({
+        status: 'error',
+        message: 'Error al generar la semana',
+        dias_con_advertencia: [],
+        dias_con_error: [{ fecha: '', error: error.response?.data?.detail || error.message || 'Error desconocido' }],
+        dias_salteados: [],
+      })
     } finally {
-      setIsLoading(false)
+      setIsGenerating(false)
     }
   }
 
@@ -218,15 +219,22 @@ export const CalendarView: React.FC = () => {
     }
     return (
       <div className="turno-pills">
-        {turno.asignaciones.map((a, idx) => (
-          <span
-            key={idx}
-            className={`pill pill-${a.colaborador.sector_id}`}
-            title={a.colaborador.nombre}
-          >
-            {a.colaborador.nombre.split(' ')[0]}
-          </span>
-        ))}
+        {turno.asignaciones.map((a, idx) => {
+          const sector = sectores.get(a.colaborador.sector_id)
+          return (
+            <span
+              key={idx}
+              className="pill"
+              style={{
+                backgroundColor: sector?.color || '#999',
+                color: 'white'
+              }}
+              title={a.colaborador.nombre}
+            >
+              {a.colaborador.nombre.split(' ')[0]}
+            </span>
+          )
+        })}
       </div>
     )
   }
@@ -612,14 +620,22 @@ export const CalendarView: React.FC = () => {
           <div className="legend-box">—</div>
           <span>Sin turnos generados</span>
         </div>
-        <div className="legend-item">
-          <div className="legend-box pill pill-tipo_a">Tipo A</div>
-          <span>Sector Tipo A</span>
-        </div>
-        <div className="legend-item">
-          <div className="legend-box pill pill-tipo_b">Tipo B</div>
-          <span>Sector Tipo B</span>
-        </div>
+        {Array.from(sectores.values()).map((sector) => (
+          <div key={sector.id} className="legend-item">
+            <div
+              className="legend-box pill"
+              style={{
+                backgroundColor: sector.color,
+                color: 'white',
+                borderRadius: '12px',
+                border: 'none'
+              }}
+            >
+              {sector.nombre.substring(0, 3)}
+            </div>
+            <span>{sector.nombre}</span>
+          </div>
+        ))}
         <div className="legend-item">
           <div className="legend-box pill pill-vacation">Vac</div>
           <span>De vacaciones</span>

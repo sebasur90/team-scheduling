@@ -96,7 +96,7 @@ export const PreferenciasUsuarios: React.FC = () => {
                 <tr key={colab.id} className={editingId === colab.id ? 'editing' : ''}>
                   <td>{colab.nombre}</td>
                   <td>{colab.email}</td>
-                  <td>{colab.sector?.nombre || 'N/A'}</td>
+                  <td>{colab.sector_nombre || 'N/A'}</td>
                   <td>
                     {editingId === colab.id ? (
                       <select
