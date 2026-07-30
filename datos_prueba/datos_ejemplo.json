@@ -65,7 +65,7 @@
       "rol": "usuario",
       "estado_atencion": "activo",
       "puntaje_prioridad": 0,
-      "franja_preferida": 2
+      "franja_preferida": 4
     },
     {
       "nombre": "María López",
@@ -74,7 +74,7 @@
       "rol": "usuario",
       "estado_atencion": "activo",
       "puntaje_prioridad": 0,
-      "franja_preferida": 4
+      "franja_preferida": 2
     },
     {
       "nombre": "Carlos Rodríguez",
@@ -83,7 +83,7 @@
       "rol": "usuario",
       "estado_atencion": "activo",
       "puntaje_prioridad": 0,
-      "franja_preferida": 3
+      "franja_preferida": 4
     },
     {
       "nombre": "Ana Martínez",
@@ -92,7 +92,7 @@
       "rol": "usuario",
       "estado_atencion": "activo",
       "puntaje_prioridad": 0,
-      "franja_preferida": 4
+      "franja_preferida": 2
     },
     {
       "nombre": "Pedro Fernández",
@@ -101,7 +101,7 @@
       "rol": "usuario",
       "estado_atencion": "activo",
       "puntaje_prioridad": 0,
-      "franja_preferida": 1
+      "franja_preferida": 2
     },
     {
       "nombre": "Laura Sánchez",
@@ -110,7 +110,7 @@
       "rol": "usuario",
       "estado_atencion": "activo",
       "puntaje_prioridad": 0,
-      "franja_preferida": 4
+      "franja_preferida": 1
     },
     {
       "nombre": "Roberto Díaz",
@@ -119,7 +119,7 @@
       "rol": "usuario",
       "estado_atencion": "activo",
       "puntaje_prioridad": 0,
-      "franja_preferida": 3
+      "franja_preferida": 4
     },
     {
       "nombre": "Andrea Gutiérrez",
@@ -128,7 +128,7 @@
       "rol": "usuario",
       "estado_atencion": "activo",
       "puntaje_prioridad": 0,
-      "franja_preferida": 4
+      "franja_preferida": 3
     },
     {
       "nombre": "Diego Morales",
@@ -137,7 +137,7 @@
       "rol": "usuario",
       "estado_atencion": "activo",
       "puntaje_prioridad": 0,
-      "franja_preferida": 4
+      "franja_preferida": 3
     },
     {
       "nombre": "Sofia Reyes",
@@ -146,7 +146,7 @@
       "rol": "usuario",
       "estado_atencion": "activo",
       "puntaje_prioridad": 0,
-      "franja_preferida": 1
+      "franja_preferida": 2
     },
     {
       "nombre": "Alejandro Peña",
@@ -155,7 +155,7 @@
       "rol": "usuario",
       "estado_atencion": "activo",
       "puntaje_prioridad": 0,
-      "franja_preferida": 1
+      "franja_preferida": 4
     },
     {
       "nombre": "Catalina Torres",
@@ -164,7 +164,7 @@
       "rol": "usuario",
       "estado_atencion": "activo",
       "puntaje_prioridad": 0,
-      "franja_preferida": 3
+      "franja_preferida": 2
     },
     {
       "nombre": "Miguel Castro",
@@ -191,7 +191,7 @@
       "rol": "usuario",
       "estado_atencion": "activo",
       "puntaje_prioridad": 0,
-      "franja_preferida": 2
+      "franja_preferida": 3
     },
     {
       "nombre": "Isabel Navarro",
@@ -200,7 +200,7 @@
       "rol": "usuario",
       "estado_atencion": "activo",
       "puntaje_prioridad": 0,
-      "franja_preferida": 1
+      "franja_preferida": 2
     },
     {
       "nombre": "Gonzalo Flores",
@@ -209,7 +209,7 @@
       "rol": "usuario",
       "estado_atencion": "activo",
       "puntaje_prioridad": 0,
-      "franja_preferida": 3
+      "franja_preferida": 2
     },
     {
       "nombre": "Roxana Acosta",
@@ -218,7 +218,7 @@
       "rol": "usuario",
       "estado_atencion": "activo",
       "puntaje_prioridad": 0,
-      "franja_preferida": 4
+      "franja_preferida": 1
     },
     {
       "nombre": "Eduardo Rojas",
@@ -227,7 +227,7 @@
       "rol": "usuario",
       "estado_atencion": "activo",
       "puntaje_prioridad": 0,
-      "franja_preferida": 2
+      "franja_preferida": 3
     },
     {
       "nombre": "Marcela Vargas",
@@ -245,7 +245,7 @@
       "rol": "usuario",
       "estado_atencion": "activo",
       "puntaje_prioridad": 0,
-      "franja_preferida": 4
+      "franja_preferida": 2
     }
   ],
   "tareas_especiales": [
@@ -269,8 +269,140 @@
       "descripcion": "Tarea especial de Municipalidad"
     }
   ],
+  "vacaciones": [
+    {
+      "colaborador_index": 1,
+      "fecha": "2026-08-06",
+      "motivo": "vacaciones"
+    },
+    {
+      "colaborador_index": 1,
+      "fecha": "2026-09-21",
+      "motivo": "vacaciones"
+    },
+    {
+      "colaborador_index": 1,
+      "fecha": "2026-08-05",
+      "motivo": "vacaciones"
+    },
+    {
+      "colaborador_index": 4,
+      "fecha": "2026-08-30",
+      "motivo": "vacaciones"
+    },
+    {
+      "colaborador_index": 4,
+      "fecha": "2026-09-04",
+      "motivo": "vacaciones"
+    },
+    {
+      "colaborador_index": 5,
+      "fecha": "2026-08-18",
+      "motivo": "vacaciones"
+    },
+    {
+      "colaborador_index": 6,
+      "fecha": "2026-08-07",
+      "motivo": "vacaciones"
+    },
+    {
+      "colaborador_index": 6,
+      "fecha": "2026-09-25",
+      "motivo": "vacaciones"
+    },
+    {
+      "colaborador_index": 6,
+      "fecha": "2026-09-14",
+      "motivo": "vacaciones"
+    },
+    {
+      "colaborador_index": 7,
+      "fecha": "2026-10-03",
+      "motivo": "vacaciones"
+    },
+    {
+      "colaborador_index": 7,
+      "fecha": "2026-08-18",
+      "motivo": "vacaciones"
+    },
+    {
+      "colaborador_index": 11,
+      "fecha": "2026-10-21",
+      "motivo": "vacaciones"
+    },
+    {
+      "colaborador_index": 12,
+      "fecha": "2026-10-05",
+      "motivo": "vacaciones"
+    },
+    {
+      "colaborador_index": 13,
+      "fecha": "2026-08-20",
+      "motivo": "vacaciones"
+    },
+    {
+      "colaborador_index": 13,
+      "fecha": "2026-08-05",
+      "motivo": "vacaciones"
+    },
+    {
+      "colaborador_index": 14,
+      "fecha": "2026-10-31",
+      "motivo": "vacaciones"
+    },
+    {
+      "colaborador_index": 14,
+      "fecha": "2026-10-09",
+      "motivo": "vacaciones"
+    },
+    {
+      "colaborador_index": 16,
+      "fecha": "2026-09-17",
+      "motivo": "vacaciones"
+    },
+    {
+      "colaborador_index": 16,
+      "fecha": "2026-08-30",
+      "motivo": "vacaciones"
+    },
+    {
+      "colaborador_index": 16,
+      "fecha": "2026-09-06",
+      "motivo": "vacaciones"
+    },
+    {
+      "colaborador_index": 17,
+      "fecha": "2026-10-28",
+      "motivo": "vacaciones"
+    },
+    {
+      "colaborador_index": 17,
+      "fecha": "2026-08-18",
+      "motivo": "vacaciones"
+    },
+    {
+      "colaborador_index": 19,
+      "fecha": "2026-08-04",
+      "motivo": "vacaciones"
+    },
+    {
+      "colaborador_index": 21,
+      "fecha": "2026-08-02",
+      "motivo": "vacaciones"
+    },
+    {
+      "colaborador_index": 21,
+      "fecha": "2026-09-03",
+      "motivo": "vacaciones"
+    },
+    {
+      "colaborador_index": 21,
+      "fecha": "2026-08-07",
+      "motivo": "vacaciones"
+    }
+  ],
   "metadata": {
-    "fecha_generacion": "2026-07-30T11:34:23.812604",
+    "fecha_generacion": "2026-07-30T13:01:45.411501",
     "descripcion": "Datos de prueba generados automáticamente para el sistema de planificación de almuerzos",
     "total_colaboradores": 21,
     "total_sectores": 3,
