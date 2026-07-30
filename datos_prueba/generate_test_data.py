@@ -9,7 +9,7 @@ Genera:
 
 import json
 import random
-from datetime import time, datetime, timedelta
+from datetime import time, datetime, timedelta, date
 
 # Colores hexadecimales
 COLORES = {
@@ -162,6 +162,31 @@ def generate_tareas_especiales():
         }
     ]
 
+def generate_vacaciones():
+    """Genera vacaciones aleatorias para los colaboradores."""
+    vacaciones = []
+
+    # Generar fechas para agosto, septiembre y octubre 2026
+    fecha_inicio = date(2026, 8, 1)
+    fecha_fin = date(2026, 10, 31)
+
+    # Para cada colaborador, generar 0-3 días de vacaciones
+    for i in range(1, 22):  # 21 colaboradores
+        num_dias_ausencia = random.randint(0, 3)
+
+        for _ in range(num_dias_ausencia):
+            # Seleccionar una fecha aleatoria
+            dias_diferencia = random.randint(0, (fecha_fin - fecha_inicio).days)
+            fecha_ausencia = fecha_inicio + timedelta(days=dias_diferencia)
+
+            vacaciones.append({
+                "colaborador_index": i,
+                "fecha": fecha_ausencia.isoformat(),
+                "motivo": "vacaciones"
+            })
+
+    return vacaciones
+
 def generate_test_data():
     """Genera todos los datos de prueba."""
     data = {
@@ -169,6 +194,7 @@ def generate_test_data():
         "franjas_horarias": generate_franjas_horarias(),
         "colaboradores": generate_colaboradores(),
         "tareas_especiales": generate_tareas_especiales(),
+        "vacaciones": generate_vacaciones(),
         "metadata": {
             "fecha_generacion": datetime.now().isoformat(),
             "descripcion": "Datos de prueba generados automáticamente para el sistema de planificación de almuerzos",
@@ -197,6 +223,7 @@ if __name__ == "__main__":
     print(f"  - Franjas horarias: {len(data['franjas_horarias'])}")
     print(f"  - Colaboradores: {len(data['colaboradores'])}")
     print(f"  - Tareas especiales: {len(data['tareas_especiales'])}")
+    print(f"  - Vacaciones: {len(data['vacaciones'])}")
 
     # Mostrar distribución de colaboradores
     print(f"\nDistribución de colaboradores por sector:")

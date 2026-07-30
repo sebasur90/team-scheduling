@@ -26,6 +26,7 @@ from app.models.tarea_especial import TareaEspecialTipo, ColaboradorTareaTipo, T
 from app.models.turno import AsignacionAlmuerzo, TurnoAlmuerzo
 from app.models.swap import SwapSolicitud
 from app.models.incidencia import IncidenciaCobertura, HistorialReemplazo
+from app.models.ausencia import Ausencia
 from app.config import DATABASE_URL
 
 def load_json_data():
@@ -43,31 +44,34 @@ def clear_database(db: Session):
     try:
         # Limpiar en orden inverso de dependencias
 
-        # 1. Limpiar historial de reemplazos (depende de incidencias)
+        # 1. Limpiar ausencias/vacaciones
+        db.query(Ausencia).delete()
+
+        # 2. Limpiar historial de reemplazos (depende de incidencias)
         db.query(HistorialReemplazo).delete()
 
-        # 2. Limpiar swaps (depende de asignacion_almuerzo)
+        # 3. Limpiar swaps (depende de asignacion_almuerzo)
         db.query(SwapSolicitud).delete()
 
-        # 3. Limpiar incidencias (depende de asignacion_almuerzo)
+        # 4. Limpiar incidencias (depende de asignacion_almuerzo)
         db.query(IncidenciaCobertura).delete()
 
-        # 4. Limpiar asignaciones de almuerzo (depende de colaborador)
+        # 5. Limpiar asignaciones de almuerzo (depende de colaborador)
         db.query(AsignacionAlmuerzo).delete()
 
-        # 5. Limpiar turnos de almuerzo
+        # 6. Limpiar turnos de almuerzo
         db.query(TurnoAlmuerzo).delete()
 
-        # 6. Limpiar asignaciones de tareas a colaboradores
+        # 7. Limpiar asignaciones de tareas a colaboradores
         db.query(ColaboradorTareaTipo).delete()
 
-        # 7. Limpiar tipos de tareas especiales
+        # 8. Limpiar tipos de tareas especiales
         db.query(TareaEspecialTipo).delete()
 
-        # 8. Limpiar colaboradores NO-ADMIN
+        # 9. Limpiar colaboradores NO-ADMIN
         db.query(Colaborador).filter(Colaborador.es_admin == False).delete()
 
-        # 9. Limpiar franjas horarias
+        # 10. Limpiar franjas horarias
         db.query(FranjaHoraria).delete()
 
         # NOTA: No se borran los sectores porque pueden estar en uso por el admin
@@ -247,6 +251,43 @@ def assign_special_tasks(db: Session):
         print(f"  ⚠️  Error al asignar tareas: {e}")
         db.rollback()
 
+def load_vacaciones(db: Session, data: dict):
+    """Carga las vacaciones de los colaboradores."""
+    print("\n🏖️  Cargando vacaciones...")
+
+    if "vacaciones" not in data:
+        print("  ⚠️  No hay datos de vacaciones en el archivo JSON")
+        return
+
+    vacaciones_cargadas = 0
+    try:
+        # Obtener lista de colaboradores
+        colaboradores = db.query(Colaborador).filter(Colaborador.es_admin == False).all()
+        colab_map = {i: colab for i, colab in enumerate(colaboradores, 1)}
+
+        for vac_data in data["vacaciones"]:
+            colab_index = vac_data["colaborador_index"]
+            if colab_index not in colab_map:
+                continue
+
+            colab = colab_map[colab_index]
+            fecha = datetime.strptime(vac_data["fecha"], "%Y-%m-%d").date()
+
+            ausencia = Ausencia(
+                colaborador_id=colab.id,
+                fecha=fecha,
+                motivo=vac_data["motivo"]
+            )
+            db.add(ausencia)
+            vacaciones_cargadas += 1
+
+        db.commit()
+        print(f"  ✅ Total vacaciones cargadas: {vacaciones_cargadas}")
+
+    except Exception as e:
+        print(f"  ⚠️  Error al cargar vacaciones: {e}")
+        db.rollback()
+
 def ensure_admin(db: Session):
     """Asegura que exista el usuario admin."""
     print("\n🔐 Verificando usuario admin...")
@@ -325,6 +366,9 @@ def main():
         # Asignar tareas especiales a colaboradores
         assign_special_tasks(db)
 
+        # Cargar vacaciones
+        load_vacaciones(db, data)
+
         # Asegurar que existe el admin
         ensure_admin(db)
 
@@ -337,6 +381,8 @@ def main():
         print(f"  • Franjas horarias: {len(franjas_map)}")
         print(f"  • Colaboradores: {len(colaboradores_map)}")
         print(f"  • Tareas especiales: {len(tareas_map)}")
+        vacaciones_count = len(data.get("vacaciones", []))
+        print(f"  • Vacaciones: {vacaciones_count}")
 
         print(f"\n🎯 Tareas especiales disponibles:")
         for tarea_name in tareas_map.keys():
