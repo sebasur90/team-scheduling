@@ -1,10 +1,13 @@
-import React, { useState, useEffect } from 'react'
-import { turnosApi, TurnoAlmuerzoResponse } from '../api/turnos'
+import React, { useState, useEffect, useCallback } from 'react'
+import { turnosApi, TurnoAlmuerzoResponse, AsignacionResponse } from '../api/turnos'
 import { franjasApi, FranjaHoraria } from '../api/franjas'
 import { diasNolaborablesApi } from '../api/diasNolaborables'
 import { ausenciasApi, Ausencia } from '../api/ausencias'
 import { sectoresApi, type Sector } from '../api/sectores'
 import { useAuthContext } from '../contexts/AuthContext'
+import { swapsApi, SwapResponse } from '../api/swaps'
+import { SwapConfirmModal } from './SwapConfirmModal'
+import { SwapStatusModal } from './SwapStatusModal'
 import './CalendarView.css'
 
 import { colaboradoresApi, type Colaborador } from '../api/colaboradores'
@@ -33,6 +36,16 @@ export const CalendarView: React.FC = () => {
   const [generationResult, setGenerationResult] = useState<GenerationResult | null>(null)
   const [isGenerating, setIsGenerating] = useState(false)
 
+  const [swapConfirmModal, setSwapConfirmModal] = useState<{
+    asignacionOrigen: AsignacionResponse
+    asignacionReceptor: AsignacionResponse
+    receptorNombre: string
+    franjaOrigen: string
+    franjaReceptor: string
+    fecha: string
+  } | null>(null)
+  const [swapStatusModal, setSwapStatusModal] = useState<SwapResponse | null>(null)
+
   function getMonday(date: Date): Date {
     const d = new Date(date)
     const day = d.getDay()
@@ -51,6 +64,32 @@ export const CalendarView: React.FC = () => {
     const days = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sab']
     return days[date.getDay()]
   }
+
+  const reloadTurnos = useCallback(async () => {
+    const turnosMap = new Map<string, TurnoAlmuerzoResponse>()
+    const weekDaysList: Date[] = []
+    for (let i = 0; i < 5; i++) {
+      const d = new Date(selectedWeekMonday)
+      d.setDate(d.getDate() + i)
+      weekDaysList.push(d)
+    }
+    await Promise.all(
+      weekDaysList.map(async (d) => {
+        const dateStr = formatDate(d)
+        const res = await turnosApi.list(dateStr)
+        res.data.franjas.forEach((turno) => {
+          turnosMap.set(`${dateStr}-${turno.franja_horaria_id}`, turno)
+        })
+      })
+    )
+    setTurnos(turnosMap)
+  }, [selectedWeekMonday])
+
+  useEffect(() => {
+    const handler = () => { reloadTurnos() }
+    window.addEventListener('swap-updated', handler)
+    return () => window.removeEventListener('swap-updated', handler)
+  }, [reloadTurnos])
 
   useEffect(() => {
     const loadData = async () => {
@@ -217,22 +256,29 @@ export const CalendarView: React.FC = () => {
     if (turno.asignaciones.length === 0) {
       return <span className="turno-empty">Sin turno</span>
     }
+
+    const dateStr = formatDate(date)
+    const myInfoForDate = user ? getUserAsignacionForDate(dateStr) : null
+    const canInitiateSwap = user && user.rol !== 'viewer' && myInfoForDate !== null
+
     return (
       <div className="turno-pills">
         {turno.asignaciones.map((a, idx) => {
           const sector = sectores.get(a.colaborador.sector_id)
-          const isCurrentUser = user && a.colaborador.id === user.id
+          const isCurrentUser = user && a.colaborador_id === user.id
+          const isPendienteSwap = isCurrentUser && a.estado === 'pendiente_swap'
+          const isClickable = isCurrentUser ? isPendienteSwap : canInitiateSwap
+
           return (
             <span
               key={idx}
-              className={`pill ${isCurrentUser ? 'current-user' : ''}`}
-              style={{
-                backgroundColor: sector?.color || '#999',
-                color: 'white'
-              }}
-              title={a.colaborador.nombre}
+              className={`pill ${isCurrentUser ? 'current-user' : ''} ${isPendienteSwap ? 'pill-pending-swap' : ''} ${isClickable ? 'pill-clickable' : ''}`}
+              style={{ backgroundColor: sector?.color || '#999', color: 'white' }}
+              title={isPendienteSwap ? 'Intercambio pendiente — clic para ver estado' : isClickable ? `Intercambiar con ${a.colaborador.nombre}` : a.colaborador.nombre}
+              onClick={isClickable ? () => handlePillClick(date, a, turno) : undefined}
             >
               {a.colaborador.nombre.split(' ')[0]}
+              {isPendienteSwap && <span className="swap-badge" />}
             </span>
           )
         })}
@@ -265,6 +311,58 @@ export const CalendarView: React.FC = () => {
 
   const isDiaNoLaborable = (date: Date): boolean => {
     return diasNoLaborables.has(formatDate(date))
+  }
+
+  const formatFranja = (franja: FranjaHoraria): string =>
+    `${franja.hora_inicio.slice(0, 5)} – ${franja.hora_fin.slice(0, 5)}`
+
+  const getUserAsignacionForDate = (dateStr: string): { asig: AsignacionResponse; turno: TurnoAlmuerzoResponse } | null => {
+    for (const franja of franjas) {
+      const turno = turnos.get(`${dateStr}-${franja.id}`)
+      if (turno) {
+        const myAsig = turno.asignaciones.find((a) => user && a.colaborador_id === user.id)
+        if (myAsig) return { asig: myAsig, turno }
+      }
+    }
+    return null
+  }
+
+  const handlePillClick = async (
+    date: Date,
+    clickedAsig: AsignacionResponse,
+    clickedTurno: TurnoAlmuerzoResponse
+  ) => {
+    if (!user || user.rol === 'viewer') return
+
+    if (clickedAsig.colaborador_id === user.id) {
+      if (clickedAsig.estado === 'pendiente_swap') {
+        try {
+          const res = await swapsApi.list()
+          const swap = res.data.find(
+            (s) =>
+              (s.asignacion_origen_id === clickedAsig.id || s.asignacion_receptor_id === clickedAsig.id) &&
+              s.estado === 'pendiente'
+          )
+          if (swap) setSwapStatusModal(swap)
+        } catch (err) {
+          console.error('Error cargando swap:', err)
+        }
+      }
+      return
+    }
+
+    const dateStr = formatDate(date)
+    const myInfo = getUserAsignacionForDate(dateStr)
+    if (!myInfo) return
+
+    setSwapConfirmModal({
+      asignacionOrigen: myInfo.asig,
+      asignacionReceptor: clickedAsig,
+      receptorNombre: clickedAsig.colaborador.nombre,
+      franjaOrigen: formatFranja(myInfo.turno.franja_horaria),
+      franjaReceptor: formatFranja(clickedTurno.franja_horaria),
+      fecha: dateStr,
+    })
   }
 
   const handleDiaNoLaborableClick = (date: Date) => {
@@ -615,6 +713,28 @@ export const CalendarView: React.FC = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {swapConfirmModal && (
+        <SwapConfirmModal
+          {...swapConfirmModal}
+          onClose={() => setSwapConfirmModal(null)}
+          onSuccess={() => {
+            setSwapConfirmModal(null)
+            reloadTurnos()
+          }}
+        />
+      )}
+
+      {swapStatusModal && (
+        <SwapStatusModal
+          swap={swapStatusModal}
+          onClose={() => setSwapStatusModal(null)}
+          onSuccess={() => {
+            setSwapStatusModal(null)
+            reloadTurnos()
+          }}
+        />
       )}
 
       <div className="calendar-legend">

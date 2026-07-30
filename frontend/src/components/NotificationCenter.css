@@ -158,6 +158,80 @@
   cursor: not-allowed;
 }
 
+.swap-action-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.swap-action-card--done {
+  opacity: 0.7;
+}
+
+.swap-action-header {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #1976d2;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.swap-action-mensaje {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #333;
+  line-height: 1.4;
+}
+
+.swap-action-done-msg {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #888;
+  font-style: italic;
+}
+
+.swap-action-buttons {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.btn-swap-rechazar {
+  padding: 0.4rem 0.9rem;
+  border: 1px solid #d32f2f;
+  background: white;
+  color: #d32f2f;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-swap-rechazar:hover:not(:disabled) {
+  background: #ffebee;
+}
+
+.btn-swap-aceptar {
+  padding: 0.4rem 0.9rem;
+  border: none;
+  background: #2e7d32;
+  color: white;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-swap-aceptar:hover:not(:disabled) {
+  background: #1b5e20;
+}
+
+.btn-swap-rechazar:disabled,
+.btn-swap-aceptar:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 @media (max-width: 768px) {
   .notification-item {
     flex-direction: column;

@@ -209,6 +209,32 @@
   font-weight: 600;
 }
 
+.pill.pill-clickable {
+  cursor: pointer;
+}
+
+.pill.pill-clickable:hover {
+  filter: brightness(1.15);
+  transform: scale(1.05);
+}
+
+.pill.pill-pending-swap {
+  position: relative;
+  border: 2.5px solid #ff6d00;
+  box-shadow: 0 0 6px rgba(255, 109, 0, 0.4);
+}
+
+.swap-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #ff6d00;
+  border: 1.5px solid white;
+}
+
 .pill-tipo_a {
   background: #4caf50;
 }

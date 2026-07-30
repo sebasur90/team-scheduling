@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import './NotificationCenter.css'
 import { notificacionesApi, type Notificacion } from '../api/notificaciones'
+import { SwapActionCard } from './SwapActionCard'
 
 export const NotificationCenter: React.FC = () => {
   const [notifications, setNotifications] = useState<Notificacion[]>([])
@@ -76,34 +77,50 @@ export const NotificationCenter: React.FC = () => {
         </div>
       ) : (
         <div className="notifications-list">
-          {notifications.map((notif) => (
-            <div key={notif.id} className={`notification-item notification-${notif.tipo} ${notif.leida ? 'read' : 'unread'}`}>
-              <div className="notification-content">
-                <p className="notification-message">{getMessageForNotification(notif)}</p>
-                <time className="notification-time">
-                  {new Date(notif.created_at).toLocaleString('es-AR')}
-                </time>
-              </div>
-              <div className="notification-actions">
-                {notif.tipo === 'franja_preferida_disponible' && notif.estado === 'pendiente' && (
+          {notifications.map((notif) => {
+            if (notif.tipo === 'swap_solicitado' && notif.referencia_id) {
+              return (
+                <div key={notif.id} className={`notification-item notification-swap_solicitado ${notif.leida ? 'read' : 'unread'}`}>
+                  <SwapActionCard
+                    notif={notif}
+                    onRefresh={() => setNotifications((ns) => ns.map((n) => n.id === notif.id ? { ...n, leida: true } : n))}
+                  />
+                  <time className="notification-time">
+                    {new Date(notif.created_at).toLocaleString('es-AR')}
+                  </time>
+                </div>
+              )
+            }
+
+            return (
+              <div key={notif.id} className={`notification-item notification-${notif.tipo} ${notif.leida ? 'read' : 'unread'}`}>
+                <div className="notification-content">
+                  <p className="notification-message">{getMessageForNotification(notif)}</p>
+                  <time className="notification-time">
+                    {new Date(notif.created_at).toLocaleString('es-AR')}
+                  </time>
+                </div>
+                <div className="notification-actions">
+                  {notif.tipo === 'franja_preferida_disponible' && notif.estado === 'pendiente' && (
+                    <button
+                      className="btn-accept"
+                      onClick={() => handleAceptarCambioFranja(notif.id)}
+                      title="Aceptar cambio de franja"
+                    >
+                      Aceptar cambio
+                    </button>
+                  )}
                   <button
-                    className="btn-accept"
-                    onClick={() => handleAceptarCambioFranja(notif.id)}
-                    title="Aceptar cambio de franja"
+                    className="btn-delete"
+                    onClick={() => deleteNotification(notif.id)}
+                    title="Eliminar"
                   >
-                    Aceptar cambio
+                    ✕
                   </button>
-                )}
-                <button
-                  className="btn-delete"
-                  onClick={() => deleteNotification(notif.id)}
-                  title="Eliminar"
-                >
-                  ✕
-                </button>
+                </div>
               </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
       )}
     </div>

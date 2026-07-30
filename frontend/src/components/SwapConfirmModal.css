@@ -1,0 +1,55 @@
+.swap-confirm-modal {
+  width: 380px;
+  max-width: calc(100% - 2rem);
+}
+
+.swap-confirm-body {
+  padding: 0.5rem 0 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.swap-info-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+}
+
+.swap-info-label {
+  font-size: 0.8rem;
+  color: #888;
+  min-width: 72px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.swap-info-value {
+  font-size: 0.95rem;
+  color: #333;
+}
+
+.swap-franja {
+  font-family: 'Courier New', monospace;
+  font-size: 0.9rem;
+  color: #1976d2;
+  font-weight: 600;
+}
+
+.swap-arrow {
+  text-align: center;
+  font-size: 1.2rem;
+  color: #aaa;
+  margin: 0.25rem 0;
+}
+
+.swap-error {
+  margin-top: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: #ffebee;
+  border: 1px solid #ef9a9a;
+  border-radius: 4px;
+  color: #c62828;
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
