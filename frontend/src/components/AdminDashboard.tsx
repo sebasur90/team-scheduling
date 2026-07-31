@@ -1,7 +1,6 @@
 import React, { useState } from 'react'
 import { AdminPanel } from './AdminPanel'
 import { CalendarView } from './CalendarView'
-import { NotificacionesConfig } from './NotificacionesConfig'
 import { SectoresPanel } from './SectoresPanel'
 import { TareasEspecialesPanel } from './TareasEspecialesPanel'
 import { Preferences } from './Preferences'
@@ -152,7 +151,43 @@ export const AdminDashboard: React.FC = () => {
       case 'notificaciones':
         return (
           <div className="dashboard-section">
-            <NotificacionesConfig />
+            <h2>Notificaciones y Swaps Pendientes</h2>
+            {alerts && alerts.swaps_pendientes.count > 0 ? (
+              <div>
+                <h3>↔️ Swaps Pendientes ({alerts.swaps_pendientes.count})</h3>
+                <div style={{ display: 'grid', gap: '1rem', marginBottom: '2rem' }}>
+                  {alerts.swaps_pendientes.items.map((item: any) => (
+                    <div key={item.id} style={{
+                      padding: '1rem',
+                      border: '1px solid #e5e7eb',
+                      borderRadius: '6px',
+                      backgroundColor: '#fef3c7',
+                      borderLeft: '4px solid #f59e0b',
+                    }}>
+                      <div style={{ fontWeight: 'bold', marginBottom: '0.5rem' }}>
+                        {item.solicitante} ↔️ {item.receptor}
+                      </div>
+                      <div style={{ fontSize: '0.9rem', color: '#666' }}>
+                        📅 {item.fecha} • {item.franja_origen} ↔️ {item.franja_receptor}
+                      </div>
+                      <div style={{ fontSize: '0.85rem', color: '#999', marginTop: '0.5rem' }}>
+                        Hace {item.hace}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div style={{
+                padding: '2rem',
+                textAlign: 'center',
+                backgroundColor: '#f0fdf4',
+                borderRadius: '6px',
+                color: '#16a34a',
+              }}>
+                ✓ No hay swaps pendientes
+              </div>
+            )}
           </div>
         )
       case 'configuracion':
