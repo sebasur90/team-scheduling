@@ -78,7 +78,6 @@ export const PreferenciasUsuarios: React.FC = () => {
           <thead>
             <tr>
               <th>Nombre</th>
-              <th>Email</th>
               <th>Sector</th>
               <th>Franja Preferida</th>
               <th>Acciones</th>
@@ -87,7 +86,7 @@ export const PreferenciasUsuarios: React.FC = () => {
           <tbody>
             {colaboradores.length === 0 ? (
               <tr>
-                <td colSpan={5} className="empty-cell">
+                <td colSpan={4} className="empty-cell">
                   No hay colaboradores
                 </td>
               </tr>
@@ -95,7 +94,6 @@ export const PreferenciasUsuarios: React.FC = () => {
               colaboradores.map((colab) => (
                 <tr key={colab.id} className={editingId === colab.id ? 'editing' : ''}>
                   <td>{colab.nombre}</td>
-                  <td>{colab.email}</td>
                   <td>{colab.sector_nombre || 'N/A'}</td>
                   <td>
                     {editingId === colab.id ? (
