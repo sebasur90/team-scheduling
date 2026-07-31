@@ -10,6 +10,10 @@ interface DayDetailViewProps {
   formatDate: (date: Date) => string
   renderTurnoPills: (date: Date, franjaId: number) => React.ReactNode
   renderVacacionesPills: (date: Date) => React.ReactNode
+  isAdmin?: boolean
+  isGenerating?: boolean
+  onDiaNoLaborableClick?: (date: Date) => void
+  onGenerarDesdeElDia?: (date: Date) => void
 }
 
 export const DayDetailView: React.FC<DayDetailViewProps> = ({
@@ -20,21 +24,49 @@ export const DayDetailView: React.FC<DayDetailViewProps> = ({
   formatDate,
   renderTurnoPills,
   renderVacacionesPills,
+  isAdmin = false,
+  isGenerating = false,
+  onDiaNoLaborableClick,
+  onGenerarDesdeElDia,
 }) => {
   const dateStr = formatDate(selectedDate)
 
   return (
-    <div className="md:hidden space-y-3">
-      {isDiaNoLaborable && (
-        <div className="bg-amber-50 border-l-4 border-amber-500 p-3 rounded">
-          <div className="text-sm font-medium text-amber-900">Día no laborable</div>
+    <div className="md:hidden space-y-2">
+      {/* Controls row - compact layout */}
+      {isAdmin && (
+        <div className="flex gap-2 items-stretch">
+          {/* Día no laborable button */}
+          <button
+            onClick={() => onDiaNoLaborableClick?.(selectedDate)}
+            className={`flex-1 px-2 py-1.5 text-xs font-medium rounded transition whitespace-nowrap ${
+              isDiaNoLaborable
+                ? 'bg-amber-200 text-amber-900 hover:bg-amber-300'
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            }`}
+          >
+            {isDiaNoLaborable ? 'Sin laborable' : 'No laborable'}
+          </button>
+
+          {/* Generar día button */}
+          <button
+            onClick={() => onGenerarDesdeElDia?.(selectedDate)}
+            disabled={isGenerating}
+            className={`flex-1 px-2 py-1.5 text-xs font-medium rounded transition ${
+              isGenerating
+                ? 'bg-gray-400 cursor-not-allowed'
+                : 'bg-sky-700 hover:bg-sky-800 text-white'
+            }`}
+          >
+            {isGenerating ? 'Gen...' : 'Regenerar'}
+          </button>
         </div>
       )}
 
       {/* Vacaciones */}
-      <div className="bg-white rounded-lg border border-gray-200 p-3">
-        <div className="text-xs font-semibold text-gray-600 mb-2">De Vacaciones</div>
-        <div className="text-sm">{renderVacacionesPills(selectedDate)}</div>
+      <div className="bg-white rounded border border-gray-200 p-2">
+        <div className="text-xs font-semibold text-gray-600 mb-1">Vacaciones</div>
+        <div className="text-xs">{renderVacacionesPills(selectedDate)}</div>
       </div>
 
       {/* Franjas */}
@@ -45,23 +77,23 @@ export const DayDetailView: React.FC<DayDetailViewProps> = ({
         return (
           <div
             key={franja.id}
-            className={`rounded-lg border p-3 ${
+            className={`rounded border p-2 ${
               isSinTurno
                 ? 'bg-red-50 border-red-200'
                 : 'bg-white border-gray-200'
             }`}
           >
-            <div className="flex items-center justify-between mb-2">
-              <div className="font-semibold text-gray-900">
-                {franja.hora_inicio} – {franja.hora_fin}
+            <div className="flex items-center justify-between mb-1">
+              <div className="text-xs font-semibold text-gray-900">
+                {franja.hora_inicio.slice(0, 5)} – {franja.hora_fin.slice(0, 5)}
               </div>
               {turno && (
                 <div className="text-xs text-gray-500">
-                  {turno.asignaciones.length}/{turno.capacidad || turno.asignaciones.length}
+                  {turno.asignaciones.length}
                 </div>
               )}
             </div>
-            <div className="text-sm">
+            <div className="text-xs">
               {renderTurnoPills(selectedDate, franja.id)}
             </div>
           </div>

@@ -1,6 +1,6 @@
 import React from 'react'
 
-type AdminTabType = 'resumen' | 'colaboradores' | 'turnos' | 'sectores' | 'config' | 'notificaciones'
+export type AdminTabType = 'resumen' | 'colaboradores' | 'turnos' | 'vacaciones' | 'preferencias' | 'notificaciones'
 
 interface AdminBottomNavProps {
   activeTab: AdminTabType
@@ -13,10 +13,10 @@ export const AdminBottomNav: React.FC<AdminBottomNavProps> = ({
 }) => {
   const tabs = [
     { id: 'resumen' as const, icon: '📊', label: 'Resumen' },
-    { id: 'colaboradores' as const, icon: '👥', label: 'Colaboradores' },
+    { id: 'colaboradores' as const, icon: '👥', label: 'Colabs' },
     { id: 'turnos' as const, icon: '📅', label: 'Turnos' },
-    { id: 'sectores' as const, icon: '🏭', label: 'Sectores' },
-    { id: 'config' as const, icon: '⚙️', label: 'Config' },
+    { id: 'vacaciones' as const, icon: '🏖️', label: 'Vacar' },
+    { id: 'preferencias' as const, icon: '⭐', label: 'Pref' },
     { id: 'notificaciones' as const, icon: '🔔', label: 'Notif' },
   ]
 

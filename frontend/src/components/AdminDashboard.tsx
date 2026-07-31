@@ -2,17 +2,15 @@ import React, { useState } from 'react'
 import { useAuthContext } from '../contexts/AuthContext'
 import { AdminPanel } from './AdminPanel'
 import { CalendarView } from './CalendarView'
-import { SectoresPanel } from './SectoresPanel'
-import { ConfiguracionPanel } from './ConfiguracionPanel'
+import { Vacaciones } from './Vacaciones'
+import { PreferenciasUsuarios } from './PreferenciasUsuarios'
 import { useAdminAlerts } from '../hooks/useAdminAlerts'
 import { AdminTopBar } from './AdminTopBar'
-import { AdminBottomNav } from './AdminBottomNav'
-
-type TabType = 'resumen' | 'colaboradores' | 'turnos' | 'sectores' | 'config' | 'notificaciones'
+import { AdminBottomNav, type AdminTabType } from './AdminBottomNav'
 
 export const AdminDashboard: React.FC = () => {
   const { user, logout } = useAuthContext()
-  const [activeTab, setActiveTab] = useState<TabType>('resumen')
+  const [activeTab, setActiveTab] = useState<AdminTabType>('resumen')
   const { alerts } = useAdminAlerts(true)
 
   const totalAlerts = (alerts?.swaps_pendientes?.count || 0) + (alerts?.cobertura_en_riesgo?.count || 0)
@@ -146,17 +144,19 @@ export const AdminDashboard: React.FC = () => {
           </div>
         )
 
-      case 'sectores':
+      case 'vacaciones':
         return (
           <div className="bg-white rounded-xl p-6 md:p-8">
-            <SectoresPanel />
+            <h2 className="text-2xl font-bold text-slate-900 mb-6">Vacaciones de Colaboradores</h2>
+            <Vacaciones mode="admin" />
           </div>
         )
 
-      case 'config':
+      case 'preferencias':
         return (
           <div className="bg-white rounded-xl p-6 md:p-8">
-            <ConfiguracionPanel />
+            <h2 className="text-2xl font-bold text-slate-900 mb-6">Preferencias de Franja</h2>
+            <PreferenciasUsuarios />
           </div>
         )
 

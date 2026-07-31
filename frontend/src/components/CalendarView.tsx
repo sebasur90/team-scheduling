@@ -169,7 +169,8 @@ export const CalendarView: React.FC = () => {
   // Initialize selected day for mobile view
   useEffect(() => {
     // Only reset selectedDayMobile if the current selected day is not in the new week
-    const selectedDate = new Date(selectedDayMobile)
+    const [year, month, day] = selectedDayMobile.split('-').map(Number)
+    const selectedDate = new Date(year, month - 1, day)
     const weekEnd = new Date(selectedWeekMonday)
     weekEnd.setDate(weekEnd.getDate() + 4) // Friday of the week
 
@@ -603,22 +604,22 @@ export const CalendarView: React.FC = () => {
         </div>
 
         {/* Week info */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 bg-gray-100 rounded-lg p-3">
-          <span className="text-sm md:text-base text-slate-700 font-medium">
-            Semana del {weekDays[0].toLocaleDateString('es-ES')} al{' '}
-            {weekDays[4].toLocaleDateString('es-ES')}
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 bg-gray-100 rounded-lg p-2 md:p-3">
+          <span className="text-xs md:text-base text-slate-700 font-medium order-2 md:order-1">
+            Semana del {weekDays[0].toLocaleDateString('es-ES', { day: 'numeric', month: 'numeric' })} al{' '}
+            {weekDays[4].toLocaleDateString('es-ES', { day: 'numeric', month: 'numeric' })}
           </span>
           {user?.rol === 'admin' && (
             <button
               onClick={handleGenerarSemana}
               disabled={isGenerating}
-              className={`px-4 py-2 text-white text-sm font-medium rounded-md transition ${
+              className={`w-full md:w-auto px-3 md:px-4 py-1.5 md:py-2 text-white text-xs md:text-sm font-medium rounded-md transition order-1 md:order-2 ${
                 isGenerating
                   ? 'bg-gray-400 cursor-not-allowed'
                   : 'bg-sky-700 hover:bg-sky-800'
               }`}
             >
-              {isGenerating ? 'Generando...' : 'Generar Semana'}
+              {isGenerating ? 'Gen...' : 'Gen. Semana'}
             </button>
           )}
         </div>
@@ -637,17 +638,25 @@ export const CalendarView: React.FC = () => {
           formatDate={formatDate}
           getDayName={getDayName}
         />
-        {selectedDayMobile && (
-          <DayDetailView
-            selectedDate={new Date(selectedDayMobile + 'T00:00:00Z')}
-            franjas={franjas}
-            turnos={turnos}
-            isDiaNoLaborable={isDiaNoLaborable(new Date(selectedDayMobile + 'T00:00:00Z'))}
-            formatDate={formatDate}
-            renderTurnoPills={renderTurnoPills}
-            renderVacacionesPills={renderVacacionesPills}
-          />
-        )}
+        {selectedDayMobile && (() => {
+          const [year, month, day] = selectedDayMobile.split('-').map(Number)
+          const selectedDate = new Date(year, month - 1, day)
+          return (
+            <DayDetailView
+              selectedDate={selectedDate}
+              franjas={franjas}
+              turnos={turnos}
+              isDiaNoLaborable={isDiaNoLaborable(selectedDate)}
+              formatDate={formatDate}
+              renderTurnoPills={renderTurnoPills}
+              renderVacacionesPills={renderVacacionesPills}
+              isAdmin={user?.rol === 'admin'}
+              isGenerating={isGenerating}
+              onDiaNoLaborableClick={handleDiaNoLaborableClick}
+              onGenerarDesdeElDia={handleGenerarDesdeElDia}
+            />
+          )
+        })()}
       </div>
 
       {/* Desktop view: Full calendar table */}
