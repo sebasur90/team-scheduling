@@ -583,9 +583,14 @@ export const CalendarView: React.FC = () => {
           {user?.rol === 'admin' && (
             <button
               onClick={handleGenerarSemana}
-              className="px-4 py-2 bg-sky-700 hover:bg-sky-800 text-white text-sm font-medium rounded-md transition"
+              disabled={isGenerating}
+              className={`px-4 py-2 text-white text-sm font-medium rounded-md transition ${
+                isGenerating
+                  ? 'bg-gray-400 cursor-not-allowed'
+                  : 'bg-sky-700 hover:bg-sky-800'
+              }`}
             >
-              Generar Semana
+              {isGenerating ? 'Generando...' : 'Generar Semana'}
             </button>
           )}
         </div>
