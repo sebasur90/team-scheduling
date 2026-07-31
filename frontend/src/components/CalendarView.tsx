@@ -206,14 +206,6 @@ export const CalendarView: React.FC = () => {
 
       const response = await turnosApi.generateWeek(mondayFormatted)
 
-      setGenerationResult({
-        status: response.data.status,
-        message: response.data.mensaje,
-        dias_con_advertencia: response.data.dias_con_advertencia || [],
-        dias_con_error: response.data.dias_con_error || [],
-        dias_salteados: response.data.dias_salteados || [],
-      })
-
       // Reload calendar after generation
       const turnosMap = new Map<string, TurnoAlmuerzoResponse>()
       const weekDays = []
@@ -234,6 +226,21 @@ export const CalendarView: React.FC = () => {
       )
 
       setTurnos(turnosMap)
+
+      setGenerationResult({
+        status: response.data.status,
+        message: response.data.mensaje,
+        dias_con_advertencia: response.data.dias_con_advertencia || [],
+        dias_con_error: response.data.dias_con_error || [],
+        dias_salteados: response.data.dias_salteados || [],
+      })
+
+      // Auto-close modal on success after 2 seconds
+      if (response.data.status === 'ok' || response.data.status === 'warning') {
+        setTimeout(() => {
+          setGenerationResult(null)
+        }, 2000)
+      }
     } catch (error: any) {
       console.error('Error generating week:', error)
       setGenerationResult({
