@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, status
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from datetime import datetime, date, timedelta
 from app.database import get_db
 from app.dependencies import get_admin_user
@@ -40,32 +40,43 @@ def _get_swaps_pendientes(db: Session) -> dict:
     """Obtiene swaps pendientes con detalles."""
     swaps = db.query(SwapSolicitud).filter(
         SwapSolicitud.estado == "pendiente"
+    ).options(
+        joinedload(SwapSolicitud.asignacion_origen).joinedload("turno_almuerzo").joinedload("franja_horaria"),
+        joinedload(SwapSolicitud.asignacion_receptor).joinedload("turno_almuerzo").joinedload("franja_horaria"),
+        joinedload(SwapSolicitud.colaborador_solicitante),
+        joinedload(SwapSolicitud.colaborador_receptor),
     ).order_by(SwapSolicitud.created_at.desc()).limit(10).all()
 
     items = []
     for swap in swaps:
-        franja_origen = None
-        franja_receptor = None
-        fecha = None
+        try:
+            franja_origen = None
+            franja_receptor = None
+            fecha = None
 
-        if swap.asignacion_origen and swap.asignacion_origen.turno_almuerzo:
-            turno_origen = swap.asignacion_origen.turno_almuerzo
-            fecha = turno_origen.fecha
-            franja_origen = f"{turno_origen.franja_horaria.hora_inicio.strftime('%H:%M')}–{turno_origen.franja_horaria.hora_fin.strftime('%H:%M')}"
+            if swap.asignacion_origen and swap.asignacion_origen.turno_almuerzo:
+                turno_origen = swap.asignacion_origen.turno_almuerzo
+                fecha = turno_origen.fecha
+                if turno_origen.franja_horaria:
+                    franja_origen = f"{turno_origen.franja_horaria.hora_inicio.strftime('%H:%M')}–{turno_origen.franja_horaria.hora_fin.strftime('%H:%M')}"
 
-        if swap.asignacion_receptor and swap.asignacion_receptor.turno_almuerzo:
-            turno_receptor = swap.asignacion_receptor.turno_almuerzo
-            franja_receptor = f"{turno_receptor.franja_horaria.hora_inicio.strftime('%H:%M')}–{turno_receptor.franja_horaria.hora_fin.strftime('%H:%M')}"
+            if swap.asignacion_receptor and swap.asignacion_receptor.turno_almuerzo:
+                turno_receptor = swap.asignacion_receptor.turno_almuerzo
+                if turno_receptor.franja_horaria:
+                    franja_receptor = f"{turno_receptor.franja_horaria.hora_inicio.strftime('%H:%M')}–{turno_receptor.franja_horaria.hora_fin.strftime('%H:%M')}"
 
-        items.append({
-            "id": swap.id,
-            "solicitante": swap.colaborador_solicitante.nombre if swap.colaborador_solicitante else "?",
-            "receptor": swap.colaborador_receptor.nombre if swap.colaborador_receptor else "?",
-            "fecha": fecha.isoformat() if fecha else None,
-            "franja_origen": franja_origen,
-            "franja_receptor": franja_receptor,
-            "hace": _format_tiempo_hace(swap.created_at),
-        })
+            items.append({
+                "id": swap.id,
+                "solicitante": swap.colaborador_solicitante.nombre if swap.colaborador_solicitante else "?",
+                "receptor": swap.colaborador_receptor.nombre if swap.colaborador_receptor else "?",
+                "fecha": fecha.isoformat() if fecha else None,
+                "franja_origen": franja_origen,
+                "franja_receptor": franja_receptor,
+                "hace": _format_tiempo_hace(swap.created_at),
+            })
+        except Exception as e:
+            logger.warning(f"Error procesando swap {swap.id}: {e}")
+            continue
 
     return {"count": len(items), "items": items}
 
