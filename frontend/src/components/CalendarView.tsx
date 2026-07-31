@@ -197,6 +197,7 @@ export const CalendarView: React.FC = () => {
 
   const handleCurrentWeek = () => {
     setSelectedWeekMonday(getMonday(new Date()))
+    setSelectedDayMobile(formatDate(new Date()))
   }
 
   const handleGenerarSemana = async () => {
