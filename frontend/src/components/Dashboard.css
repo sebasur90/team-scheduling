@@ -1,35 +1,38 @@
 .dashboard {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-  background-color: var(--color-gray-50);
+  background-color: #f0f9ff; /* sky-50 */
 }
 
 .dashboard-main {
-  flex: 1;
-  padding: var(--space-lg);
+  padding: 1rem;
 }
 
-.container {
-  max-width: 1280px;
-  margin: 0 auto;
+@media (min-width: 768px) {
+  .dashboard-main {
+    padding: 2rem;
+  }
 }
 
 .tabs {
   display: flex;
-  gap: var(--space-md);
-  margin-bottom: var(--space-lg);
-  border-bottom: 2px solid var(--color-gray-200);
+  gap: 1rem;
+  margin-bottom: 2rem;
+  border-bottom: 2px solid #e5e7eb;
   overflow-x: auto;
+}
+
+@media (max-width: 768px) {
+  .tabs {
+    gap: 0.5rem;
+  }
 }
 
 .tab-button {
   background: none;
   border: none;
-  padding: var(--space-md);
+  padding: 1rem;
   font-size: 1rem;
   font-weight: 500;
-  color: var(--color-gray-600);
+  color: #4b5563;
   cursor: pointer;
   border-bottom: 3px solid transparent;
   margin-bottom: -2px;
@@ -41,21 +44,6 @@
   gap: 0.5rem;
 }
 
-.badge-unread {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 20px;
-  height: 20px;
-  padding: 0 4px;
-  background-color: #ef4444;
-  color: white;
-  font-size: 0.7rem;
-  font-weight: 700;
-  border-radius: 10px;
-  margin-left: 4px;
-}
-
 .tab-button:hover {
   color: var(--color-primary);
 }
@@ -63,6 +51,28 @@
 .tab-button.active {
   color: var(--color-primary);
   border-bottom-color: var(--color-primary);
+}
+
+@media (max-width: 768px) {
+  .tab-button {
+    padding: 0.5rem;
+    font-size: 0.875rem;
+  }
+}
+
+.badge-unread {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 4px;
+  background-color: #dc2626;
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 700;
+  border-radius: 10px;
+  margin-left: 4px;
 }
 
 .tab-content {
@@ -77,20 +87,5 @@
   to {
     opacity: 1;
     transform: translateY(0);
-  }
-}
-
-@media (max-width: 768px) {
-  .dashboard-main {
-    padding: var(--space-md);
-  }
-
-  .tabs {
-    gap: var(--space-sm);
-  }
-
-  .tab-button {
-    padding: var(--space-sm);
-    font-size: 0.875rem;
   }
 }

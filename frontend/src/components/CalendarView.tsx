@@ -14,6 +14,8 @@ import { SwapResponseBanner } from './SwapResponseBanner'
 import './CalendarView.css'
 
 import { colaboradoresApi, type Colaborador } from '../api/colaboradores'
+import { DayStrip } from './DayStrip'
+import { DayDetailView } from './DayDetailView'
 
 interface GenerationResult {
   status: string
@@ -27,6 +29,7 @@ export const CalendarView: React.FC = () => {
   const { user } = useAuthContext()
   const { notificaciones } = useUserNotifications()
   const [selectedWeekMonday, setSelectedWeekMonday] = useState<Date>(getMonday(new Date()))
+  const [selectedDayMobile, setSelectedDayMobile] = useState<string>('')
   const [franjas, setFranjas] = useState<FranjaHoraria[]>([])
   const [turnos, setTurnos] = useState<Map<string, TurnoAlmuerzoResponse>>(new Map())
   const [diasNoLaborables, setDiasNoLaborables] = useState<Set<string>>(new Set())
@@ -157,6 +160,11 @@ export const CalendarView: React.FC = () => {
     }
 
     loadData()
+  }, [selectedWeekMonday])
+
+  // Initialize selected day for mobile view
+  useEffect(() => {
+    setSelectedDayMobile(formatDate(selectedWeekMonday))
   }, [selectedWeekMonday])
 
   const handlePreviousWeek = () => {
@@ -504,35 +512,98 @@ export const CalendarView: React.FC = () => {
 
   return (
     <div className="calendar-view">
-      <div className="calendar-header">
-        <h2>Calendario de Turnos</h2>
-        <div className="week-navigation">
-          <button className="btn btn-nav" onClick={handlePreviousWeek}>
+      <div className="flex flex-col gap-4 mb-4">
+        <h2 className="text-2xl font-bold text-slate-900">Calendario de Turnos</h2>
+
+        {/* Mobile week navigation - compact */}
+        <div className="md:hidden flex gap-2">
+          <button
+            onClick={handlePreviousWeek}
+            className="flex-1 px-3 py-2 bg-sky-700 hover:bg-sky-800 text-white text-sm font-medium rounded-md transition"
+          >
+            ← Ant
+          </button>
+          <button
+            onClick={handleCurrentWeek}
+            className="flex-1 px-3 py-2 bg-gray-700 hover:bg-gray-800 text-white text-sm font-medium rounded-md transition"
+          >
+            Hoy
+          </button>
+          <button
+            onClick={handleNextWeek}
+            className="flex-1 px-3 py-2 bg-sky-700 hover:bg-sky-800 text-white text-sm font-medium rounded-md transition"
+          >
+            Sig →
+          </button>
+        </div>
+
+        {/* Desktop week navigation - full text */}
+        <div className="hidden md:flex gap-3">
+          <button
+            onClick={handlePreviousWeek}
+            className="px-4 py-2 bg-sky-700 hover:bg-sky-800 text-white font-medium rounded-md transition"
+          >
             ← Semana Anterior
           </button>
-          <button className="btn btn-nav" onClick={handleCurrentWeek}>
+          <button
+            onClick={handleCurrentWeek}
+            className="px-4 py-2 bg-gray-700 hover:bg-gray-800 text-white font-medium rounded-md transition"
+          >
             Semana Actual
           </button>
-          <button className="btn btn-nav" onClick={handleNextWeek}>
+          <button
+            onClick={handleNextWeek}
+            className="px-4 py-2 bg-sky-700 hover:bg-sky-800 text-white font-medium rounded-md transition"
+          >
             Semana Siguiente →
           </button>
         </div>
-      </div>
 
-      <div className="week-info">
-        <span>
-          Semana del {weekDays[0].toLocaleDateString('es-ES')} al{' '}
-          {weekDays[4].toLocaleDateString('es-ES')}
-        </span>
-        {user?.rol === 'admin' && (
-          <button className="btn btn-primary btn-small" onClick={handleGenerarSemana}>Generar Semana</button>
-        )}
+        {/* Week info */}
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 bg-gray-100 rounded-lg p-3">
+          <span className="text-sm md:text-base text-slate-700 font-medium">
+            Semana del {weekDays[0].toLocaleDateString('es-ES')} al{' '}
+            {weekDays[4].toLocaleDateString('es-ES')}
+          </span>
+          {user?.rol === 'admin' && (
+            <button
+              onClick={handleGenerarSemana}
+              className="px-4 py-2 bg-sky-700 hover:bg-sky-800 text-white text-sm font-medium rounded-md transition"
+            >
+              Generar Semana
+            </button>
+          )}
+        </div>
       </div>
 
       <SwapPendingBanner notificaciones={notificaciones} />
       <SwapResponseBanner />
 
-      <div className="calendar-grid-container">
+      {/* Mobile view: Day strip + detail view */}
+      <div className="md:hidden px-4 mb-4">
+        <DayStrip
+          weekDays={weekDays}
+          selectedDay={selectedDayMobile}
+          onSelectDay={setSelectedDayMobile}
+          isDiaNoLaborable={isDiaNoLaborable}
+          formatDate={formatDate}
+          getDayName={getDayName}
+        />
+        {selectedDayMobile && (
+          <DayDetailView
+            selectedDate={new Date(selectedDayMobile)}
+            franjas={franjas}
+            turnos={turnos}
+            isDiaNoLaborable={isDiaNoLaborable(new Date(selectedDayMobile))}
+            formatDate={formatDate}
+            renderTurnoPills={renderTurnoPills}
+            renderVacacionesPills={renderVacacionesPills}
+          />
+        )}
+      </div>
+
+      {/* Desktop view: Full calendar table */}
+      <div className="hidden md:block calendar-grid-container">
         <table className="calendar-grid">
           <thead>
             <tr>

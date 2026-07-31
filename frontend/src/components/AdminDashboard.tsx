@@ -1,295 +1,220 @@
 import React, { useState } from 'react'
+import { useAuthContext } from '../contexts/AuthContext'
 import { AdminPanel } from './AdminPanel'
 import { CalendarView } from './CalendarView'
 import { SectoresPanel } from './SectoresPanel'
-import { TareasEspecialesPanel } from './TareasEspecialesPanel'
-import { Preferences } from './Preferences'
-import { PreferenciasUsuarios } from './PreferenciasUsuarios'
-import { Vacaciones } from './Vacaciones'
 import { ConfiguracionPanel } from './ConfiguracionPanel'
 import { useAdminAlerts } from '../hooks/useAdminAlerts'
-import './AdminDashboard.css'
+import { AdminTopBar } from './AdminTopBar'
+import { AdminBottomNav } from './AdminBottomNav'
 
-type TabType = 'inicio' | 'colaboradores' | 'tareas' | 'sectores' | 'calendario' | 'preferencias' | 'preferencias-usuarios' | 'vacaciones' | 'notificaciones' | 'configuracion'
+type TabType = 'resumen' | 'colaboradores' | 'turnos' | 'sectores' | 'config' | 'notificaciones'
 
 export const AdminDashboard: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<TabType>('inicio')
+  const { user, logout } = useAuthContext()
+  const [activeTab, setActiveTab] = useState<TabType>('resumen')
   const { alerts } = useAdminAlerts(true)
-
-  const getStatColor = (count: number): string => {
-    return count > 0 ? 'stat-alert' : 'stat-ok'
-  }
 
   const totalAlerts = (alerts?.swaps_pendientes?.count || 0) + (alerts?.cobertura_en_riesgo?.count || 0)
 
+  const getStatBgColor = (count: number): string => {
+    return count > 0 ? 'bg-red-500' : 'bg-emerald-500'
+  }
+
+  const getStatBorderColor = (type: string, count: number): string => {
+    if (type === 'swaps' && count > 0) return 'border-l-4 border-amber-500'
+    if (type === 'cobertura' && count > 0) return 'border-l-4 border-red-500'
+    return 'border-l-4 border-emerald-500'
+  }
+
   const renderContent = () => {
     switch (activeTab) {
-      case 'inicio':
+      case 'resumen':
         return (
-          <div className="dashboard-inicio">
-            <h2>Inicio</h2>
-            <div className="dashboard-stats">
-              <div className={`stat-card ${getStatColor(alerts?.swaps_pendientes.count || 0)}`}>
-                <div className="stat-number">{alerts?.swaps_pendientes.count || 0}</div>
-                <div className="stat-label">Swaps pendientes</div>
+          <div className="bg-white rounded-xl p-6 md:p-8">
+            <h2 className="text-2xl font-bold text-slate-900 mb-6">Panel de Resumen</h2>
+
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+              <div className={`${getStatBgColor(alerts?.swaps_pendientes.count || 0)} rounded-lg p-4 text-white text-center`}>
+                <div className="text-3xl font-bold">{alerts?.swaps_pendientes.count || 0}</div>
+                <div className="text-sm opacity-90">Swaps pendientes</div>
               </div>
-              <div className={`stat-card ${getStatColor(alerts?.turnos_sin_confirmar.count || 0)}`}>
-                <div className="stat-number">{alerts?.turnos_sin_confirmar.count || 0}</div>
-                <div className="stat-label">Sin confirmar</div>
+              <div className={`${getStatBgColor(alerts?.turnos_sin_confirmar.count || 0)} rounded-lg p-4 text-white text-center`}>
+                <div className="text-3xl font-bold">{alerts?.turnos_sin_confirmar.count || 0}</div>
+                <div className="text-sm opacity-90">Sin confirmar</div>
               </div>
-              <div className={`stat-card ${getStatColor(alerts?.cobertura_en_riesgo.count || 0)}`}>
-                <div className="stat-number">{alerts?.cobertura_en_riesgo.count || 0}</div>
-                <div className="stat-label">Cobertura en riesgo</div>
+              <div className={`${getStatBgColor(alerts?.cobertura_en_riesgo.count || 0)} rounded-lg p-4 text-white text-center`}>
+                <div className="text-3xl font-bold">{alerts?.cobertura_en_riesgo.count || 0}</div>
+                <div className="text-sm opacity-90">Cobertura en riesgo</div>
               </div>
-              <div className="stat-card stat-ok">
-                <div className="stat-number">{alerts?.colaboradores_activos || 0}</div>
-                <div className="stat-label">Colaboradores activos</div>
+              <div className="bg-emerald-500 rounded-lg p-4 text-white text-center">
+                <div className="text-3xl font-bold">{alerts?.colaboradores_activos || 0}</div>
+                <div className="text-sm opacity-90">Colaboradores activos</div>
               </div>
             </div>
 
             {totalAlerts > 0 ? (
-              <div className="alerts-feed">
-                <h3>⚠️ Requieren atención</h3>
-                {alerts?.swaps_pendientes.count! > 0 && (
-                  <div className="alert-section alert-critical">
-                    <div className="alert-header">
-                      <span className="alert-icon">↔️</span>
-                      <span className="alert-title">Swaps pendientes ({alerts.swaps_pendientes.count})</span>
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-red-600 mb-4">⚠️ Requieren atención</h3>
+
+                {(alerts?.swaps_pendientes?.count || 0) > 0 && (
+                  <div className={`bg-amber-50 rounded-lg p-4 ${getStatBorderColor('swaps', alerts?.swaps_pendientes?.count || 0)}`}>
+                    <div className="font-semibold text-slate-900 mb-3">
+                      ↔️ Swaps pendientes ({alerts?.swaps_pendientes?.count || 0})
                     </div>
-                    {alerts.swaps_pendientes.items.map((item: any) => (
-                      <div key={item.id} className="alert-item">
-                        <span className="alert-desc">{item.solicitante} ↔️ {item.receptor}</span>
-                        <span className="alert-time">{item.hace}</span>
-                      </div>
-                    ))}
-                    <button className="btn-view" onClick={() => setActiveTab('notificaciones')}>Ver →</button>
+                    <div className="space-y-2">
+                      {alerts?.swaps_pendientes?.items?.map((item: any) => (
+                        <div key={item.id} className="flex justify-between items-center text-sm text-slate-700">
+                          <span>{item.solicitante} ↔️ {item.receptor}</span>
+                          <span className="text-xs text-slate-500">{item.hace}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <button
+                      onClick={() => setActiveTab('notificaciones')}
+                      className="mt-3 w-full bg-sky-700 hover:bg-sky-800 text-white py-2 rounded-md text-sm font-medium transition"
+                    >
+                      Ver →
+                    </button>
                   </div>
                 )}
 
-                {alerts?.cobertura_en_riesgo.count! > 0 && (
-                  <div className="alert-section alert-critical">
-                    <div className="alert-header">
-                      <span className="alert-icon">⚠️</span>
-                      <span className="alert-title">Cobertura en riesgo ({alerts.cobertura_en_riesgo.count})</span>
+                {(alerts?.cobertura_en_riesgo?.count || 0) > 0 && (
+                  <div className={`bg-red-50 rounded-lg p-4 ${getStatBorderColor('cobertura', alerts?.cobertura_en_riesgo?.count || 0)}`}>
+                    <div className="font-semibold text-slate-900 mb-3">
+                      🚨 Cobertura en riesgo ({alerts?.cobertura_en_riesgo?.count || 0})
                     </div>
-                    {alerts.cobertura_en_riesgo.items.map((item: any, idx: number) => (
-                      <div key={idx} className="alert-item">
-                        <span className="alert-desc">{item.fecha} - {item.franja}</span>
-                        <span className={`alert-status ${item.estado}`}>{item.estado}</span>
-                      </div>
-                    ))}
-                    <button className="btn-view" onClick={() => setActiveTab('calendario')}>Ver →</button>
+                    <div className="space-y-2">
+                      {alerts?.cobertura_en_riesgo?.items?.map((item: any, idx: number) => (
+                        <div key={idx} className="flex justify-between items-center text-sm text-slate-700">
+                          <span>{item.fecha} - {item.franja}</span>
+                          <span className="px-2 py-1 bg-red-200 text-red-800 rounded text-xs font-medium">{item.estado}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <button
+                      onClick={() => setActiveTab('turnos')}
+                      className="mt-3 w-full bg-sky-700 hover:bg-sky-800 text-white py-2 rounded-md text-sm font-medium transition"
+                    >
+                      Ver →
+                    </button>
                   </div>
                 )}
 
-                {alerts?.turnos_sin_confirmar.count! > 0 && (
-                  <div className="alert-section alert-warning">
-                    <div className="alert-header">
-                      <span className="alert-icon">⏳</span>
-                      <span className="alert-title">Sin confirmar ({alerts.turnos_sin_confirmar.count})</span>
+                {(alerts?.turnos_sin_confirmar?.count || 0) > 0 && (
+                  <div className="bg-yellow-50 border-l-4 border-amber-500 rounded-lg p-4">
+                    <div className="font-semibold text-slate-900 mb-3">
+                      ⏳ Sin confirmar ({alerts?.turnos_sin_confirmar?.count || 0})
                     </div>
-                    {alerts.turnos_sin_confirmar.items.map((item: any, idx: number) => (
-                      <div key={idx} className="alert-item">
-                        <span className="alert-desc">{item.colaborador} - {item.fecha}</span>
-                        <span className="alert-franja">{item.franja}</span>
-                      </div>
-                    ))}
-                    <button className="btn-view" onClick={() => setActiveTab('calendario')}>Ver →</button>
+                    <div className="space-y-2">
+                      {alerts?.turnos_sin_confirmar?.items?.map((item: any, idx: number) => (
+                        <div key={idx} className="flex justify-between items-center text-sm text-slate-700">
+                          <span>{item.colaborador} - {item.fecha}</span>
+                          <span className="px-2 py-1 bg-yellow-200 text-yellow-800 rounded text-xs font-medium">{item.franja}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <button
+                      onClick={() => setActiveTab('turnos')}
+                      className="mt-3 w-full bg-sky-700 hover:bg-sky-800 text-white py-2 rounded-md text-sm font-medium transition"
+                    >
+                      Ver →
+                    </button>
                   </div>
                 )}
               </div>
             ) : (
-              <div className="alerts-ok">
-                <div className="ok-icon">✓</div>
-                <div className="ok-text">Todo en orden</div>
+              <div className="bg-emerald-50 border-2 border-dashed border-emerald-300 rounded-lg p-8 text-center">
+                <div className="text-4xl mb-3">✓</div>
+                <div className="text-emerald-700 font-semibold">Todo en orden</div>
               </div>
             )}
           </div>
         )
+
       case 'colaboradores':
         return (
-          <div className="dashboard-section">
+          <div className="bg-white rounded-xl p-6 md:p-8">
             <AdminPanel />
           </div>
         )
-      case 'tareas':
+
+      case 'turnos':
         return (
-          <div className="dashboard-section">
-            <TareasEspecialesPanel />
-          </div>
-        )
-      case 'sectores':
-        return (
-          <div className="dashboard-section">
-            <SectoresPanel />
-          </div>
-        )
-      case 'calendario':
-        return (
-          <div className="dashboard-section">
+          <div className="bg-white rounded-xl p-6 md:p-8">
             <CalendarView />
           </div>
         )
-      case 'preferencias':
+
+      case 'sectores':
         return (
-          <div className="dashboard-section">
-            <Preferences />
+          <div className="bg-white rounded-xl p-6 md:p-8">
+            <SectoresPanel />
           </div>
         )
-      case 'preferencias-usuarios':
+
+      case 'config':
         return (
-          <div className="dashboard-section">
-            <PreferenciasUsuarios />
+          <div className="bg-white rounded-xl p-6 md:p-8">
+            <ConfiguracionPanel />
           </div>
         )
-      case 'vacaciones':
-        return (
-          <div className="dashboard-section">
-            <Vacaciones mode="admin" />
-          </div>
-        )
+
       case 'notificaciones':
         return (
-          <div className="dashboard-section">
-            <h2>Notificaciones y Swaps Pendientes</h2>
+          <div className="bg-white rounded-xl p-6 md:p-8">
+            <h2 className="text-2xl font-bold text-slate-900 mb-6">Notificaciones y Swaps Pendientes</h2>
             {alerts && alerts.swaps_pendientes.count > 0 ? (
               <div>
-                <h3>↔️ Swaps Pendientes ({alerts.swaps_pendientes.count})</h3>
-                <div style={{ display: 'grid', gap: '1rem', marginBottom: '2rem' }}>
+                <h3 className="text-lg font-semibold text-slate-900 mb-4">↔️ Swaps Pendientes ({alerts.swaps_pendientes.count})</h3>
+                <div className="space-y-3">
                   {alerts.swaps_pendientes.items.map((item: any) => (
-                    <div key={item.id} style={{
-                      padding: '1rem',
-                      border: '1px solid #e5e7eb',
-                      borderRadius: '6px',
-                      backgroundColor: '#fef3c7',
-                      borderLeft: '4px solid #f59e0b',
-                    }}>
-                      <div style={{ fontWeight: 'bold', marginBottom: '0.5rem' }}>
+                    <div key={item.id} className="border-l-4 border-amber-500 bg-amber-50 p-4 rounded">
+                      <div className="font-semibold text-slate-900 mb-2">
                         {item.solicitante} ↔️ {item.receptor}
                       </div>
-                      <div style={{ fontSize: '0.9rem', color: '#666' }}>
+                      <div className="text-sm text-slate-600">
                         📅 {item.fecha} • {item.franja_origen} ↔️ {item.franja_receptor}
                       </div>
-                      <div style={{ fontSize: '0.85rem', color: '#999', marginTop: '0.5rem' }}>
-                        Hace {item.hace}
-                      </div>
+                      <div className="text-xs text-slate-500 mt-2">Hace {item.hace}</div>
                     </div>
                   ))}
                 </div>
               </div>
             ) : (
-              <div style={{
-                padding: '2rem',
-                textAlign: 'center',
-                backgroundColor: '#f0fdf4',
-                borderRadius: '6px',
-                color: '#16a34a',
-              }}>
-                ✓ No hay swaps pendientes
+              <div className="bg-emerald-50 border-2 border-dashed border-emerald-300 rounded-lg p-8 text-center">
+                <div className="text-2xl mb-2">✓</div>
+                <div className="text-emerald-700 font-semibold">No hay swaps pendientes</div>
               </div>
             )}
           </div>
         )
-      case 'configuracion':
-        return (
-          <div className="dashboard-section">
-            <ConfiguracionPanel />
-          </div>
-        )
+
       default:
         return null
     }
   }
 
+  if (!user) {
+    return <div className="p-4 text-center">Cargando...</div>
+  }
+
   return (
-    <div className="admin-dashboard">
-      <div className="dashboard-header">
-        <h1>Panel de Administración</h1>
+    <div className="admin-dashboard flex flex-col h-screen bg-gray-50">
+      <AdminTopBar user={user} onLogout={logout} />
+
+      <div className="hidden md:block flex-shrink-0 pt-20 pb-4 px-6">
+        <h1 className="text-3xl font-bold text-slate-900">Panel de Administración</h1>
       </div>
 
-      <div className="dashboard-container">
-        <aside className="dashboard-sidebar">
-          <nav className="dashboard-nav">
-            <button
-              className={`nav-item ${activeTab === 'inicio' ? 'active' : ''}`}
-              onClick={() => setActiveTab('inicio')}
-            >
-              <span className="nav-icon">🏠</span>
-              Inicio
-            </button>
-            <button
-              className={`nav-item ${activeTab === 'colaboradores' ? 'active' : ''}`}
-              onClick={() => setActiveTab('colaboradores')}
-            >
-              <span className="nav-icon">👥</span>
-              Colaboradores
-            </button>
-            <button
-              className={`nav-item ${activeTab === 'tareas' ? 'active' : ''}`}
-              onClick={() => setActiveTab('tareas')}
-            >
-              <span className="nav-icon">✓</span>
-              Tareas Especiales
-            </button>
-            <button
-              className={`nav-item ${activeTab === 'sectores' ? 'active' : ''}`}
-              onClick={() => setActiveTab('sectores')}
-            >
-              <span className="nav-icon">📋</span>
-              Sectores
-            </button>
-            <button
-              className={`nav-item ${activeTab === 'calendario' ? 'active' : ''}`}
-              onClick={() => setActiveTab('calendario')}
-            >
-              <span className="nav-icon">📅</span>
-              Calendario
-            </button>
-            <button
-              className={`nav-item ${activeTab === 'preferencias' ? 'active' : ''}`}
-              onClick={() => setActiveTab('preferencias')}
-            >
-              <span className="nav-icon">❤️</span>
-              Mi Preferencia
-            </button>
-            <button
-              className={`nav-item ${activeTab === 'preferencias-usuarios' ? 'active' : ''}`}
-              onClick={() => setActiveTab('preferencias-usuarios')}
-            >
-              <span className="nav-icon">📋</span>
-              Preferencias de Usuarios
-            </button>
-            <button
-              className={`nav-item ${activeTab === 'vacaciones' ? 'active' : ''}`}
-              onClick={() => setActiveTab('vacaciones')}
-            >
-              <span className="nav-icon">🏖️</span>
-              Vacaciones
-            </button>
-            <button
-              className={`nav-item ${activeTab === 'notificaciones' ? 'active' : ''}`}
-              onClick={() => setActiveTab('notificaciones')}
-            >
-              <span className="nav-icon">🔔</span>
-              Notificaciones
-              {totalAlerts > 0 && (
-                <span className="badge badge-alert">{totalAlerts}</span>
-              )}
-            </button>
-            <button
-              className={`nav-item ${activeTab === 'configuracion' ? 'active' : ''}`}
-              onClick={() => setActiveTab('configuracion')}
-            >
-              <span className="nav-icon">⚙️</span>
-              Configuración
-            </button>
-          </nav>
-        </aside>
+      <main className="flex-1 overflow-y-auto pt-16 md:pt-0 pb-24 md:pb-6 px-4 md:px-8">
+        {renderContent()}
+      </main>
 
-        <main className="dashboard-content">
-          {renderContent()}
-        </main>
-      </div>
+      <AdminBottomNav
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+      />
     </div>
   )
 }
