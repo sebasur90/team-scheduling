@@ -25,11 +25,25 @@ interface GenerationResult {
   dias_salteados: Array<{ fecha: string; motivo: string }>
 }
 
+function formatDateHelper(date: Date): string {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+function getMondayHelper(date: Date): Date {
+  const d = new Date(date)
+  const day = d.getDay()
+  const diff = d.getDate() - day + (day === 0 ? -6 : 1)
+  return new Date(d.setDate(diff))
+}
+
 export const CalendarView: React.FC = () => {
   const { user } = useAuthContext()
   const { notificaciones } = useUserNotifications()
-  const [selectedWeekMonday, setSelectedWeekMonday] = useState<Date>(getMonday(new Date()))
-  const [selectedDayMobile, setSelectedDayMobile] = useState<string>('')
+  const [selectedWeekMonday, setSelectedWeekMonday] = useState<Date>(getMondayHelper(new Date()))
+  const [selectedDayMobile, setSelectedDayMobile] = useState<string>(formatDateHelper(new Date()))
   const [franjas, setFranjas] = useState<FranjaHoraria[]>([])
   const [turnos, setTurnos] = useState<Map<string, TurnoAlmuerzoResponse>>(new Map())
   const [diasNoLaborables, setDiasNoLaborables] = useState<Set<string>>(new Set())
@@ -53,30 +67,14 @@ export const CalendarView: React.FC = () => {
   } | null>(null)
   const [swapStatusModal, setSwapStatusModal] = useState<SwapResponse | null>(null)
 
-  function getMonday(date: Date): Date {
-    const d = new Date(date)
-    const day = d.getDay()
-    const diff = d.getDate() - day + (day === 0 ? -6 : 1)
-    return new Date(d.setDate(diff))
-  }
-
-  function formatDate(date: Date): string {
-    const year = date.getFullYear()
-    const month = String(date.getMonth() + 1).padStart(2, '0')
-    const day = String(date.getDate()).padStart(2, '0')
-    return `${year}-${month}-${day}`
-  }
+  // Alias para usar las funciones helper dentro del componente
+  const getMonday = getMondayHelper
+  const formatDate = formatDateHelper
 
   function getDayName(date: Date): string {
     const days = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sab']
     return days[date.getDay()]
   }
-
-  // Initialize mobile day view with today's date
-  useEffect(() => {
-    const today = new Date()
-    setSelectedDayMobile(formatDate(today))
-  }, [])
 
   const reloadTurnos = useCallback(async () => {
     const turnosMap = new Map<string, TurnoAlmuerzoResponse>()

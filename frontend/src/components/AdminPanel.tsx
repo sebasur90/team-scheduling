@@ -964,53 +964,115 @@ export function AdminPanel({ activeTab = 'colaboradores' }: AdminPanelProps) {
           {colabLoading ? (
             <div className="loading">Cargando colaboradores...</div>
           ) : (
-            <div className="table-container">
-              <table className="admin-table">
-                <thead>
-                  <tr>
-                    <th>Nombre</th>
-                    <th>Sector</th>
-                    <th>Rol</th>
-                    <th>Estado</th>
-                    <th>Tareas Especiales</th>
-                    <th>Acciones</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {colaboradores.map((colab) => {
-                    const tareasHabilitadas = tareasEspeciales
-                      .filter((t) => colab.tarea_tipo_ids?.includes(t.id))
-                      .map((t) => t.nombre)
-                      .join(', ');
-                    return (
-                      <tr key={colab.id}>
-                        <td>{colab.nombre}</td>
-                        <td>{colab.sector_nombre || getSectorName(colab.sector_id)}</td>
-                        <td>{colab.rol}</td>
-                        <td>{colab.estado_atencion}</td>
-                        <td>{tareasHabilitadas || '–'}</td>
-                        <td>
+            <>
+              {/* Desktop Table View */}
+              <div className="hidden md:block table-container">
+                <table className="admin-table">
+                  <thead>
+                    <tr>
+                      <th>Nombre</th>
+                      <th>Sector</th>
+                      <th>Rol</th>
+                      <th>Estado</th>
+                      <th>Tareas Especiales</th>
+                      <th>Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {colaboradores.map((colab) => {
+                      const tareasHabilitadas = tareasEspeciales
+                        .filter((t) => colab.tarea_tipo_ids?.includes(t.id))
+                        .map((t) => t.nombre)
+                        .join(', ');
+                      return (
+                        <tr key={colab.id}>
+                          <td>{colab.nombre}</td>
+                          <td>{colab.sector_nombre || getSectorName(colab.sector_id)}</td>
+                          <td>{colab.rol}</td>
+                          <td>{colab.estado_atencion}</td>
+                          <td>{tareasHabilitadas || '–'}</td>
+                          <td>
+                            <button
+                              type="button"
+                              className="btn-icon"
+                              onClick={() => handleEditColaborador(colab)}
+                            >
+                              ✏
+                            </button>
+                            <button
+                              type="button"
+                              className="btn-icon btn-delete"
+                              onClick={() => handleDeleteColaborador(colab.id)}
+                            >
+                              🗑
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Mobile Card View */}
+              <div className="md:hidden space-y-3">
+                {colaboradores.map((colab) => {
+                  const tareasHabilitadas = tareasEspeciales
+                    .filter((t) => colab.tarea_tipo_ids?.includes(t.id))
+                    .map((t) => t.nombre)
+                    .join(', ');
+                  return (
+                    <div
+                      key={colab.id}
+                      className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm"
+                    >
+                      <div className="flex justify-between items-start mb-3">
+                        <div>
+                          <h4 className="font-semibold text-gray-900">{colab.nombre}</h4>
+                          <p className="text-sm text-gray-500">
+                            {colab.sector_nombre || getSectorName(colab.sector_id)}
+                          </p>
+                        </div>
+                        <div className="flex gap-2">
                           <button
                             type="button"
-                            className="btn-icon"
+                            className="p-2 hover:bg-gray-100 rounded-md transition"
                             onClick={() => handleEditColaborador(colab)}
+                            title="Editar"
                           >
-                            ✏
+                            ✏️
                           </button>
                           <button
                             type="button"
-                            className="btn-icon btn-delete"
+                            className="p-2 hover:bg-red-50 rounded-md transition"
                             onClick={() => handleDeleteColaborador(colab.id)}
+                            title="Eliminar"
                           >
                             🗑
                           </button>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3 text-sm">
+                        <div>
+                          <span className="text-gray-500">Rol:</span>
+                          <p className="font-medium text-gray-900">{colab.rol}</p>
+                        </div>
+                        <div>
+                          <span className="text-gray-500">Estado:</span>
+                          <p className="font-medium text-gray-900">{colab.estado_atencion}</p>
+                        </div>
+                      </div>
+                      {tareasHabilitadas && (
+                        <div className="mt-3 pt-3 border-t border-gray-200">
+                          <span className="text-gray-500 text-sm">Tareas:</span>
+                          <p className="text-sm text-gray-700">{tareasHabilitadas}</p>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </>
           )}
         </div>
       )}
