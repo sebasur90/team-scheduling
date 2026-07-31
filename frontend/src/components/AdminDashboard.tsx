@@ -63,7 +63,7 @@ export const AdminDashboard: React.FC = () => {
                         <span className="alert-time">{item.hace}</span>
                       </div>
                     ))}
-                    <button className="btn-view" onClick={() => setActiveTab('colaboradores')}>Ver →</button>
+                    <button className="btn-view" onClick={() => setActiveTab('notificaciones')}>Ver →</button>
                   </div>
                 )}
 
