@@ -639,10 +639,10 @@ export const CalendarView: React.FC = () => {
         />
         {selectedDayMobile && (
           <DayDetailView
-            selectedDate={new Date(selectedDayMobile)}
+            selectedDate={new Date(selectedDayMobile + 'T00:00:00Z')}
             franjas={franjas}
             turnos={turnos}
-            isDiaNoLaborable={isDiaNoLaborable(new Date(selectedDayMobile))}
+            isDiaNoLaborable={isDiaNoLaborable(new Date(selectedDayMobile + 'T00:00:00Z'))}
             formatDate={formatDate}
             renderTurnoPills={renderTurnoPills}
             renderVacacionesPills={renderVacacionesPills}
