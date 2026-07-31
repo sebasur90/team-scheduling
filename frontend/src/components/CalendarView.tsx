@@ -72,6 +72,12 @@ export const CalendarView: React.FC = () => {
     return days[date.getDay()]
   }
 
+  // Initialize mobile day view with today's date
+  useEffect(() => {
+    const today = new Date()
+    setSelectedDayMobile(formatDate(today))
+  }, [])
+
   const reloadTurnos = useCallback(async () => {
     const turnosMap = new Map<string, TurnoAlmuerzoResponse>()
     const weekDaysList: Date[] = []
