@@ -14,10 +14,30 @@ type PeriodType = 'semanal' | 'mensual' | 'personalizado'
 export const ReportesPanel: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabType>('ausencias')
   const [periodType, setPeriodType] = useState<PeriodType>('semanal')
-  const [fechaInicio, setFechaInicio] = useState('')
-  const [fechaFin, setFechaFin] = useState('')
-  const [sectorId, setSectorId] = useState<number | undefined>()
   const [sectores, setSectores] = useState<Sector[]>([])
+  const [sectorId, setSectorId] = useState<number | undefined>()
+
+  // Inicializar fechas desde el inicio
+  const getInitialDates = (period: PeriodType) => {
+    const today = new Date()
+    const inicio = new Date(today)
+    const fin = new Date(today)
+
+    if (period === 'semanal') {
+      inicio.setDate(today.getDate() - 7)
+    } else if (period === 'mensual') {
+      inicio.setDate(1)
+    }
+
+    return {
+      inicio: inicio.toISOString().split('T')[0],
+      fin: fin.toISOString().split('T')[0],
+    }
+  }
+
+  const initialDates = getInitialDates('semanal')
+  const [fechaInicio, setFechaInicio] = useState(initialDates.inicio)
+  const [fechaFin, setFechaFin] = useState(initialDates.fin)
 
   // Cargar sectores
   useEffect(() => {
@@ -32,20 +52,11 @@ export const ReportesPanel: React.FC = () => {
     fetchSectores()
   }, [])
 
-  // Inicializar fechas basado en período
+  // Actualizar fechas cuando cambia el período
   useEffect(() => {
-    const today = new Date()
-    const inicio = new Date(today)
-    const fin = new Date(today)
-
-    if (periodType === 'semanal') {
-      inicio.setDate(today.getDate() - 7)
-    } else if (periodType === 'mensual') {
-      inicio.setDate(1)
-    }
-
-    setFechaInicio(inicio.toISOString().split('T')[0])
-    setFechaFin(fin.toISOString().split('T')[0])
+    const dates = getInitialDates(periodType)
+    setFechaInicio(dates.inicio)
+    setFechaFin(dates.fin)
   }, [periodType])
 
   // Fetch data para cada sección
