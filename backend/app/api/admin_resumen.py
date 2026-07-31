@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session, joinedload
-from datetime import datetime, date, timedelta
+from datetime import datetime, date, timedelta, timezone
 from app.database import get_db
 from app.dependencies import get_admin_user
 from app.models.colaborador import Colaborador
@@ -20,7 +20,10 @@ router = APIRouter(prefix="/admin", tags=["admin_resumen"], redirect_slashes=Fal
 
 def _format_tiempo_hace(created_at: datetime) -> str:
     """Formatea el tiempo transcurrido como '2h', '30m', etc."""
-    ahora = datetime.utcnow()
+    ahora = datetime.now(timezone.utc)
+    # Asegurar que created_at es timezone-aware
+    if created_at.tzinfo is None:
+        created_at = created_at.replace(tzinfo=timezone.utc)
     diff = ahora - created_at
     minutos = diff.total_seconds() / 60
 
@@ -41,8 +44,12 @@ def _get_swaps_pendientes(db: Session) -> dict:
     swaps = db.query(SwapSolicitud).filter(
         SwapSolicitud.estado == "pendiente"
     ).options(
-        joinedload(SwapSolicitud.asignacion_origen).joinedload("turno_almuerzo").joinedload("franja_horaria"),
-        joinedload(SwapSolicitud.asignacion_receptor).joinedload("turno_almuerzo").joinedload("franja_horaria"),
+        joinedload(SwapSolicitud.asignacion_origen)
+            .joinedload(AsignacionAlmuerzo.turno_almuerzo)
+            .joinedload(TurnoAlmuerzo.franja_horaria),
+        joinedload(SwapSolicitud.asignacion_receptor)
+            .joinedload(AsignacionAlmuerzo.turno_almuerzo)
+            .joinedload(TurnoAlmuerzo.franja_horaria),
         joinedload(SwapSolicitud.colaborador_solicitante),
         joinedload(SwapSolicitud.colaborador_receptor),
     ).order_by(SwapSolicitud.created_at.desc()).limit(10).all()
