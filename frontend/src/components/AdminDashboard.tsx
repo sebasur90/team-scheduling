@@ -4,6 +4,7 @@ import { AdminPanel } from './AdminPanel'
 import { CalendarView } from './CalendarView'
 import { Vacaciones } from './Vacaciones'
 import { PreferenciasUsuarios } from './PreferenciasUsuarios'
+import { ReportesPanel } from './ReportesPanel'
 import { useAdminAlerts } from '../hooks/useAdminAlerts'
 import { AdminTopBar } from './AdminTopBar'
 import { AdminBottomNav, type AdminTabType } from './AdminBottomNav'
@@ -157,6 +158,13 @@ export const AdminDashboard: React.FC = () => {
           <div className="bg-white rounded-xl p-6 md:p-8">
             <h2 className="text-2xl font-bold text-slate-900 mb-6">Preferencias de Franja</h2>
             <PreferenciasUsuarios />
+          </div>
+        )
+
+      case 'reportes':
+        return (
+          <div className="bg-white rounded-xl p-6 md:p-8">
+            <ReportesPanel />
           </div>
         )
 
