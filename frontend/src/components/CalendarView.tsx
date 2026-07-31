@@ -225,7 +225,28 @@ export const CalendarView: React.FC = () => {
         })
       )
 
+      // Force re-render by setting turnos state
       setTurnos(turnosMap)
+
+      // Find first day with turnos to display
+      let firstDayWithTurnos = null
+      for (let i = 0; i < 5; i++) {
+        const date = new Date(monday)
+        date.setDate(date.getDate() + i)
+        const dateStr = formatDate(date)
+        const dayHasTurnos = Array.from(turnosMap.values()).some(
+          (turno) => turno.fecha === dateStr || turno.fecha?.startsWith(dateStr)
+        )
+        if (dayHasTurnos) {
+          firstDayWithTurnos = dateStr
+          break
+        }
+      }
+
+      // Select first day with turnos, or keep current day
+      if (firstDayWithTurnos) {
+        setSelectedDayMobile(firstDayWithTurnos)
+      }
 
       setGenerationResult({
         status: response.data.status,
