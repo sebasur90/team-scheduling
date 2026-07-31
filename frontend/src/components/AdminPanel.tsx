@@ -1016,61 +1016,76 @@ export function AdminPanel({ activeTab = 'colaboradores' }: AdminPanelProps) {
 
               {/* Mobile Card View */}
               <div className="md:hidden space-y-3">
-                {colaboradores.map((colab) => {
-                  const tareasHabilitadas = tareasEspeciales
-                    .filter((t) => colab.tarea_tipo_ids?.includes(t.id))
-                    .map((t) => t.nombre)
-                    .join(', ');
-                  return (
-                    <div
-                      key={colab.id}
-                      className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm"
-                    >
-                      <div className="flex justify-between items-start mb-3">
-                        <div>
-                          <h4 className="font-semibold text-gray-900">{colab.nombre}</h4>
-                          <p className="text-sm text-gray-500">
-                            {colab.sector_nombre || getSectorName(colab.sector_id)}
-                          </p>
-                        </div>
-                        <div className="flex gap-2">
-                          <button
-                            type="button"
-                            className="p-2 hover:bg-gray-100 rounded-md transition"
-                            onClick={() => handleEditColaborador(colab)}
-                            title="Editar"
-                          >
-                            ✏️
-                          </button>
-                          <button
-                            type="button"
-                            className="p-2 hover:bg-red-50 rounded-md transition"
-                            onClick={() => handleDeleteColaborador(colab.id)}
-                            title="Eliminar"
-                          >
-                            🗑
-                          </button>
+                {colaboradores
+                  .sort((a, b) => a.nombre.localeCompare(b.nombre))
+                  .map((colab) => {
+                    const sector = sectores.find((s) => s.id === colab.sector_id);
+                    const sectorColor = sector?.color || '#999999';
+                    const tareasHabilitadas = tareasEspeciales
+                      .filter((t) => colab.tarea_tipo_ids?.includes(t.id))
+                      .map((t) => t.nombre)
+                      .join(', ');
+                    return (
+                      <div
+                        key={colab.id}
+                        className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition"
+                      >
+                        {/* Sector color bar */}
+                        <div
+                          className="h-1"
+                          style={{ backgroundColor: sectorColor }}
+                        />
+                        <div className="p-4">
+                          <div className="flex justify-between items-start mb-3">
+                            <div className="flex-1">
+                              <h4 className="font-semibold text-gray-900">{colab.nombre}</h4>
+                              <p className="text-sm text-gray-500 flex items-center gap-2">
+                                <span
+                                  className="inline-block w-2 h-2 rounded-full"
+                                  style={{ backgroundColor: sectorColor }}
+                                />
+                                {colab.sector_nombre || getSectorName(colab.sector_id)}
+                              </p>
+                            </div>
+                            <div className="flex gap-2">
+                              <button
+                                type="button"
+                                className="p-2 hover:bg-gray-100 rounded-md transition"
+                                onClick={() => handleEditColaborador(colab)}
+                                title="Editar"
+                              >
+                                ✏️
+                              </button>
+                              <button
+                                type="button"
+                                className="p-2 hover:bg-red-50 rounded-md transition"
+                                onClick={() => handleDeleteColaborador(colab.id)}
+                                title="Eliminar"
+                              >
+                                🗑
+                              </button>
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-2 gap-3 text-sm">
+                            <div>
+                              <span className="text-gray-500">Rol:</span>
+                              <p className="font-medium text-gray-900">{colab.rol}</p>
+                            </div>
+                            <div>
+                              <span className="text-gray-500">Estado:</span>
+                              <p className="font-medium text-gray-900">{colab.estado_atencion}</p>
+                            </div>
+                          </div>
+                          {tareasHabilitadas && (
+                            <div className="mt-3 pt-3 border-t border-gray-200">
+                              <span className="text-gray-500 text-sm">Tareas:</span>
+                              <p className="text-sm text-gray-700">{tareasHabilitadas}</p>
+                            </div>
+                          )}
                         </div>
                       </div>
-                      <div className="grid grid-cols-2 gap-3 text-sm">
-                        <div>
-                          <span className="text-gray-500">Rol:</span>
-                          <p className="font-medium text-gray-900">{colab.rol}</p>
-                        </div>
-                        <div>
-                          <span className="text-gray-500">Estado:</span>
-                          <p className="font-medium text-gray-900">{colab.estado_atencion}</p>
-                        </div>
-                      </div>
-                      {tareasHabilitadas && (
-                        <div className="mt-3 pt-3 border-t border-gray-200">
-                          <span className="text-gray-500 text-sm">Tareas:</span>
-                          <p className="text-sm text-gray-700">{tareasHabilitadas}</p>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
+                    );
+                  })}
               </div>
             </>
           )}

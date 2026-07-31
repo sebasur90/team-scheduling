@@ -168,8 +168,19 @@ export const CalendarView: React.FC = () => {
 
   // Initialize selected day for mobile view
   useEffect(() => {
+    // Only reset selectedDayMobile if the current selected day is not in the new week
+    const selectedDate = new Date(selectedDayMobile)
+    const weekEnd = new Date(selectedWeekMonday)
+    weekEnd.setDate(weekEnd.getDate() + 4) // Friday of the week
+
+    if (selectedDayMobile && selectedDate >= selectedWeekMonday && selectedDate <= weekEnd) {
+      // Keep the selected day if it's in the current week
+      return
+    }
+
+    // Otherwise, select the first day of the new week (Monday)
     setSelectedDayMobile(formatDate(selectedWeekMonday))
-  }, [selectedWeekMonday])
+  }, [selectedWeekMonday, selectedDayMobile, formatDate])
 
   const handlePreviousWeek = () => {
     const prev = new Date(selectedWeekMonday)
