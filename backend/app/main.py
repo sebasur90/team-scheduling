@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.config import DEBUG, APP_ENV
 from app.database import engine
 from app.models.base import Base
-from app.api import auth, franjas, sectores, colaboradores, notificaciones, incidencias, admin_incidencias, preferencias, turnos, admin_turnos, dias_no_laborables, ausencias, configuracion, tareas_especiales, swap, admin_resumen
+from app.api import auth, franjas, sectores, colaboradores, notificaciones, incidencias, admin_incidencias, preferencias, turnos, admin_turnos, dias_no_laborables, ausencias, configuracion, tareas_especiales, swap, admin_resumen, admin_reportes
 from app.services.task_scheduler import APSchedulerService
 import logging
 
@@ -45,6 +45,7 @@ app.include_router(configuracion.router, prefix="/api")
 app.include_router(tareas_especiales.router, prefix="/api")
 app.include_router(swap.router, prefix="/api")
 app.include_router(admin_resumen.router, prefix="/api")
+app.include_router(admin_reportes.router, prefix="/api")
 
 # Incluir router de desarrollo solo en local
 if APP_ENV == "local":
