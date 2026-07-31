@@ -174,12 +174,11 @@ def _get_distribucion_franjas(
         fecha, franja_id, capacidad, hora_inicio, hora_fin, orden, asignados = turno
 
         # Contar ausentes en esa fecha/franja
+        activos_subq = db.query(Colaborador.id).filter(Colaborador.estado_atencion == "activo").subquery()
         ausentes = db.query(func.count(Ausencia.id)).filter(
             and_(
                 Ausencia.fecha == fecha,
-                Ausencia.colaborador_id.in_(
-                    db.query(Colaborador.id).filter(Colaborador.estado_atencion == "activo").subquery()
-                )
+                Ausencia.colaborador_id.in_(activos_subq)
             )
         ).scalar() or 0
 
@@ -326,7 +325,8 @@ def _calcular_cobertura_franjas(
         # Porcentaje de cobertura
         porcentaje_cobertura = 0.0
         if capacidad_promedio and turnos_count > 0:
-            porcentaje_cobertura = (ocupacion_promedio / capacidad_promedio * 100) if capacidad_promedio > 0 else 0.0
+            cap_float = float(capacidad_promedio)
+            porcentaje_cobertura = (ocupacion_promedio / cap_float * 100) if cap_float > 0 else 0.0
 
         cobertura_list.append(CoberturaPorFranja(
             franja_id=franja.id,
