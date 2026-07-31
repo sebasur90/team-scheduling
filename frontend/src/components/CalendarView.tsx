@@ -6,8 +6,11 @@ import { ausenciasApi, Ausencia } from '../api/ausencias'
 import { sectoresApi, type Sector } from '../api/sectores'
 import { useAuthContext } from '../contexts/AuthContext'
 import { swapsApi, SwapResponse } from '../api/swaps'
+import { useUserNotifications } from '../hooks/useUserNotifications'
 import { SwapConfirmModal } from './SwapConfirmModal'
 import { SwapStatusModal } from './SwapStatusModal'
+import { SwapPendingBanner } from './SwapPendingBanner'
+import { SwapResponseBanner } from './SwapResponseBanner'
 import './CalendarView.css'
 
 import { colaboradoresApi, type Colaborador } from '../api/colaboradores'
@@ -22,6 +25,7 @@ interface GenerationResult {
 
 export const CalendarView: React.FC = () => {
   const { user } = useAuthContext()
+  const { notificaciones } = useUserNotifications()
   const [selectedWeekMonday, setSelectedWeekMonday] = useState<Date>(getMonday(new Date()))
   const [franjas, setFranjas] = useState<FranjaHoraria[]>([])
   const [turnos, setTurnos] = useState<Map<string, TurnoAlmuerzoResponse>>(new Map())
@@ -524,6 +528,9 @@ export const CalendarView: React.FC = () => {
           <button className="btn btn-primary btn-small" onClick={handleGenerarSemana}>Generar Semana</button>
         )}
       </div>
+
+      <SwapPendingBanner notificaciones={notificaciones} />
+      <SwapResponseBanner />
 
       <div className="calendar-grid-container">
         <table className="calendar-grid">

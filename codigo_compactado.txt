@@ -21,6 +21,7 @@ ESTRUCTURA DE DIRECTORIOS:
 │   │   │   ├── notificaciones.py
 │   │   │   ├── preferencias.py
 │   │   │   ├── sectores.py
+│   │   │   ├── swap.py
 │   │   │   ├── tareas_especiales.py
 │   │   │   └── turnos.py
 │   │   ├── auth/
@@ -35,6 +36,7 @@ ESTRUCTURA DE DIRECTORIOS:
 │   │   │   ├── franja_history.py
 │   │   │   ├── notificador.py
 │   │   │   ├── prioridad.py
+│   │   │   ├── swap_validator.py
 │   │   │   └── tipos.py
 │   │   ├── models/
 │   │   │   ├── __init__.py
@@ -122,14 +124,12 @@ ESTRUCTURA DE DIRECTORIOS:
 ├── datos_prueba/
 │   ├── README.md
 │   ├── UV_INSTRUCTIONS.md
-│   ├── colaboradores.csv
 │   ├── datos_ejemplo.json
 │   ├── generate_test_data.py
 │   ├── load_data.sh
 │   ├── load_test_data.py
 │   ├── load_with_uv.sh
 │   ├── pyproject.toml
-│   ├── sectores.csv
 │   └── view_test_data.py
 ├── docs/
 │   └── superpowers/
@@ -143,6 +143,7 @@ ESTRUCTURA DE DIRECTORIOS:
 │           ├── 2026-07-28-vacaciones-design.md
 │           ├── 2026-07-29-admin-config-panel-design.md
 │           ├── 2026-07-29-generar-semana-dia-design.md
+│           ├── 2026-07-30-swap-horarios-almuerzo-design.md
 │           └── PLAN_AUTH_OPCION1.md
 ├── frontend/
 │   ├── dist/
@@ -167,6 +168,7 @@ ESTRUCTURA DE DIRECTORIOS:
 │   │   │   ├── franjas.ts
 │   │   │   ├── notificaciones.ts
 │   │   │   ├── sectores.ts
+│   │   │   ├── swaps.ts
 │   │   │   ├── tareasEspeciales.ts
 │   │   │   └── turnos.ts
 │   │   ├── components/
@@ -179,6 +181,8 @@ ESTRUCTURA DE DIRECTORIOS:
 │   │   │   ├── CalendarView.css
 │   │   │   ├── CalendarView.tsx
 │   │   │   ├── ConfiguracionCobertura.tsx
+│   │   │   ├── ConfiguracionPanel.css
+│   │   │   ├── ConfiguracionPanel.tsx
 │   │   │   ├── Dashboard.css
 │   │   │   ├── Dashboard.tsx
 │   │   │   ├── Header.css
@@ -191,6 +195,17 @@ ESTRUCTURA DE DIRECTORIOS:
 │   │   │   ├── NotificationCenter.tsx
 │   │   │   ├── Preferences.css
 │   │   │   ├── Preferences.tsx
+│   │   │   ├── PreferenciasUsuarios.css
+│   │   │   ├── PreferenciasUsuarios.tsx
+│   │   │   ├── SectoresPanel.css
+│   │   │   ├── SectoresPanel.tsx
+│   │   │   ├── SwapActionCard.tsx
+│   │   │   ├── SwapConfirmModal.css
+│   │   │   ├── SwapConfirmModal.tsx
+│   │   │   ├── SwapStatusModal.css
+│   │   │   ├── SwapStatusModal.tsx
+│   │   │   ├── TareasEspecialesPanel.css
+│   │   │   ├── TareasEspecialesPanel.tsx
 │   │   │   ├── Vacaciones.css
 │   │   │   ├── Vacaciones.tsx
 │   │   │   ├── ViewerPanel.css
@@ -247,26 +262,26 @@ ESTRUCTURA DE DIRECTORIOS:
 
 ================================================================================
 
-ARCHIVOS INCLUIDOS: 81
+ARCHIVOS INCLUIDOS: 83
 ================================================================================
 
 
 ################################################################################
-# ARCHIVO 1/81: backend/app/__init__.py
+# ARCHIVO 1/83: backend/app/__init__.py
 ################################################################################
 
 """Almuerzos backend application"""
 
 
 ################################################################################
-# ARCHIVO 2/81: backend/app/api/__init__.py
+# ARCHIVO 2/83: backend/app/api/__init__.py
 ################################################################################
 
 # API module
 
 
 ################################################################################
-# ARCHIVO 3/81: backend/app/api/admin_incidencias.py
+# ARCHIVO 3/83: backend/app/api/admin_incidencias.py
 ################################################################################
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -398,7 +413,7 @@ def resolver_presencial(
 
 
 ################################################################################
-# ARCHIVO 4/81: backend/app/api/admin_turnos.py
+# ARCHIVO 4/83: backend/app/api/admin_turnos.py
 ################################################################################
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -806,7 +821,7 @@ def override_asignacion(
 
 
 ################################################################################
-# ARCHIVO 5/81: backend/app/api/ausencias.py
+# ARCHIVO 5/83: backend/app/api/ausencias.py
 ################################################################################
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -1001,7 +1016,7 @@ def delete_vacaciones_bloque(
 
 
 ################################################################################
-# ARCHIVO 6/81: backend/app/api/auth.py
+# ARCHIVO 6/83: backend/app/api/auth.py
 ################################################################################
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -1111,7 +1126,7 @@ def me(token: str, db: Session = Depends(get_db)):
 
 
 ################################################################################
-# ARCHIVO 7/81: backend/app/api/colaboradores.py
+# ARCHIVO 7/83: backend/app/api/colaboradores.py
 ################################################################################
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -1308,7 +1323,7 @@ def update_mi_preferencia(
 
 
 ################################################################################
-# ARCHIVO 8/81: backend/app/api/configuracion.py
+# ARCHIVO 8/83: backend/app/api/configuracion.py
 ################################################################################
 
 from fastapi import APIRouter, Depends
@@ -1409,7 +1424,7 @@ def update_notificaciones(
 
 
 ################################################################################
-# ARCHIVO 9/81: backend/app/api/dev.py
+# ARCHIVO 9/83: backend/app/api/dev.py
 ################################################################################
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -1545,7 +1560,7 @@ def simular_evento(
 
 
 ################################################################################
-# ARCHIVO 10/81: backend/app/api/dias_no_laborables.py
+# ARCHIVO 10/83: backend/app/api/dias_no_laborables.py
 ################################################################################
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -1620,7 +1635,7 @@ def delete_dia_no_laborable(
 
 
 ################################################################################
-# ARCHIVO 11/81: backend/app/api/franjas.py
+# ARCHIVO 11/83: backend/app/api/franjas.py
 ################################################################################
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -1729,7 +1744,7 @@ def delete_franja(
 
 
 ################################################################################
-# ARCHIVO 12/81: backend/app/api/incidencias.py
+# ARCHIVO 12/83: backend/app/api/incidencias.py
 ################################################################################
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -1820,7 +1835,7 @@ def aceptar_reemplazo(
 
 
 ################################################################################
-# ARCHIVO 13/81: backend/app/api/notificaciones.py
+# ARCHIVO 13/83: backend/app/api/notificaciones.py
 ################################################################################
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -2034,7 +2049,7 @@ def get_mis_notificaciones(
 
 
 ################################################################################
-# ARCHIVO 14/81: backend/app/api/preferencias.py
+# ARCHIVO 14/83: backend/app/api/preferencias.py
 ################################################################################
 
 from fastapi import APIRouter, HTTPException, status
@@ -2063,7 +2078,7 @@ def get_preferencia_deprecated():
 
 
 ################################################################################
-# ARCHIVO 15/81: backend/app/api/sectores.py
+# ARCHIVO 15/83: backend/app/api/sectores.py
 ################################################################################
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -2183,7 +2198,344 @@ def delete_sector(
 
 
 ################################################################################
-# ARCHIVO 16/81: backend/app/api/tareas_especiales.py
+# ARCHIVO 16/83: backend/app/api/swap.py
+################################################################################
+
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
+from sqlalchemy import or_
+from app.database import get_db
+from app.models.swap import SwapSolicitud
+from app.models.turno import AsignacionAlmuerzo
+from app.models.colaborador import Colaborador
+from app.models.notificacion import Notificacion
+from app.schemas.swap import SwapCreate, SwapResponse, SwapRechazarRequest
+from app.dependencies import get_current_user, require_non_viewer
+from app.core.swap_validator import validate_swap_coverage
+from app.services import firestore_client
+import logging
+
+logger = logging.getLogger(__name__)
+
+router = APIRouter(prefix="/swaps", tags=["swaps"], redirect_slashes=False)
+
+
+def _format_hora(turno: AsignacionAlmuerzo) -> str:
+    franja = turno.turno_almuerzo.franja_horaria
+    return f"{franja.hora_inicio.strftime('%H:%M')} – {franja.hora_fin.strftime('%H:%M')}"
+
+
+def _enrich_swap(swap: SwapSolicitud) -> dict:
+    """Construye el dict de SwapResponse con campos denormalizados."""
+    fecha = None
+    franja_origen_hora = None
+    franja_receptor_hora = None
+
+    if swap.asignacion_origen and swap.asignacion_origen.turno_almuerzo:
+        fecha = swap.asignacion_origen.turno_almuerzo.fecha
+        franja_origen_hora = _format_hora(swap.asignacion_origen)
+
+    if swap.asignacion_receptor and swap.asignacion_receptor.turno_almuerzo:
+        franja_receptor_hora = _format_hora(swap.asignacion_receptor)
+
+    nombre_solicitante = swap.colaborador_solicitante.nombre if swap.colaborador_solicitante else None
+    nombre_receptor = swap.colaborador_receptor.nombre if swap.colaborador_receptor else None
+
+    return SwapResponse(
+        id=swap.id,
+        asignacion_origen_id=swap.asignacion_origen_id,
+        asignacion_receptor_id=swap.asignacion_receptor_id,
+        colaborador_solicitante_id=swap.colaborador_solicitante_id,
+        colaborador_receptor_id=swap.colaborador_receptor_id,
+        estado=swap.estado,
+        motivo_rechazo=swap.motivo_rechazo,
+        created_at=swap.created_at,
+        fecha=fecha,
+        franja_origen_hora=franja_origen_hora,
+        franja_receptor_hora=franja_receptor_hora,
+        nombre_solicitante=nombre_solicitante,
+        nombre_receptor=nombre_receptor,
+    )
+
+
+def _crear_notificacion(db: Session, colaborador_id: int, tipo: str, mensaje: str, swap_id: int):
+    notif = Notificacion(
+        colaborador_id=colaborador_id,
+        tipo=tipo,
+        mensaje=mensaje,
+        leida=False,
+        referencia_id=swap_id,
+        referencia_tipo="swap",
+        canal="in_app",
+    )
+    db.add(notif)
+    db.flush()  # obtener notif.id sin commit
+
+    try:
+        firestore_client.write_notificacion_firestore(
+            colaborador_id,
+            notif.id,
+            {"tipo": tipo, "mensaje": mensaje, "swap_id": swap_id, "leida": False},
+        )
+    except Exception as e:
+        logger.error(f"Error escribiendo notificación Firestore: {e}")
+
+
+@router.post("", response_model=SwapResponse, status_code=status.HTTP_201_CREATED)
+def crear_swap(
+    body: SwapCreate,
+    current_user: Colaborador = Depends(require_non_viewer),
+    db: Session = Depends(get_db),
+):
+    """Solicitar un intercambio de franja de almuerzo con otro usuario."""
+    asig_origen = db.query(AsignacionAlmuerzo).filter(
+        AsignacionAlmuerzo.id == body.asignacion_origen_id
+    ).first()
+    if not asig_origen:
+        raise HTTPException(status_code=404, detail="Asignación origen no encontrada")
+
+    if asig_origen.colaborador_id != current_user.id:
+        raise HTTPException(status_code=403, detail="No puedes intercambiar la asignación de otro usuario")
+
+    asig_receptor = db.query(AsignacionAlmuerzo).filter(
+        AsignacionAlmuerzo.id == body.asignacion_receptor_id
+    ).first()
+    if not asig_receptor:
+        raise HTTPException(status_code=404, detail="Asignación receptor no encontrada")
+
+    if asig_receptor.colaborador_id == current_user.id:
+        raise HTTPException(status_code=400, detail="No puedes intercambiar contigo mismo")
+
+    if asig_origen.turno_almuerzo.fecha != asig_receptor.turno_almuerzo.fecha:
+        raise HTTPException(status_code=400, detail="Solo se puede intercambiar entre franjas del mismo día")
+
+    # Verificar que ninguna tenga swap pendiente
+    for asig in [asig_origen, asig_receptor]:
+        swap_pendiente = db.query(SwapSolicitud).filter(
+            or_(
+                SwapSolicitud.asignacion_origen_id == asig.id,
+                SwapSolicitud.asignacion_receptor_id == asig.id,
+            ),
+            SwapSolicitud.estado == "pendiente",
+        ).first()
+        if swap_pendiente:
+            raise HTTPException(
+                status_code=409,
+                detail="Una de las asignaciones ya tiene un intercambio pendiente",
+            )
+
+    # Validar cobertura
+    ok, motivo = validate_swap_coverage(db, asig_origen, asig_receptor)
+    if not ok:
+        raise HTTPException(status_code=409, detail=motivo)
+
+    # Crear swap
+    swap = SwapSolicitud(
+        asignacion_origen_id=asig_origen.id,
+        asignacion_receptor_id=asig_receptor.id,
+        colaborador_solicitante_id=current_user.id,
+        colaborador_receptor_id=asig_receptor.colaborador_id,
+        estado="pendiente",
+    )
+    db.add(swap)
+    asig_origen.estado = "pendiente_swap"
+    asig_receptor.estado = "pendiente_swap"
+    db.flush()
+
+    # Notificar al receptor y admins
+    franja_origen = _format_hora(asig_origen)
+    franja_receptor = _format_hora(asig_receptor)
+    fecha_str = asig_origen.turno_almuerzo.fecha.strftime("%d/%m/%Y")
+    mensaje_receptor = (
+        f"{current_user.nombre} quiere intercambiar su turno {franja_origen} "
+        f"por tu turno {franja_receptor} del {fecha_str}"
+    )
+    _crear_notificacion(db, asig_receptor.colaborador_id, "swap_solicitado", mensaje_receptor, swap.id)
+
+    admins = db.query(Colaborador).filter(Colaborador.rol == "admin").all()
+    for admin in admins:
+        _crear_notificacion(
+            db, admin.id, "swap_solicitado",
+            f"{current_user.nombre} solicitó intercambio con {asig_receptor.colaborador.nombre} el {fecha_str}",
+            swap.id,
+        )
+
+    db.commit()
+    db.refresh(swap)
+    return _enrich_swap(swap)
+
+
+@router.get("", response_model=list[SwapResponse])
+def listar_swaps(
+    current_user: Colaborador = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Lista los swaps del usuario (enviados y recibidos)."""
+    swaps = db.query(SwapSolicitud).filter(
+        or_(
+            SwapSolicitud.colaborador_solicitante_id == current_user.id,
+            SwapSolicitud.colaborador_receptor_id == current_user.id,
+        )
+    ).order_by(SwapSolicitud.created_at.desc()).all()
+
+    return [_enrich_swap(s) for s in swaps]
+
+
+@router.post("/{swap_id}/aceptar", response_model=SwapResponse)
+def aceptar_swap(
+    swap_id: int,
+    current_user: Colaborador = Depends(require_non_viewer),
+    db: Session = Depends(get_db),
+):
+    """Aceptar un intercambio pendiente. Solo el receptor puede aceptar."""
+    swap = db.query(SwapSolicitud).filter(SwapSolicitud.id == swap_id).first()
+    if not swap:
+        raise HTTPException(status_code=404, detail="Swap no encontrado")
+
+    if swap.colaborador_receptor_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Solo el receptor puede aceptar este intercambio")
+
+    if swap.estado != "pendiente":
+        raise HTTPException(status_code=409, detail="El intercambio ya no está pendiente")
+
+    asig_origen = db.query(AsignacionAlmuerzo).filter(
+        AsignacionAlmuerzo.id == swap.asignacion_origen_id
+    ).first()
+    asig_receptor = db.query(AsignacionAlmuerzo).filter(
+        AsignacionAlmuerzo.id == swap.asignacion_receptor_id
+    ).first()
+
+    if not asig_origen or not asig_receptor:
+        # El admin eliminó una asignación; cancelar swap automáticamente
+        swap.estado = "cancelado"
+        if asig_origen:
+            asig_origen.estado = "firme"
+        if asig_receptor:
+            asig_receptor.estado = "firme"
+        db.commit()
+        raise HTTPException(
+            status_code=409,
+            detail="Una de las asignaciones fue eliminada. El intercambio fue cancelado automáticamente.",
+        )
+
+    # Intercambio atómico
+    asig_origen.colaborador_id = swap.colaborador_receptor_id
+    asig_receptor.colaborador_id = swap.colaborador_solicitante_id
+    asig_origen.estado = "firme"
+    asig_receptor.estado = "firme"
+    swap.estado = "aceptado"
+
+    franja_receptor = _format_hora(asig_receptor)
+    fecha_str = asig_origen.turno_almuerzo.fecha.strftime("%d/%m/%Y")
+
+    # Notificar al solicitante y admins
+    _crear_notificacion(
+        db, swap.colaborador_solicitante_id, "swap_aceptado",
+        f"{current_user.nombre} aceptó el intercambio del {fecha_str}. Tu nuevo turno: {franja_receptor}",
+        swap.id,
+    )
+    admins = db.query(Colaborador).filter(Colaborador.rol == "admin").all()
+    for admin in admins:
+        _crear_notificacion(
+            db, admin.id, "swap_aceptado",
+            f"{current_user.nombre} aceptó el intercambio con {swap.colaborador_solicitante.nombre} el {fecha_str}",
+            swap.id,
+        )
+
+    db.commit()
+    db.refresh(swap)
+    return _enrich_swap(swap)
+
+
+@router.post("/{swap_id}/rechazar", response_model=SwapResponse)
+def rechazar_swap(
+    swap_id: int,
+    body: SwapRechazarRequest = None,
+    current_user: Colaborador = Depends(require_non_viewer),
+    db: Session = Depends(get_db),
+):
+    """Rechazar un intercambio pendiente. Solo el receptor puede rechazar."""
+    swap = db.query(SwapSolicitud).filter(SwapSolicitud.id == swap_id).first()
+    if not swap:
+        raise HTTPException(status_code=404, detail="Swap no encontrado")
+
+    if swap.colaborador_receptor_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Solo el receptor puede rechazar este intercambio")
+
+    if swap.estado != "pendiente":
+        raise HTTPException(status_code=409, detail="El intercambio ya no está pendiente")
+
+    swap.estado = "rechazado"
+    if body and body.motivo:
+        swap.motivo_rechazo = body.motivo
+
+    asig_origen = db.query(AsignacionAlmuerzo).filter(
+        AsignacionAlmuerzo.id == swap.asignacion_origen_id
+    ).first()
+    asig_receptor = db.query(AsignacionAlmuerzo).filter(
+        AsignacionAlmuerzo.id == swap.asignacion_receptor_id
+    ).first()
+    if asig_origen:
+        asig_origen.estado = "firme"
+    if asig_receptor:
+        asig_receptor.estado = "firme"
+
+    fecha_str = asig_origen.turno_almuerzo.fecha.strftime("%d/%m/%Y") if asig_origen else "?"
+    _crear_notificacion(
+        db, swap.colaborador_solicitante_id, "swap_rechazado",
+        f"{current_user.nombre} rechazó el intercambio del {fecha_str}",
+        swap.id,
+    )
+
+    db.commit()
+    db.refresh(swap)
+    return _enrich_swap(swap)
+
+
+@router.post("/{swap_id}/cancelar", response_model=SwapResponse)
+def cancelar_swap(
+    swap_id: int,
+    current_user: Colaborador = Depends(require_non_viewer),
+    db: Session = Depends(get_db),
+):
+    """Cancelar un intercambio pendiente. Solo el solicitante puede cancelar."""
+    swap = db.query(SwapSolicitud).filter(SwapSolicitud.id == swap_id).first()
+    if not swap:
+        raise HTTPException(status_code=404, detail="Swap no encontrado")
+
+    if swap.colaborador_solicitante_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Solo el solicitante puede cancelar este intercambio")
+
+    if swap.estado != "pendiente":
+        raise HTTPException(status_code=409, detail="El intercambio ya no está pendiente")
+
+    swap.estado = "cancelado"
+
+    asig_origen = db.query(AsignacionAlmuerzo).filter(
+        AsignacionAlmuerzo.id == swap.asignacion_origen_id
+    ).first()
+    asig_receptor = db.query(AsignacionAlmuerzo).filter(
+        AsignacionAlmuerzo.id == swap.asignacion_receptor_id
+    ).first()
+    if asig_origen:
+        asig_origen.estado = "firme"
+    if asig_receptor:
+        asig_receptor.estado = "firme"
+
+    fecha_str = asig_origen.turno_almuerzo.fecha.strftime("%d/%m/%Y") if asig_origen else "?"
+    _crear_notificacion(
+        db, swap.colaborador_receptor_id, "swap_cancelado",
+        f"{current_user.nombre} canceló la solicitud de intercambio del {fecha_str}",
+        swap.id,
+    )
+
+    db.commit()
+    db.refresh(swap)
+    return _enrich_swap(swap)
+
+
+################################################################################
+# ARCHIVO 17/83: backend/app/api/tareas_especiales.py
 ################################################################################
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -2304,7 +2656,7 @@ def delete_tipo(
 
 
 ################################################################################
-# ARCHIVO 17/81: backend/app/api/turnos.py
+# ARCHIVO 18/83: backend/app/api/turnos.py
 ################################################################################
 
 from fastapi import APIRouter, Depends
@@ -2349,14 +2701,14 @@ def list_turnos_by_date(
 
 
 ################################################################################
-# ARCHIVO 18/81: backend/app/auth/__init__.py
+# ARCHIVO 19/83: backend/app/auth/__init__.py
 ################################################################################
 
 # Auth module
 
 
 ################################################################################
-# ARCHIVO 19/81: backend/app/auth/local.py
+# ARCHIVO 20/83: backend/app/auth/local.py
 ################################################################################
 
 """
@@ -2415,7 +2767,7 @@ def get_current_user(db: Session, token: str) -> Colaborador:
 
 
 ################################################################################
-# ARCHIVO 20/81: backend/app/config.py
+# ARCHIVO 21/83: backend/app/config.py
 ################################################################################
 
 import os
@@ -2437,7 +2789,7 @@ TIMEOUT_SECONDS = int(os.getenv("TIMEOUT_SECONDS", "180"))
 
 
 ################################################################################
-# ARCHIVO 21/81: backend/app/constants.py
+# ARCHIVO 22/83: backend/app/constants.py
 ################################################################################
 
 from datetime import time, timedelta
@@ -2481,7 +2833,7 @@ SPECIAL_TASKS = {
 
 
 ################################################################################
-# ARCHIVO 22/81: backend/app/core/__init__.py
+# ARCHIVO 23/83: backend/app/core/__init__.py
 ################################################################################
 
 from app.core.engine import AssignmentEngine
@@ -2491,7 +2843,7 @@ __all__ = ["AssignmentEngine", "AssignmentResult", "ContextData", "ConflictoEmpa
 
 
 ################################################################################
-# ARCHIVO 23/81: backend/app/core/barometro.py
+# ARCHIVO 24/83: backend/app/core/barometro.py
 ################################################################################
 
 from datetime import datetime, timedelta
@@ -2640,7 +2992,7 @@ class BarometroService:
 
 
 ################################################################################
-# ARCHIVO 24/81: backend/app/core/cascade_engine.py
+# ARCHIVO 25/83: backend/app/core/cascade_engine.py
 ################################################################################
 
 from datetime import datetime
@@ -2857,7 +3209,7 @@ class CascadeEngine:
 
 
 ################################################################################
-# ARCHIVO 25/81: backend/app/core/cobertura.py
+# ARCHIVO 26/83: backend/app/core/cobertura.py
 ################################################################################
 
 from typing import List, Dict, Set
@@ -2923,7 +3275,7 @@ class CoberturaValidator:
 
 
 ################################################################################
-# ARCHIVO 26/81: backend/app/core/engine.py
+# ARCHIVO 27/83: backend/app/core/engine.py
 ################################################################################
 
 from datetime import date
@@ -3310,7 +3662,7 @@ class AssignmentEngine:
 
 
 ################################################################################
-# ARCHIVO 27/81: backend/app/core/franja_history.py
+# ARCHIVO 28/83: backend/app/core/franja_history.py
 ################################################################################
 
 from datetime import date, timedelta
@@ -3410,7 +3762,7 @@ def find_least_recent_franja(
 
 
 ################################################################################
-# ARCHIVO 28/81: backend/app/core/notificador.py
+# ARCHIVO 29/83: backend/app/core/notificador.py
 ################################################################################
 
 from datetime import date, datetime, timezone
@@ -3540,7 +3892,7 @@ def notificar_franja_liberada(db: Session, fecha: date, franja_horaria_id: int) 
 
 
 ################################################################################
-# ARCHIVO 29/81: backend/app/core/prioridad.py
+# ARCHIVO 30/83: backend/app/core/prioridad.py
 ################################################################################
 
 from typing import List, Tuple, Optional
@@ -3622,7 +3974,88 @@ class PrioridadResolver:
 
 
 ################################################################################
-# ARCHIVO 30/81: backend/app/core/tipos.py
+# ARCHIVO 31/83: backend/app/core/swap_validator.py
+################################################################################
+
+from typing import Optional
+from sqlalchemy.orm import Session
+from app.models.turno import AsignacionAlmuerzo
+from app.models.colaborador import Colaborador
+from app.models.ausencia import Ausencia
+from app.models.sector import Sector
+from app.core.cobertura import CoberturaValidator
+from app.core.tipos import ColaboradorInfo
+
+
+def _build_validator(db: Session, fecha) -> tuple[CoberturaValidator, set]:
+    """Construye CoberturaValidator y conjunto de ausentes para una fecha."""
+    sectores = db.query(Sector).all()
+    minimos = {s.id: s.minimo_cobertura for s in sectores}
+
+    ausencias = db.query(Ausencia).filter(Ausencia.fecha == fecha).all()
+    ausentes = {a.colaborador_id for a in ausencias}
+
+    colaboradores = db.query(Colaborador).all()
+    pool = []
+    sector_map = {s.id: s for s in sectores}
+    for c in colaboradores:
+        sector = sector_map.get(c.sector_id)
+        pool.append(ColaboradorInfo(
+            id=c.id,
+            nombre=c.nombre,
+            sector_id=c.sector_id,
+            sector_nombre=sector.nombre if sector else "unknown",
+            participa_almuerzo=sector.participa_almuerzo if sector else True,
+            estado_atencion=c.estado_atencion,
+            puntaje_prioridad=c.puntaje_prioridad,
+        ))
+
+    return CoberturaValidator(pool, minimos), ausentes
+
+
+def validate_swap_coverage(
+    db: Session,
+    asig_a: AsignacionAlmuerzo,
+    asig_b: AsignacionAlmuerzo,
+) -> tuple[bool, Optional[str]]:
+    """
+    Simula el intercambio entre asig_a y asig_b y verifica que ambas franjas
+    mantengan la cobertura mínima.
+
+    Devuelve (True, None) si es válido, o (False, mensaje) si rompe cobertura.
+    """
+    fecha = asig_a.turno_almuerzo.fecha
+    validator, ausentes = _build_validator(db, fecha)
+
+    # IDs de asignados en cada franja (todos los colaboradores de ese turno)
+    def asignados_en_turno(turno_id: int) -> list[int]:
+        return [
+            a.colaborador_id
+            for a in db.query(AsignacionAlmuerzo).filter(
+                AsignacionAlmuerzo.turno_almuerzo_id == turno_id
+            ).all()
+        ]
+
+    asignados_franja_a = asignados_en_turno(asig_a.turno_almuerzo_id)
+    asignados_franja_b = asignados_en_turno(asig_b.turno_almuerzo_id)
+
+    # Simular franja A: reemplazar A por B
+    simulado_a = [c for c in asignados_franja_a if c != asig_a.colaborador_id] + [asig_b.colaborador_id]
+    if not validator.satisfies_minimum_coverage(simulado_a, ausentes):
+        hora = asig_a.turno_almuerzo.franja_horaria.hora_inicio.strftime("%H:%M")
+        return False, f"El intercambio rompería la cobertura mínima en la franja de {hora}"
+
+    # Simular franja B: reemplazar B por A
+    simulado_b = [c for c in asignados_franja_b if c != asig_b.colaborador_id] + [asig_a.colaborador_id]
+    if not validator.satisfies_minimum_coverage(simulado_b, ausentes):
+        hora = asig_b.turno_almuerzo.franja_horaria.hora_inicio.strftime("%H:%M")
+        return False, f"El intercambio rompería la cobertura mínima en la franja de {hora}"
+
+    return True, None
+
+
+################################################################################
+# ARCHIVO 32/83: backend/app/core/tipos.py
 ################################################################################
 
 from dataclasses import dataclass, field
@@ -3703,7 +4136,7 @@ class AssignmentResult:
 
 
 ################################################################################
-# ARCHIVO 31/81: backend/app/database.py
+# ARCHIVO 33/83: backend/app/database.py
 ################################################################################
 
 from sqlalchemy import create_engine
@@ -3731,7 +4164,7 @@ def get_db():
 
 
 ################################################################################
-# ARCHIVO 32/81: backend/app/dependencies.py
+# ARCHIVO 34/83: backend/app/dependencies.py
 ################################################################################
 
 from fastapi import Depends, HTTPException, status
@@ -3770,7 +4203,7 @@ def require_non_viewer(current_user: Colaborador = Depends(get_current_user)) ->
 
 
 ################################################################################
-# ARCHIVO 33/81: backend/app/enums.py
+# ARCHIVO 35/83: backend/app/enums.py
 ################################################################################
 
 from enum import Enum
@@ -3842,7 +4275,7 @@ class MotivoIncidencia(str, Enum):
 
 
 ################################################################################
-# ARCHIVO 34/81: backend/app/main.py
+# ARCHIVO 36/83: backend/app/main.py
 ################################################################################
 
 from fastapi import FastAPI
@@ -3850,7 +4283,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.config import DEBUG, APP_ENV
 from app.database import engine
 from app.models.base import Base
-from app.api import auth, franjas, sectores, colaboradores, notificaciones, incidencias, admin_incidencias, preferencias, turnos, admin_turnos, dias_no_laborables, ausencias, configuracion, tareas_especiales
+from app.api import auth, franjas, sectores, colaboradores, notificaciones, incidencias, admin_incidencias, preferencias, turnos, admin_turnos, dias_no_laborables, ausencias, configuracion, tareas_especiales, swap
 from app.services.task_scheduler import APSchedulerService
 import logging
 
@@ -3890,6 +4323,7 @@ app.include_router(dias_no_laborables.router, prefix="/api")
 app.include_router(ausencias.router, prefix="/api")
 app.include_router(configuracion.router, prefix="/api")
 app.include_router(tareas_especiales.router, prefix="/api")
+app.include_router(swap.router, prefix="/api")
 
 # Incluir router de desarrollo solo en local
 if APP_ENV == "local":
@@ -3945,7 +4379,7 @@ if __name__ == "__main__":
 
 
 ################################################################################
-# ARCHIVO 35/81: backend/app/models/__init__.py
+# ARCHIVO 37/83: backend/app/models/__init__.py
 ################################################################################
 
 from app.models.sector import Sector
@@ -3982,7 +4416,7 @@ __all__ = [
 
 
 ################################################################################
-# ARCHIVO 36/81: backend/app/models/ausencia.py
+# ARCHIVO 38/83: backend/app/models/ausencia.py
 ################################################################################
 
 from datetime import date
@@ -4005,7 +4439,7 @@ class Ausencia(BaseModel):
 
 
 ################################################################################
-# ARCHIVO 37/81: backend/app/models/base.py
+# ARCHIVO 39/83: backend/app/models/base.py
 ################################################################################
 
 from datetime import datetime
@@ -4024,7 +4458,7 @@ class BaseModel(Base):
 
 
 ################################################################################
-# ARCHIVO 38/81: backend/app/models/colaborador.py
+# ARCHIVO 40/83: backend/app/models/colaborador.py
 ################################################################################
 
 from sqlalchemy import Column, String, Integer, Boolean, ForeignKey
@@ -4059,7 +4493,7 @@ class Colaborador(BaseModel):
 
 
 ################################################################################
-# ARCHIVO 39/81: backend/app/models/configuracion_cobertura.py
+# ARCHIVO 41/83: backend/app/models/configuracion_cobertura.py
 ################################################################################
 
 from sqlalchemy import Column, Integer
@@ -4077,7 +4511,7 @@ class ConfiguracionCobertura(BaseModel):
 
 
 ################################################################################
-# ARCHIVO 40/81: backend/app/models/configuracion_notificaciones.py
+# ARCHIVO 42/83: backend/app/models/configuracion_notificaciones.py
 ################################################################################
 
 from sqlalchemy import Column, Integer, Boolean, DateTime, Time
@@ -4102,7 +4536,7 @@ class ConfiguracionNotificaciones(BaseModel):
 
 
 ################################################################################
-# ARCHIVO 41/81: backend/app/models/dia_no_laborable.py
+# ARCHIVO 43/83: backend/app/models/dia_no_laborable.py
 ################################################################################
 
 from datetime import date
@@ -4121,7 +4555,7 @@ class DiaNoLaborable(BaseModel):
 
 
 ################################################################################
-# ARCHIVO 42/81: backend/app/models/franja_horaria.py
+# ARCHIVO 44/83: backend/app/models/franja_horaria.py
 ################################################################################
 
 from datetime import time
@@ -4145,7 +4579,7 @@ class FranjaHoraria(BaseModel):
 
 
 ################################################################################
-# ARCHIVO 43/81: backend/app/models/incidencia.py
+# ARCHIVO 45/83: backend/app/models/incidencia.py
 ################################################################################
 
 from sqlalchemy import Column, Integer, ForeignKey, String, DateTime, func
@@ -4186,7 +4620,7 @@ class HistorialReemplazo(BaseModel):
 
 
 ################################################################################
-# ARCHIVO 44/81: backend/app/models/notificacion.py
+# ARCHIVO 46/83: backend/app/models/notificacion.py
 ################################################################################
 
 from sqlalchemy import Column, Integer, ForeignKey, String, Text, Boolean, Date
@@ -4216,7 +4650,7 @@ class Notificacion(BaseModel):
 
 
 ################################################################################
-# ARCHIVO 45/81: backend/app/models/sector.py
+# ARCHIVO 47/83: backend/app/models/sector.py
 ################################################################################
 
 from sqlalchemy import Column, String, Integer, Boolean
@@ -4241,7 +4675,7 @@ class Sector(BaseModel):
 
 
 ################################################################################
-# ARCHIVO 46/81: backend/app/models/swap.py
+# ARCHIVO 48/83: backend/app/models/swap.py
 ################################################################################
 
 from sqlalchemy import Column, Integer, ForeignKey, String, Text
@@ -4269,7 +4703,7 @@ class SwapSolicitud(BaseModel):
 
 
 ################################################################################
-# ARCHIVO 47/81: backend/app/models/tarea_especial.py
+# ARCHIVO 49/83: backend/app/models/tarea_especial.py
 ################################################################################
 
 from datetime import date, time
@@ -4321,7 +4755,7 @@ class TareaEspecialAsignacion(BaseModel):
 
 
 ################################################################################
-# ARCHIVO 48/81: backend/app/models/turno.py
+# ARCHIVO 50/83: backend/app/models/turno.py
 ################################################################################
 
 from datetime import date
@@ -4361,14 +4795,14 @@ class AsignacionAlmuerzo(BaseModel):
 
 
 ################################################################################
-# ARCHIVO 49/81: backend/app/schemas/__init__.py
+# ARCHIVO 51/83: backend/app/schemas/__init__.py
 ################################################################################
 
 # Schemas package
 
 
 ################################################################################
-# ARCHIVO 50/81: backend/app/schemas/ausencia.py
+# ARCHIVO 52/83: backend/app/schemas/ausencia.py
 ################################################################################
 
 from pydantic import BaseModel, field_validator
@@ -4420,7 +4854,7 @@ class VacacionesBlockResponse(BaseModel):
 
 
 ################################################################################
-# ARCHIVO 51/81: backend/app/schemas/colaborador.py
+# ARCHIVO 53/83: backend/app/schemas/colaborador.py
 ################################################################################
 
 from pydantic import BaseModel, EmailStr
@@ -4468,7 +4902,7 @@ class ColaboradorResponse(ColaboradorBase):
 
 
 ################################################################################
-# ARCHIVO 52/81: backend/app/schemas/configuracion.py
+# ARCHIVO 54/83: backend/app/schemas/configuracion.py
 ################################################################################
 
 from pydantic import BaseModel, Field, field_validator
@@ -4537,7 +4971,7 @@ class ConfiguracionNotificacionesUpdate(BaseModel):
 
 
 ################################################################################
-# ARCHIVO 53/81: backend/app/schemas/configuracion_notificaciones.py
+# ARCHIVO 55/83: backend/app/schemas/configuracion_notificaciones.py
 ################################################################################
 
 from pydantic import BaseModel, Field, field_validator
@@ -4590,7 +5024,7 @@ class ConfiguracionNotificacionesUpdate(BaseModel):
 
 
 ################################################################################
-# ARCHIVO 54/81: backend/app/schemas/dia_no_laborable.py
+# ARCHIVO 56/83: backend/app/schemas/dia_no_laborable.py
 ################################################################################
 
 from pydantic import BaseModel
@@ -4611,7 +5045,7 @@ class DiaNoLaborableResponse(BaseModel):
 
 
 ################################################################################
-# ARCHIVO 55/81: backend/app/schemas/franja.py
+# ARCHIVO 57/83: backend/app/schemas/franja.py
 ################################################################################
 
 from pydantic import BaseModel, field_validator
@@ -4657,7 +5091,7 @@ class FranjaHorariaResponse(BaseModel):
 
 
 ################################################################################
-# ARCHIVO 56/81: backend/app/schemas/notificacion.py
+# ARCHIVO 58/83: backend/app/schemas/notificacion.py
 ################################################################################
 
 from pydantic import BaseModel
@@ -4683,7 +5117,7 @@ class NotificacionResponse(BaseModel):
 
 
 ################################################################################
-# ARCHIVO 57/81: backend/app/schemas/preferencia.py
+# ARCHIVO 59/83: backend/app/schemas/preferencia.py
 ################################################################################
 
 from pydantic import BaseModel
@@ -4709,7 +5143,7 @@ class PreferenciaResponse(BaseModel):
 
 
 ################################################################################
-# ARCHIVO 58/81: backend/app/schemas/sector.py
+# ARCHIVO 60/83: backend/app/schemas/sector.py
 ################################################################################
 
 from pydantic import BaseModel
@@ -4749,35 +5183,44 @@ class SectorResponse(SectorBase):
 
 
 ################################################################################
-# ARCHIVO 59/81: backend/app/schemas/swap.py
+# ARCHIVO 61/83: backend/app/schemas/swap.py
 ################################################################################
 
 from pydantic import BaseModel
-from datetime import datetime
+from datetime import datetime, date
 from typing import Optional
 
 
 class SwapCreate(BaseModel):
     asignacion_origen_id: int
-    colaborador_receptor_id: int
+    asignacion_receptor_id: int
+
+
+class SwapRechazarRequest(BaseModel):
+    motivo: Optional[str] = None
 
 
 class SwapResponse(BaseModel):
     id: int
     asignacion_origen_id: int
+    asignacion_receptor_id: Optional[int] = None
     colaborador_solicitante_id: int
     colaborador_receptor_id: int
-    asignacion_receptor_id: Optional[int] = None
     estado: str
     motivo_rechazo: Optional[str] = None
     created_at: datetime
+    fecha: Optional[date] = None
+    franja_origen_hora: Optional[str] = None
+    franja_receptor_hora: Optional[str] = None
+    nombre_solicitante: Optional[str] = None
+    nombre_receptor: Optional[str] = None
 
     class Config:
         from_attributes = True
 
 
 ################################################################################
-# ARCHIVO 60/81: backend/app/schemas/tarea_especial.py
+# ARCHIVO 62/83: backend/app/schemas/tarea_especial.py
 ################################################################################
 
 from pydantic import BaseModel
@@ -4823,7 +5266,7 @@ class ColaboradorTareaTipoResponse(BaseModel):
 
 
 ################################################################################
-# ARCHIVO 61/81: backend/app/schemas/turno.py
+# ARCHIVO 63/83: backend/app/schemas/turno.py
 ################################################################################
 
 from pydantic import BaseModel
@@ -4866,14 +5309,14 @@ class TurnoListResponse(BaseModel):
 
 
 ################################################################################
-# ARCHIVO 62/81: backend/app/services/__init__.py
+# ARCHIVO 64/83: backend/app/services/__init__.py
 ################################################################################
 
 
 
 
 ################################################################################
-# ARCHIVO 63/81: backend/app/services/firestore_client.py
+# ARCHIVO 65/83: backend/app/services/firestore_client.py
 ################################################################################
 
 import os
@@ -4952,7 +5395,7 @@ def update_incidencia_firestore(incidencia_id: int, updates: dict):
 
 
 ################################################################################
-# ARCHIVO 64/81: backend/app/services/notif_service.py
+# ARCHIVO 66/83: backend/app/services/notif_service.py
 ################################################################################
 
 from typing import Protocol
@@ -5000,7 +5443,7 @@ class FCMNotifService:
 
 
 ################################################################################
-# ARCHIVO 65/81: backend/app/services/task_scheduler.py
+# ARCHIVO 67/83: backend/app/services/task_scheduler.py
 ################################################################################
 
 from typing import Protocol
@@ -5110,7 +5553,7 @@ class APSchedulerService:
 
 
 ################################################################################
-# ARCHIVO 66/81: backend/scripts/init_admin.py
+# ARCHIVO 68/83: backend/scripts/init_admin.py
 ################################################################################
 
 #!/usr/bin/env python3
@@ -5186,14 +5629,14 @@ if __name__ == "__main__":
 
 
 ################################################################################
-# ARCHIVO 67/81: backend/tests/__init__.py
+# ARCHIVO 69/83: backend/tests/__init__.py
 ################################################################################
 
 # Tests package
 
 
 ################################################################################
-# ARCHIVO 68/81: backend/tests/conftest.py
+# ARCHIVO 70/83: backend/tests/conftest.py
 ################################################################################
 
 import pytest
@@ -5308,7 +5751,7 @@ def test_configuracion_cobertura(db_session):
 
 
 ################################################################################
-# ARCHIVO 69/81: backend/tests/test_ausencias.py
+# ARCHIVO 71/83: backend/tests/test_ausencias.py
 ################################################################################
 
 import pytest
@@ -5589,7 +6032,7 @@ class TestAusenciasEdgeCases:
 
 
 ################################################################################
-# ARCHIVO 70/81: backend/tests/test_barometro.py
+# ARCHIVO 72/83: backend/tests/test_barometro.py
 ################################################################################
 
 import pytest
@@ -5719,7 +6162,7 @@ def test_barometro_respects_configured_minimums(test_franjas, test_colaboradores
 
 
 ################################################################################
-# ARCHIVO 71/81: backend/tests/test_cascade_engine.py
+# ARCHIVO 73/83: backend/tests/test_cascade_engine.py
 ################################################################################
 
 import pytest
@@ -5818,7 +6261,7 @@ def test_cascade_engine_multiple_candidates(test_franjas, test_colaboradores, db
 
 
 ################################################################################
-# ARCHIVO 72/81: backend/tests/test_cobertura.py
+# ARCHIVO 74/83: backend/tests/test_cobertura.py
 ################################################################################
 
 """
@@ -5977,7 +6420,7 @@ def test_minimos_with_high_values(test_colab_pool):
 
 
 ################################################################################
-# ARCHIVO 73/81: backend/tests/test_configuracion_notificaciones.py
+# ARCHIVO 75/83: backend/tests/test_configuracion_notificaciones.py
 ################################################################################
 
 import pytest
@@ -6214,7 +6657,7 @@ def test_update_timings(db: Session):
 
 
 ################################################################################
-# ARCHIVO 74/81: backend/tests/test_core_engine.py
+# ARCHIVO 76/83: backend/tests/test_core_engine.py
 ################################################################################
 
 """
@@ -6382,7 +6825,7 @@ def test_minimum_coverage_failure_with_warnings(db_session, test_franjas, test_c
 
 
 ################################################################################
-# ARCHIVO 75/81: backend/tests/test_notificar_franja_liberada.py
+# ARCHIVO 77/83: backend/tests/test_notificar_franja_liberada.py
 ################################################################################
 
 """
@@ -6516,7 +6959,7 @@ def test_notificar_broadcast_multiple(db_session, test_franjas, test_colaborador
 
 
 ################################################################################
-# ARCHIVO 76/81: backend/tests/test_tareas_especiales.py
+# ARCHIVO 78/83: backend/tests/test_tareas_especiales.py
 ################################################################################
 
 import pytest
@@ -6776,7 +7219,7 @@ class TestColaboradorTareasIntegration:
 
 
 ################################################################################
-# ARCHIVO 77/81: backend/tests/test_viewer_role.py
+# ARCHIVO 79/83: backend/tests/test_viewer_role.py
 ################################################################################
 
 import pytest
@@ -7013,7 +7456,7 @@ def test_valid_roles_only(db: Session):
 
 
 ################################################################################
-# ARCHIVO 78/81: compactar_codigo.py
+# ARCHIVO 80/83: compactar_codigo.py
 ################################################################################
 
 #!/usr/bin/env python3
@@ -7144,7 +7587,7 @@ if __name__ == "__main__":
 
 
 ################################################################################
-# ARCHIVO 79/81: datos_prueba/generate_test_data.py
+# ARCHIVO 81/83: datos_prueba/generate_test_data.py
 ################################################################################
 
 """
@@ -7158,7 +7601,7 @@ Genera:
 
 import json
 import random
-from datetime import time, datetime, timedelta
+from datetime import time, datetime, timedelta, date
 
 # Colores hexadecimales
 COLORES = {
@@ -7311,6 +7754,31 @@ def generate_tareas_especiales():
         }
     ]
 
+def generate_vacaciones():
+    """Genera vacaciones aleatorias para los colaboradores."""
+    vacaciones = []
+
+    # Generar fechas para agosto, septiembre y octubre 2026
+    fecha_inicio = date(2026, 8, 1)
+    fecha_fin = date(2026, 10, 31)
+
+    # Para cada colaborador, generar 0-3 días de vacaciones
+    for i in range(1, 22):  # 21 colaboradores
+        num_dias_ausencia = random.randint(0, 3)
+
+        for _ in range(num_dias_ausencia):
+            # Seleccionar una fecha aleatoria
+            dias_diferencia = random.randint(0, (fecha_fin - fecha_inicio).days)
+            fecha_ausencia = fecha_inicio + timedelta(days=dias_diferencia)
+
+            vacaciones.append({
+                "colaborador_index": i,
+                "fecha": fecha_ausencia.isoformat(),
+                "motivo": "vacaciones"
+            })
+
+    return vacaciones
+
 def generate_test_data():
     """Genera todos los datos de prueba."""
     data = {
@@ -7318,6 +7786,7 @@ def generate_test_data():
         "franjas_horarias": generate_franjas_horarias(),
         "colaboradores": generate_colaboradores(),
         "tareas_especiales": generate_tareas_especiales(),
+        "vacaciones": generate_vacaciones(),
         "metadata": {
             "fecha_generacion": datetime.now().isoformat(),
             "descripcion": "Datos de prueba generados automáticamente para el sistema de planificación de almuerzos",
@@ -7346,6 +7815,7 @@ if __name__ == "__main__":
     print(f"  - Franjas horarias: {len(data['franjas_horarias'])}")
     print(f"  - Colaboradores: {len(data['colaboradores'])}")
     print(f"  - Tareas especiales: {len(data['tareas_especiales'])}")
+    print(f"  - Vacaciones: {len(data['vacaciones'])}")
 
     # Mostrar distribución de colaboradores
     print(f"\nDistribución de colaboradores por sector:")
@@ -7365,7 +7835,7 @@ if __name__ == "__main__":
 
 
 ################################################################################
-# ARCHIVO 80/81: datos_prueba/load_test_data.py
+# ARCHIVO 82/83: datos_prueba/load_test_data.py
 ################################################################################
 
 """
@@ -7396,6 +7866,7 @@ from app.models.tarea_especial import TareaEspecialTipo, ColaboradorTareaTipo, T
 from app.models.turno import AsignacionAlmuerzo, TurnoAlmuerzo
 from app.models.swap import SwapSolicitud
 from app.models.incidencia import IncidenciaCobertura, HistorialReemplazo
+from app.models.ausencia import Ausencia
 from app.config import DATABASE_URL
 
 def load_json_data():
@@ -7413,31 +7884,34 @@ def clear_database(db: Session):
     try:
         # Limpiar en orden inverso de dependencias
 
-        # 1. Limpiar historial de reemplazos (depende de incidencias)
+        # 1. Limpiar ausencias/vacaciones
+        db.query(Ausencia).delete()
+
+        # 2. Limpiar historial de reemplazos (depende de incidencias)
         db.query(HistorialReemplazo).delete()
 
-        # 2. Limpiar swaps (depende de asignacion_almuerzo)
+        # 3. Limpiar swaps (depende de asignacion_almuerzo)
         db.query(SwapSolicitud).delete()
 
-        # 3. Limpiar incidencias (depende de asignacion_almuerzo)
+        # 4. Limpiar incidencias (depende de asignacion_almuerzo)
         db.query(IncidenciaCobertura).delete()
 
-        # 4. Limpiar asignaciones de almuerzo (depende de colaborador)
+        # 5. Limpiar asignaciones de almuerzo (depende de colaborador)
         db.query(AsignacionAlmuerzo).delete()
 
-        # 5. Limpiar turnos de almuerzo
+        # 6. Limpiar turnos de almuerzo
         db.query(TurnoAlmuerzo).delete()
 
-        # 6. Limpiar asignaciones de tareas a colaboradores
+        # 7. Limpiar asignaciones de tareas a colaboradores
         db.query(ColaboradorTareaTipo).delete()
 
-        # 7. Limpiar tipos de tareas especiales
+        # 8. Limpiar tipos de tareas especiales
         db.query(TareaEspecialTipo).delete()
 
-        # 8. Limpiar colaboradores NO-ADMIN
+        # 9. Limpiar colaboradores NO-ADMIN
         db.query(Colaborador).filter(Colaborador.es_admin == False).delete()
 
-        # 9. Limpiar franjas horarias
+        # 10. Limpiar franjas horarias
         db.query(FranjaHoraria).delete()
 
         # NOTA: No se borran los sectores porque pueden estar en uso por el admin
@@ -7617,6 +8091,43 @@ def assign_special_tasks(db: Session):
         print(f"  ⚠️  Error al asignar tareas: {e}")
         db.rollback()
 
+def load_vacaciones(db: Session, data: dict):
+    """Carga las vacaciones de los colaboradores."""
+    print("\n🏖️  Cargando vacaciones...")
+
+    if "vacaciones" not in data:
+        print("  ⚠️  No hay datos de vacaciones en el archivo JSON")
+        return
+
+    vacaciones_cargadas = 0
+    try:
+        # Obtener lista de colaboradores
+        colaboradores = db.query(Colaborador).filter(Colaborador.es_admin == False).all()
+        colab_map = {i: colab for i, colab in enumerate(colaboradores, 1)}
+
+        for vac_data in data["vacaciones"]:
+            colab_index = vac_data["colaborador_index"]
+            if colab_index not in colab_map:
+                continue
+
+            colab = colab_map[colab_index]
+            fecha = datetime.strptime(vac_data["fecha"], "%Y-%m-%d").date()
+
+            ausencia = Ausencia(
+                colaborador_id=colab.id,
+                fecha=fecha,
+                motivo=vac_data["motivo"]
+            )
+            db.add(ausencia)
+            vacaciones_cargadas += 1
+
+        db.commit()
+        print(f"  ✅ Total vacaciones cargadas: {vacaciones_cargadas}")
+
+    except Exception as e:
+        print(f"  ⚠️  Error al cargar vacaciones: {e}")
+        db.rollback()
+
 def ensure_admin(db: Session):
     """Asegura que exista el usuario admin."""
     print("\n🔐 Verificando usuario admin...")
@@ -7695,6 +8206,9 @@ def main():
         # Asignar tareas especiales a colaboradores
         assign_special_tasks(db)
 
+        # Cargar vacaciones
+        load_vacaciones(db, data)
+
         # Asegurar que existe el admin
         ensure_admin(db)
 
@@ -7707,6 +8221,8 @@ def main():
         print(f"  • Franjas horarias: {len(franjas_map)}")
         print(f"  • Colaboradores: {len(colaboradores_map)}")
         print(f"  • Tareas especiales: {len(tareas_map)}")
+        vacaciones_count = len(data.get("vacaciones", []))
+        print(f"  • Vacaciones: {vacaciones_count}")
 
         print(f"\n🎯 Tareas especiales disponibles:")
         for tarea_name in tareas_map.keys():
@@ -7735,7 +8251,7 @@ if __name__ == "__main__":
 
 
 ################################################################################
-# ARCHIVO 81/81: datos_prueba/view_test_data.py
+# ARCHIVO 83/83: datos_prueba/view_test_data.py
 ################################################################################
 
 """

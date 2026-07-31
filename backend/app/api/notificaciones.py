@@ -11,6 +11,9 @@ from app.core.cascade_engine import CascadeEngine
 from app.core.barometro import BarometroService
 from app.services import firestore_client
 from app.dependencies import get_current_user
+import logging
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/notificaciones", tags=["notificaciones"], redirect_slashes=False)
 
@@ -206,3 +209,38 @@ def get_mis_notificaciones(
         result.append(notif_dict)
 
     return result
+
+
+@router.patch("/{id}/leer", status_code=status.HTTP_200_OK)
+def marcar_notificacion_leida(
+    id: int,
+    current_user: Colaborador = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Marca una notificación como leída."""
+    notif = db.query(Notificacion).filter(Notificacion.id == id).first()
+    if not notif:
+        raise HTTPException(status_code=404, detail="Notificación no encontrada")
+
+    if notif.colaborador_id != current_user.id:
+        raise HTTPException(status_code=403, detail="No tienes permiso para marcar esta notificación")
+
+    notif.leida = True
+    db.add(notif)
+    db.commit()
+
+    # Actualizar en Firestore también
+    try:
+        firestore_client.write_notificacion_firestore(
+            current_user.id,
+            notif.id,
+            {
+                "tipo": notif.tipo,
+                "mensaje": notif.mensaje,
+                "leida": True,
+            },
+        )
+    except Exception as e:
+        logger.warning(f"Error actualizando Firestore para notificación {notif.id}: {e}")
+
+    return {"status": "ok", "notificacion_id": notif.id}

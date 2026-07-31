@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { useAuth } from '../contexts/AuthContext'
+import { useUserNotifications } from '../hooks/useUserNotifications'
 import { Header } from './Header'
 import { Barometro } from './Barometro'
 import { CalendarView } from './CalendarView'
@@ -14,7 +15,10 @@ type TabType = 'calendar' | 'preferences' | 'vacaciones' | 'notifications'
 
 export const Dashboard: React.FC = () => {
   const { user, logout } = useAuth()
+  const { notificaciones } = useUserNotifications()
   const [activeTab, setActiveTab] = useState<TabType>('calendar')
+
+  const unreadCount = notificaciones.filter(n => !n.leida).length
 
   if (!user) {
     return <div>Cargando...</div>
@@ -68,6 +72,9 @@ export const Dashboard: React.FC = () => {
             onClick={() => setActiveTab('notifications')}
           >
             🔔 Notificaciones
+            {unreadCount > 0 && (
+              <span className="badge badge-unread">{unreadCount}</span>
+            )}
           </button>
         </div>
 

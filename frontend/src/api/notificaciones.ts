@@ -33,4 +33,7 @@ export const notificacionesApi = {
 
   responder: (notificationId: number, respuesta: 'si' | 'no') =>
     client.post(`/notificaciones/${notificationId}/responder`, { respuesta }),
+
+  marcarLeida: (notificationId: number) =>
+    client.patch(`/notificaciones/${notificationId}/leer`),
 }

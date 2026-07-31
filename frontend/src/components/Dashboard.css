@@ -35,6 +35,25 @@
   margin-bottom: -2px;
   transition: all 0.2s ease;
   white-space: nowrap;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.badge-unread {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 4px;
+  background-color: #ef4444;
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 700;
+  border-radius: 10px;
+  margin-left: 4px;
 }
 
 .tab-button:hover {

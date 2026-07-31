@@ -8,12 +8,20 @@ import { Preferences } from './Preferences'
 import { PreferenciasUsuarios } from './PreferenciasUsuarios'
 import { Vacaciones } from './Vacaciones'
 import { ConfiguracionPanel } from './ConfiguracionPanel'
+import { useAdminAlerts } from '../hooks/useAdminAlerts'
 import './AdminDashboard.css'
 
 type TabType = 'inicio' | 'colaboradores' | 'tareas' | 'sectores' | 'calendario' | 'preferencias' | 'preferencias-usuarios' | 'vacaciones' | 'notificaciones' | 'configuracion'
 
 export const AdminDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabType>('inicio')
+  const { alerts } = useAdminAlerts(true)
+
+  const getStatColor = (count: number): string => {
+    return count > 0 ? 'stat-alert' : 'stat-ok'
+  }
+
+  const totalAlerts = (alerts?.swaps_pendientes?.count || 0) + (alerts?.cobertura_en_riesgo?.count || 0)
 
   const renderContent = () => {
     switch (activeTab) {
@@ -22,24 +30,81 @@ export const AdminDashboard: React.FC = () => {
           <div className="dashboard-inicio">
             <h2>Inicio</h2>
             <div className="dashboard-stats">
-              <div className="stat-card">
-                <div className="stat-number">0</div>
-                <div className="stat-label">Incidencias activas</div>
+              <div className={`stat-card ${getStatColor(alerts?.swaps_pendientes.count || 0)}`}>
+                <div className="stat-number">{alerts?.swaps_pendientes.count || 0}</div>
+                <div className="stat-label">Swaps pendientes</div>
               </div>
-              <div className="stat-card">
-                <div className="stat-number">0</div>
+              <div className={`stat-card ${getStatColor(alerts?.turnos_sin_confirmar.count || 0)}`}>
+                <div className="stat-number">{alerts?.turnos_sin_confirmar.count || 0}</div>
+                <div className="stat-label">Sin confirmar</div>
+              </div>
+              <div className={`stat-card ${getStatColor(alerts?.cobertura_en_riesgo.count || 0)}`}>
+                <div className="stat-number">{alerts?.cobertura_en_riesgo.count || 0}</div>
+                <div className="stat-label">Cobertura en riesgo</div>
+              </div>
+              <div className="stat-card stat-ok">
+                <div className="stat-number">{alerts?.colaboradores_activos || 0}</div>
                 <div className="stat-label">Colaboradores activos</div>
               </div>
-              <div className="stat-card">
-                <div className="stat-number">0</div>
-                <div className="stat-label">Franjas hoy</div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-number">✓</div>
-                <div className="stat-label">Estado cobertura</div>
-              </div>
             </div>
-            <p className="info-text">Bienvenido al panel de administración. Usa el menú lateral para navegar.</p>
+
+            {totalAlerts > 0 ? (
+              <div className="alerts-feed">
+                <h3>⚠️ Requieren atención</h3>
+                {alerts?.swaps_pendientes.count! > 0 && (
+                  <div className="alert-section alert-critical">
+                    <div className="alert-header">
+                      <span className="alert-icon">↔️</span>
+                      <span className="alert-title">Swaps pendientes ({alerts.swaps_pendientes.count})</span>
+                    </div>
+                    {alerts.swaps_pendientes.items.map((item: any) => (
+                      <div key={item.id} className="alert-item">
+                        <span className="alert-desc">{item.solicitante} ↔️ {item.receptor}</span>
+                        <span className="alert-time">{item.hace}</span>
+                      </div>
+                    ))}
+                    <button className="btn-view" onClick={() => setActiveTab('colaboradores')}>Ver →</button>
+                  </div>
+                )}
+
+                {alerts?.cobertura_en_riesgo.count! > 0 && (
+                  <div className="alert-section alert-critical">
+                    <div className="alert-header">
+                      <span className="alert-icon">⚠️</span>
+                      <span className="alert-title">Cobertura en riesgo ({alerts.cobertura_en_riesgo.count})</span>
+                    </div>
+                    {alerts.cobertura_en_riesgo.items.map((item: any, idx: number) => (
+                      <div key={idx} className="alert-item">
+                        <span className="alert-desc">{item.fecha} - {item.franja}</span>
+                        <span className={`alert-status ${item.estado}`}>{item.estado}</span>
+                      </div>
+                    ))}
+                    <button className="btn-view" onClick={() => setActiveTab('calendario')}>Ver →</button>
+                  </div>
+                )}
+
+                {alerts?.turnos_sin_confirmar.count! > 0 && (
+                  <div className="alert-section alert-warning">
+                    <div className="alert-header">
+                      <span className="alert-icon">⏳</span>
+                      <span className="alert-title">Sin confirmar ({alerts.turnos_sin_confirmar.count})</span>
+                    </div>
+                    {alerts.turnos_sin_confirmar.items.map((item: any, idx: number) => (
+                      <div key={idx} className="alert-item">
+                        <span className="alert-desc">{item.colaborador} - {item.fecha}</span>
+                        <span className="alert-franja">{item.franja}</span>
+                      </div>
+                    ))}
+                    <button className="btn-view" onClick={() => setActiveTab('calendario')}>Ver →</button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="alerts-ok">
+                <div className="ok-icon">✓</div>
+                <div className="ok-text">Todo en orden</div>
+              </div>
+            )}
           </div>
         )
       case 'colaboradores':
@@ -172,6 +237,9 @@ export const AdminDashboard: React.FC = () => {
             >
               <span className="nav-icon">🔔</span>
               Notificaciones
+              {totalAlerts > 0 && (
+                <span className="badge badge-alert">{totalAlerts}</span>
+              )}
             </button>
             <button
               className={`nav-item ${activeTab === 'configuracion' ? 'active' : ''}`}
