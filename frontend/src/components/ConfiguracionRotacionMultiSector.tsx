@@ -77,6 +77,21 @@ export const ConfiguracionRotacionMultiSector: React.FC<Props> = ({
     loadSectores()
   }, [])
 
+  // Inicializar distribución personalizada cuando sectores se cargan
+  useEffect(() => {
+    if (!activa || modo !== 'personalizado' || sectores.length === 0) return
+    if (Object.keys(distribucionPorDia).length > 0) return // Ya inicializado
+
+    const newDist: Record<string, Record<string, number>> = {}
+    for (const dia of diasOrdenados) {
+      newDist[String(dia)] = {}
+      for (const sector of sectores) {
+        newDist[String(dia)][sector] = 0
+      }
+    }
+    setDistribucionPorDia(newDist)
+  }, [sectores, modo, activa])
+
   // Recomputar distribuciones cuando cambian patrón, modo o díasAplicables
   useEffect(() => {
     if (!activa) return
@@ -122,17 +137,17 @@ export const ConfiguracionRotacionMultiSector: React.FC<Props> = ({
 
   const handleToggle = (checked: boolean) => {
     setActiva(checked)
-    if (checked && modo === 'patron_fijo' && patronSemanal.length === 0 && sectores.length > 0) {
-      // Inicializar patrón fijo
+    if (!checked) return
+
+    // Inicializar estructura según modo
+    if (modo === 'patron_fijo' && patronSemanal.length === 0 && sectores.length > 0) {
       setPatronSemanal(new Array(diasOrdenados.length).fill(sectores[0]))
-    }
-    if (checked && modo === 'personalizado' && Object.keys(distribucionPorDia).length === 0 && sectores.length > 0) {
-      // Inicializar personalizado
+    } else if (modo === 'personalizado' && sectores.length > 0) {
       const newDist: Record<string, Record<string, number>> = {}
       for (const dia of diasOrdenados) {
         newDist[String(dia)] = {}
         for (const sector of sectores) {
-          newDist[String(dia)][sector] = 0
+          newDist[String(dia)][sector] = distribucionPorDia[String(dia)]?.[sector] || 0
         }
       }
       setDistribucionPorDia(newDist)
@@ -144,12 +159,13 @@ export const ConfiguracionRotacionMultiSector: React.FC<Props> = ({
 
     if (nuevoModo === 'patron_fijo' && patronSemanal.length === 0) {
       setPatronSemanal(new Array(diasOrdenados.length).fill(sectores[0] || ''))
-    } else if (nuevoModo === 'personalizado' && Object.keys(distribucionPorDia).length === 0) {
+    } else if (nuevoModo === 'personalizado') {
+      // Siempre reinicializar distribución personalizada al cambiar de modo
       const newDist: Record<string, Record<string, number>> = {}
       for (const dia of diasOrdenados) {
         newDist[String(dia)] = {}
         for (const sector of sectores) {
-          newDist[String(dia)][sector] = 0
+          newDist[String(dia)][sector] = distribucionPorDia[String(dia)]?.[sector] || 0
         }
       }
       setDistribucionPorDia(newDist)
@@ -163,7 +179,7 @@ export const ConfiguracionRotacionMultiSector: React.FC<Props> = ({
   }
 
   const handleDistribucionChange = (dia: string, sector: string, cantidad: number) => {
-    const newDist = { ...distribucionPorDia }
+    const newDist = JSON.parse(JSON.stringify(distribucionPorDia)) // Deep copy
     if (!newDist[dia]) {
       newDist[dia] = {}
     }
