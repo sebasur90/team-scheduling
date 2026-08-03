@@ -203,9 +203,10 @@ export const ConfiguracionRotacionMultiSector: React.FC<Props> = ({
             type="checkbox"
             checked={activa}
             onChange={(e) => handleToggle(e.target.checked)}
-            disabled={disabled}
+            disabled={disabled || diasAplicables.length === 0}
+            title={diasAplicables.length === 0 ? "Selecciona días aplicables primero" : ""}
           />
-          <span>Rotación multi-sector</span>
+          <span>Rotación multi-sector {diasAplicables.length === 0 && '(requiere días)'}</span>
         </label>
       </div>
 
@@ -213,6 +214,20 @@ export const ConfiguracionRotacionMultiSector: React.FC<Props> = ({
 
       {activa && (
         <>
+          {diasAplicables.length === 0 && (
+            <div style={{
+              padding: '1rem',
+              marginBottom: '1rem',
+              background: '#fff3cd',
+              color: '#856404',
+              border: '1px solid #ffc107',
+              borderRadius: '4px',
+              fontSize: '0.9rem'
+            }}>
+              ⚠️ Debes seleccionar al menos un día aplicable antes de configurar la rotación multi-sector.
+            </div>
+          )}
+
           <div style={styles.modoSelector}>
             <div style={styles.radioGroup}>
               <label style={styles.radioLabel}>
@@ -222,7 +237,7 @@ export const ConfiguracionRotacionMultiSector: React.FC<Props> = ({
                   value="patron_fijo"
                   checked={modo === 'patron_fijo'}
                   onChange={() => handleModoChange('patron_fijo')}
-                  disabled={disabled}
+                  disabled={disabled || diasAplicables.length === 0}
                 />
                 <span>Patrón Fijo</span>
               </label>
@@ -233,7 +248,7 @@ export const ConfiguracionRotacionMultiSector: React.FC<Props> = ({
                   value="personalizado"
                   checked={modo === 'personalizado'}
                   onChange={() => handleModoChange('personalizado')}
-                  disabled={disabled}
+                  disabled={disabled || diasAplicables.length === 0}
                 />
                 <span>Personalizado</span>
               </label>
