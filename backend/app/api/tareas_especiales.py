@@ -58,6 +58,10 @@ def create_tipo(
         fecha_inicio_ciclo=data.fecha_inicio_ciclo,
         fija_almuerzo=data.fija_almuerzo,
         franja_almuerzo_id=data.franja_almuerzo_id,
+        configuracion_rotacion=(
+            data.configuracion_rotacion.model_dump()
+            if data.configuracion_rotacion else None
+        ),
     )
     db.add(tipo)
     db.commit()
@@ -108,6 +112,13 @@ def update_tipo(
         tipo.fija_almuerzo = data.fija_almuerzo
     if data.franja_almuerzo_id is not None:
         tipo.franja_almuerzo_id = data.franja_almuerzo_id
+
+    # Handle configuracion_rotacion with model_fields_set to distinguish null from unset
+    if 'configuracion_rotacion' in data.model_fields_set:
+        tipo.configuracion_rotacion = (
+            data.configuracion_rotacion.model_dump()
+            if data.configuracion_rotacion else None
+        )
 
     db.commit()
     db.refresh(tipo)

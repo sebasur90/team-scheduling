@@ -1,5 +1,12 @@
 import client from './client'
 
+export interface ConfiguracionRotacionMultiSector {
+  modo: 'patron_fijo' | 'personalizado'
+  patron_semanal: string[] | null
+  distribucion_por_dia: Record<string, Record<string, number>> | null
+  distribuciones_sector: Record<string, number>
+}
+
 export interface TareaEspecialTipo {
   id: number
   nombre: string
@@ -11,6 +18,7 @@ export interface TareaEspecialTipo {
   fecha_inicio_ciclo: string | null
   fija_almuerzo: boolean
   franja_almuerzo_id: number | null
+  configuracion_rotacion: ConfiguracionRotacionMultiSector | null
   created_at: string
   updated_at: string
 }
@@ -25,6 +33,7 @@ export interface TareaEspecialTipoCreate {
   fecha_inicio_ciclo?: string | null
   fija_almuerzo?: boolean
   franja_almuerzo_id?: number | null
+  configuracion_rotacion?: ConfiguracionRotacionMultiSector | null
 }
 
 export interface TareaEspecialTipoUpdate {
@@ -37,6 +46,7 @@ export interface TareaEspecialTipoUpdate {
   fecha_inicio_ciclo?: string | null
   fija_almuerzo?: boolean
   franja_almuerzo_id?: number | null
+  configuracion_rotacion?: ConfiguracionRotacionMultiSector | null
 }
 
 export interface TareaEspecialAsignacion {

@@ -16,6 +16,7 @@ class TareaEspecialTipo(BaseModel):
     fecha_inicio_ciclo = Column(Date, nullable=True)
     fija_almuerzo = Column(Boolean, nullable=False, default=False)
     franja_almuerzo_id = Column(Integer, ForeignKey("franja_horaria.id"), nullable=True)
+    configuracion_rotacion = Column(JSON, nullable=True)
 
     asignaciones = relationship("TareaEspecialAsignacion", back_populates="tipo", cascade="all, delete-orphan")
     colaboradores_habilitados = relationship("ColaboradorTareaTipo", back_populates="tarea_tipo", cascade="all, delete-orphan")

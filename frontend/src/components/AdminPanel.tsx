@@ -11,6 +11,7 @@ import { ConfiguracionCobertura } from './ConfiguracionCobertura';
 import { NotificacionesConfig } from './NotificacionesConfig';
 import { Vacaciones } from './Vacaciones';
 import { CronogramaTareasPanel } from './CronogramaTareasPanel';
+import { ConfiguracionRotacionMultiSector } from './ConfiguracionRotacionMultiSector';
 import { Colaborador } from '../api/auth';
 import client from '../api/client';
 import './AdminPanel.css';
@@ -102,6 +103,7 @@ export function AdminPanel({ activeTab: propActiveTab = 'colaboradores' }: Admin
     fecha_inicio_ciclo: '',
     fija_almuerzo: false,
     franja_almuerzo_id: null,
+    configuracion_rotacion: null,
   });
   const [editingTareaId, setEditingTareaId] = useState<number | null>(null);
   const [editingTareaData, setEditingTareaData] = useState<Partial<any> | null>(null);
@@ -405,6 +407,7 @@ export function AdminPanel({ activeTab: propActiveTab = 'colaboradores' }: Admin
         fecha_inicio_ciclo: '',
         fija_almuerzo: false,
         franja_almuerzo_id: null,
+        configuracion_rotacion: null,
       });
       setShowTareaForm(false);
     } catch (err: any) {
@@ -427,6 +430,7 @@ export function AdminPanel({ activeTab: propActiveTab = 'colaboradores' }: Admin
       fecha_inicio_ciclo: tarea.fecha_inicio_ciclo || '',
       fija_almuerzo: tarea.fija_almuerzo || false,
       franja_almuerzo_id: tarea.franja_almuerzo_id || null,
+      configuracion_rotacion: tarea.configuracion_rotacion || null,
     });
   };
 
@@ -1617,6 +1621,21 @@ export function AdminPanel({ activeTab: propActiveTab = 'colaboradores' }: Admin
                   </div>
                 </div>
               )}
+
+              <div className="form-row">
+                <ConfiguracionRotacionMultiSector
+                  valor={editingTareaId ? editingTareaData?.configuracion_rotacion : tareaFormData.configuracion_rotacion}
+                  diasAplicables={editingTareaId ? (editingTareaData?.dia_semana_aplicable || []) : tareaFormData.dia_semana_aplicable}
+                  onChange={(config) => {
+                    if (editingTareaId) {
+                      setEditingTareaData({ ...editingTareaData, configuracion_rotacion: config });
+                    } else {
+                      setTareaFormData({ ...tareaFormData, configuracion_rotacion: config });
+                    }
+                  }}
+                  disabled={tareaFormLoading}
+                />
+              </div>
 
               <div className="form-actions">
                 <button type="submit" className="btn btn-primary" disabled={tareaFormLoading}>

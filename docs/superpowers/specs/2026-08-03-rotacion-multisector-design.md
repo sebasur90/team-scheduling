@@ -31,22 +31,23 @@ Extender el sistema de tareas especiales para soportar **rotación multi-sector 
 5. Configura distribución de sectores
 
 **Modo 1: Patrón Fijo**
-- Admin define secuencia de 5 días (lunes a viernes)
-- Cada posición es un sector: C (Comercial), O (Operativo), G (Gerencia)
-- Ejemplo: "C-O-C-O-G"
+- Admin define secuencia de N días (según `dia_semana_aplicable`)
+- Cada posición es un sector identificado por su nombre: "comerciales", "operativos", "gerencia"
+- Ejemplo para 5 días: `["comerciales", "operativos", "comerciales", "operativos", "gerencia"]`
 - Admin especifica cuotas totales: Comerciales: 2, Operativos: 2, Gerencia: 1
-- El sistema valida que la suma sea 5
+- El sistema valida que la suma de cuotas coincida con la cantidad de días aplicables
 
 **Modo 2: Personalizado**
-- Grid 5 días × 3 sectores
+- Grid N días × sectores activos
 - Para cada día, admin ingresa cantidad de colaboradores por sector
-- Ejemplo: Lunes [C:1, O:0, G:0], Martes [C:0, O:1, G:0], etc.
+- Ejemplo: Lunes [comerciales:1, operativos:0, gerencia:0], Martes [comerciales:0, operativos:1, gerencia:0], etc.
 - Admin especifica cuotas totales igual
 
 **Validaciones:**
-- Patrón fijo: 5 caracteres exactos, solo C/O/G
+- Patrón fijo: largo del array debe coincidir con `len(dia_semana_aplicable)`; solo sectores válidos (existentes en la BD)
 - Personalizado: cada día tiene asignación válida
-- Suma total de distribuciones_sector coincide con días aplicables
+- Suma total de `distribuciones_sector` coincide con `len(dia_semana_aplicable)`  
+  ⚠️ Esta validación ocurre en `TareaEspecialTipoCreate` (model validator), no en el schema interno, porque depende del campo `dia_semana_aplicable`
 - Si no es multi-sector (checkbox no marcado), `configuracion_rotacion = null`
 
 **Salida:** POST /tareas-especiales/tipos retorna TareaEspecialTipoResponse con `configuracion_rotacion` poblado
@@ -59,6 +60,7 @@ Extender el sistema de tareas especiales para soportar **rotación multi-sector 
 2. Puede cambiar modo (patrón fijo ↔ personalizado)
 3. Puede cambiar patrón o distribución por día
 4. Puede cambiar cuotas de sectores
+5. Puede desactivar multi-sector enviando `configuracion_rotacion: null` explícitamente
 
 **Validaciones:** Igual a RF1
 
@@ -82,10 +84,10 @@ Extender el sistema de tareas especiales para soportar **rotación multi-sector 
 1. Para cada fecha en el rango:
    - Obtener día de semana (0=Lunes, 4=Viernes)
    - Determinar qué sectores aplican hoy:
-     - Si modo `patrón_fijo`: parsear `patrón_semanal[weekday]`
-     - Si modo `personalizado`: leer `distribucion_por_dia[weekday]`
+     - Si modo `patron_fijo`: leer `patron_semanal[weekday_index]` donde `weekday_index` es la posición del weekday dentro de los días aplicables ordenados
+     - Si modo `personalizado`: leer `distribucion_por_dia[str(weekday)]`
    - Para cada sector + cantidad:
-     - Obtener pool de colaboradores del sector (solo activos)
+     - Obtener pool de colaboradores del sector (solo activos, habilitados para la tarea)
      - Encontrar siguiente en rotación round-robin
      - Crear `TareaEspecialAsignacion`
 
@@ -96,8 +98,8 @@ Extender el sistema de tareas especiales para soportar **rotación multi-sector 
 
 3. **Seguimiento de rotación:**
    - Mantener índice de rotación **por sector** dentro de la tarea
-   - Consultar última asignación del sector para esa tarea
-   - Asignar siguiente en orden del pool
+   - Consultar última asignación del sector para esa tarea en la BD
+   - Para asignaciones múltiples en el mismo día (cantidad > 1): rastrear en memoria los ya asignados en el ciclo actual, haciendo flush antes de buscar la siguiente rotación
 
 **Salida:** POST /tareas-especiales/generar-cronograma retorna:
 ```json
@@ -145,10 +147,10 @@ Extender el sistema de tareas especiales para soportar **rotación multi-sector 
 class TareaEspecialTipo(BaseModel):
     # ... campos existentes ...
     configuracion_rotacion: Column(JSON, nullable=True)
-    # Estructura:
+    # Estructura JSON almacenada:
     # {
-    #   "modo": "patrón_fijo" | "personalizado",
-    #   "patrón_semanal": "C-O-C-O-G" | null,
+    #   "modo": "patron_fijo" | "personalizado",
+    #   "patron_semanal": ["comerciales", "operativos", "comerciales", "operativos", "gerencia"] | null,
     #   "distribucion_por_dia": {
     #     "0": {"comerciales": 1, "operativos": 0, "gerencia": 0},
     #     "1": {"comerciales": 0, "operativos": 1, "gerencia": 0},
@@ -166,7 +168,8 @@ class TareaEspecialTipo(BaseModel):
 
 ```sql
 ALTER TABLE tarea_especial_tipo
-ADD COLUMN configuracion_rotacion JSON DEFAULT NULL;
+ADD COLUMN configuracion_rotacion TEXT DEFAULT NULL;
+-- SQLite almacena JSON como TEXT; el ORM serializa/deserializa automáticamente
 ```
 
 ### Schema (Pydantic)
@@ -174,48 +177,107 @@ ADD COLUMN configuracion_rotacion JSON DEFAULT NULL;
 **Nuevo schema en `app/schemas/tarea_especial.py`:**
 
 ```python
+from typing import Literal, Optional, Dict, List
+from pydantic import BaseModel, field_validator, model_validator
+
 class ConfiguracionRotacionMultiSector(BaseModel):
-    modo: Literal["patrón_fijo", "personalizado"]
-    patrón_semanal: Optional[str] = None  # "C-O-C-O-G"
+    modo: Literal["patron_fijo", "personalizado"]
+    patron_semanal: Optional[List[str]] = None
+    # Lista de nombres de sector, uno por día aplicable
+    # Ejemplo 5 días: ["comerciales", "operativos", "comerciales", "operativos", "gerencia"]
     distribucion_por_dia: Optional[Dict[str, Dict[str, int]]] = None
     # Ejemplo: {"0": {"comerciales": 1, "operativos": 0, "gerencia": 0}}
     distribuciones_sector: Dict[str, int]
     # {"comerciales": 2, "operativos": 2, "gerencia": 1}
 
-    @field_validator('patrón_semanal')
+    @field_validator('patron_semanal')
     @classmethod
-    def validar_patron(cls, v, info):
-        if info.data.get('modo') == 'patrón_fijo':
-            if not v or len(v) != 5:
-                raise ValueError("patrón_semanal debe tener 5 caracteres")
-            if not all(c in 'COG' for c in v):
-                raise ValueError("patrón_semanal solo acepta C, O, G")
-        return v
-
-    @field_validator('distribuciones_sector')
-    @classmethod
-    def validar_distribuciones(cls, v):
-        total = sum(v.values())
-        if total != 5:
-            raise ValueError("La suma de distribuciones_sector debe ser 5")
+    def validar_patron_no_vacio(cls, v, info):
+        # Largo se valida en TareaEspecialTipoCreate (depende de dia_semana_aplicable)
+        if info.data.get('modo') == 'patron_fijo' and not v:
+            raise ValueError("patron_semanal es requerido en modo patron_fijo")
         return v
 ```
 
-**Actualizar `TareaEspecialTipoCreate` y `TareaEspecialTipoUpdate`:**
+**⚠️ La validación de suma de `distribuciones_sector` se hace en el model validator de `TareaEspecialTipoCreate`:**
 
 ```python
 class TareaEspecialTipoCreate(TareaEspecialTipoBase):
     configuracion_rotacion: Optional[ConfiguracionRotacionMultiSector] = None
 
+    @model_validator(mode='after')
+    def validar_configuracion_rotacion(self):
+        config = self.configuracion_rotacion
+        if config is None:
+            return self
+
+        n_dias = len(self.dia_semana_aplicable)
+
+        # Validar suma de cuotas == días aplicables
+        total = sum(config.distribuciones_sector.values())
+        if total != n_dias:
+            raise ValueError(
+                f"La suma de distribuciones_sector ({total}) debe coincidir "
+                f"con la cantidad de días aplicables ({n_dias})"
+            )
+
+        # Validar largo de patron_semanal
+        if config.modo == 'patron_fijo':
+            if not config.patron_semanal or len(config.patron_semanal) != n_dias:
+                raise ValueError(
+                    f"patron_semanal debe tener {n_dias} elementos "
+                    f"(uno por cada día en dia_semana_aplicable)"
+                )
+
+        return self
+
+
 class TareaEspecialTipoUpdate(BaseModel):
     nombre: Optional[str] = None
-    # ... otros campos ...
+    dia_semana_aplicable: Optional[List[int]] = None
+    hora_inicio: Optional[time] = None
+    hora_fin: Optional[time] = None
+    frecuencia: Optional[str] = None
+    inhabilita_almuerzo: Optional[bool] = None
+    fecha_inicio_ciclo: Optional[date] = None
+    fija_almuerzo: Optional[bool] = None
+    franja_almuerzo_id: Optional[int] = None
     configuracion_rotacion: Optional[ConfiguracionRotacionMultiSector] = None
+    # Enviar configuracion_rotacion=null para desactivar multi-sector
+
+
+class TareaEspecialTipoResponse(TareaEspecialTipoBase):
+    id: int
+    configuracion_rotacion: Optional[ConfiguracionRotacionMultiSector] = None  # ← NUEVO
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+```
+
+**Actualizar `update_tipo` en la API para soportar limpiar a null:**
+
+```python
+# En update_tipo(), usar model_fields_set para detectar campos enviados explícitamente
+if 'configuracion_rotacion' in data.model_fields_set:
+    tipo.configuracion_rotacion = (
+        data.configuracion_rotacion.model_dump() if data.configuracion_rotacion else None
+    )
 ```
 
 ### Motor de Rotación
 
 **`app/core/task_rotation_engine.py` (refactor)**
+
+**Imports adicionales necesarios:**
+```python
+from datetime import date, datetime, timedelta
+from app.models import (
+    TareaEspecialTipo, TareaEspecialAsignacion, ColaboradorTareaTipo,
+    Colaborador, Sector  # ← NUEVOS
+)
+```
 
 ```python
 class TaskRotationEngine:
@@ -237,26 +299,33 @@ class TaskRotationEngine:
         config = tipo.configuracion_rotacion
         asignaciones_creadas = 0
         advertencias = []
+
+        # Días aplicables ordenados para indexar patron_semanal
+        dias_aplicables = sorted(tipo.dia_semana_aplicable)
         
         current = fecha_inicio
         while current <= fecha_fin:
             weekday = current.weekday()  # 0-4 = Mon-Fri
             
-            # Validar que sea día aplicable
-            if weekday not in tipo.dia_semana_aplicable:
-                current = TaskRotationEngine._next_day(current)
+            if weekday not in dias_aplicables:
+                current += timedelta(days=1)  # ← usar timedelta, no aritmética manual
                 continue
             
             # Obtener distribución para hoy
-            if config['modo'] == 'patrón_fijo':
-                sector_hoy = config['patrón_semanal'][weekday]
-                sector_count = {sector_hoy: 1}
+            if config['modo'] == 'patron_fijo':
+                # patron_semanal es una lista indexada por posición en dias_aplicables
+                patron_idx = dias_aplicables.index(weekday)
+                sector_nombre = config['patron_semanal'][patron_idx]
+                sector_count = {sector_nombre: 1}
             else:  # personalizado
                 sector_count = config['distribucion_por_dia'].get(str(weekday), {})
             
             # Procesar cada sector
             for sector_nombre, cantidad_necesaria in sector_count.items():
-                # Obtener pool del sector (solo activos)
+                if cantidad_necesaria == 0:
+                    continue
+
+                # Obtener pool del sector (solo activos, habilitados para la tarea)
                 pool = db.query(ColaboradorTareaTipo).join(
                     Colaborador,
                     ColaboradorTareaTipo.colaborador_id == Colaborador.id
@@ -276,13 +345,28 @@ class TaskRotationEngine:
                     )
                     continue
                 
-                # Rotar y asignar
+                if len(pool) < cantidad_necesaria:
+                    advertencias.append(
+                        f"Tarea '{tipo.nombre}' sector '{sector_nombre}': "
+                        f"pool insuficiente ({cantidad_necesaria} necesarios, "
+                        f"{len(pool)} disponibles) el {current}"
+                    )
+                
+                # Rotar y asignar: rastrear ya-asignados en este ciclo (mismo día/sector)
+                # para evitar repetir cuando cantidad_necesaria > 1
+                asignados_este_ciclo: list[int] = []
+                
                 for i in range(cantidad_necesaria):
-                    last_asignacion = db.query(TareaEspecialAsignacion).filter(
+                    # Buscar última asignación de este sector para esta tarea
+                    last_asignacion = db.query(TareaEspecialAsignacion).join(
+                        Colaborador,
+                        TareaEspecialAsignacion.colaborador_id == Colaborador.id
+                    ).join(
+                        Sector,
+                        Colaborador.sector_id == Sector.id
+                    ).filter(
                         TareaEspecialAsignacion.tarea_especial_tipo_id == tipo.id,
-                        TareaEspecialAsignacion.colaborador.has(
-                            Colaborador.sector_obj.has(Sector.nombre == sector_nombre)
-                        )
+                        Sector.nombre == sector_nombre
                     ).order_by(TareaEspecialAsignacion.fecha.desc()).first()
                     
                     if last_asignacion:
@@ -291,13 +375,23 @@ class TaskRotationEngine:
                              if c.colaborador_id == last_asignacion.colaborador_id),
                             -1
                         )
-                        next_idx = (last_idx + 1) % len(pool)
+                        # Avanzar hasta encontrar uno no asignado en este ciclo
+                        for _ in range(len(pool)):
+                            last_idx = (last_idx + 1) % len(pool)
+                            if pool[last_idx].colaborador_id not in asignados_este_ciclo:
+                                break
+                        next_idx = last_idx
                     else:
-                        next_idx = 0
+                        # Primera vez: tomar el primero no asignado en este ciclo
+                        next_idx = next(
+                            (j for j, c in enumerate(pool)
+                             if c.colaborador_id not in asignados_este_ciclo),
+                            0
+                        )
                     
                     colaborador_id = pool[next_idx].colaborador_id
                     
-                    # Crear asignación (evitar duplicados)
+                    # Verificar que no exista ya la asignación en BD
                     existing = db.query(TareaEspecialAsignacion).filter(
                         TareaEspecialAsignacion.fecha == current,
                         TareaEspecialAsignacion.tarea_especial_tipo_id == tipo.id,
@@ -311,31 +405,44 @@ class TaskRotationEngine:
                             colaborador_id=colaborador_id
                         )
                         db.add(asignacion)
+                        db.flush()  # ← flush para que las siguientes queries vean esta asignación
                         asignaciones_creadas += 1
+                    
+                    asignados_este_ciclo.append(colaborador_id)
             
-            current = TaskRotationEngine._next_day(current)
+            current += timedelta(days=1)  # ← timedelta, sin bugs de fin de mes
         
         db.commit()
         return asignaciones_creadas, advertencias
-    
-    @staticmethod
-    def _next_day(fecha):
-        """Avanza un día, manejando fin de mes/año"""
-        if fecha.day < 28:
-            return fecha.replace(day=fecha.day + 1)
-        elif fecha.month < 12:
-            return fecha.replace(month=fecha.month + 1, day=1)
-        else:
-            return fecha.replace(year=fecha.year + 1, month=1, day=1)
 ```
 
-### API (Sin cambios de endpoints, solo lógica)
+> **Nota:** El `_next_day` helper manual que existe en el engine actual tiene un bug: salta del día 28 directamente al 1 del mes siguiente aunque el mes tenga 30 o 31 días. Se reemplaza por `current += timedelta(days=1)` en toda la función, incluyendo el engine simple.
 
-**`app/api/tareas_especiales.py` (cambios mínimos)**
+### API (Cambios en lógica)
 
-- `create_tipo()`: acepta `configuracion_rotacion` del schema
-- `update_tipo()`: actualiza `configuracion_rotacion`
+**`app/api/tareas_especiales.py` (cambios)**
+
+- `create_tipo()`: serializa `configuracion_rotacion` a dict antes de persistir
+- `update_tipo()`: usa `model_fields_set` para detectar `configuracion_rotacion` enviado explícitamente (incluso si es `null`)
 - `generar_cronograma()`: llama a `TaskRotationEngine.generar()` que maneja ambos casos
+
+```python
+# create_tipo — serializar config a dict para Column(JSON)
+tipo = TareaEspecialTipo(
+    ...
+    configuracion_rotacion=(
+        data.configuracion_rotacion.model_dump() 
+        if data.configuracion_rotacion else None
+    ),
+)
+
+# update_tipo — detectar null explícito
+if 'configuracion_rotacion' in data.model_fields_set:
+    tipo.configuracion_rotacion = (
+        data.configuracion_rotacion.model_dump() 
+        if data.configuracion_rotacion else None
+    )
+```
 
 ---
 
@@ -345,193 +452,56 @@ class TaskRotationEngine:
 
 Ubicación: `frontend/src/components/ConfiguracionRotacionMultiSector.tsx`
 
+**⚠️ Los sectores se cargan dinámicamente desde `GET /sectores`, no están hardcodeados.**
+
 ```typescript
+interface ConfiguracionRotacionMultiSector {
+  modo: 'patron_fijo' | 'personalizado'
+  patron_semanal: string[] | null  // array de nombres de sector, uno por día aplicable
+  distribucion_por_dia: Record<string, Record<string, number>> | null
+  distribuciones_sector: Record<string, number>
+}
+
 interface Props {
   valor: ConfiguracionRotacionMultiSector | null
+  diasAplicables: number[]  // viene del formulario padre (dia_semana_aplicable)
   onChange: (config: ConfiguracionRotacionMultiSector | null) => void
   disabled?: boolean
 }
 
 export const ConfiguracionRotacionMultiSector: React.FC<Props> = ({
   valor,
+  diasAplicables,
   onChange,
   disabled = false,
 }) => {
+  const [sectores, setSectores] = useState<string[]>([])
   const [activa, setActiva] = useState(valor !== null)
-  const [modo, setModo] = useState<'patrón_fijo' | 'personalizado'>(
-    valor?.modo || 'patrón_fijo'
-  )
-  const [patron, setPatron] = useState(valor?.patrón_semanal || 'C-O-C-O-G')
-  const [distribucionPorDia, setDistribucionPorDia] = useState(
-    valor?.distribucion_por_dia || {}
-  )
-  const [distribuciones, setDistribuciones] = useState(
-    valor?.distribuciones_sector || {
-      comerciales: 2,
-      operativos: 2,
-      gerencia: 1,
-    }
+  const [modo, setModo] = useState<'patron_fijo' | 'personalizado'>(
+    valor?.modo || 'patron_fijo'
   )
 
   const diasSemana = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes']
-  const sectores = ['comerciales', 'operativos', 'gerencia']
+  const diasOrdenados = [...diasAplicables].sort()
+
+  // Cargar sectores desde la API
+  useEffect(() => {
+    sectoresApi.list().then((res) => {
+      setSectores(res.data.map((s) => s.nombre))
+    })
+  }, [])
+
+  // ... resto de la lógica de UI ...
 
   const handleToggle = (checked: boolean) => {
     setActiva(checked)
-    if (checked) {
-      onChange({
-        modo: 'patrón_fijo',
-        patrón_semanal: patron,
-        distribucion_por_dia: null,
-        distribuciones_sector: distribuciones,
-      })
-    } else {
-      onChange(null)
-    }
-  }
-
-  const handleModoChange = (nuevoModo: 'patrón_fijo' | 'personalizado') => {
-    setModo(nuevoModo)
-    onChange({
-      modo: nuevoModo,
-      patrón_semanal: nuevoModo === 'patrón_fijo' ? patron : null,
-      distribucion_por_dia: nuevoModo === 'personalizado' ? distribucionPorDia : null,
-      distribuciones_sector: distribuciones,
-    })
-  }
-
-  const handlePatronChange = (dia: number, sector: string) => {
-    const nuevoPatron = patron.split('')
-    nuevoPatron[dia] = sector[0].toUpperCase()
-    const nuevo = nuevoPatron.join('')
-    setPatron(nuevo)
-    onChange({
-      modo,
-      patrón_semanal: nuevo,
-      distribucion_por_dia: null,
-      distribuciones_sector: distribuciones,
-    })
+    onChange(checked ? buildConfig() : null)
   }
 
   // UI implementada en CSS + JSX
-  return (
-    <div className="config-rotacion">
-      <label className="checkbox-label">
-        <input
-          type="checkbox"
-          checked={activa}
-          onChange={(e) => handleToggle(e.target.checked)}
-          disabled={disabled}
-        />
-        <span>Rotación multi-sector</span>
-      </label>
-
-      {activa && (
-        <div className="rotacion-config">
-          {/* Selector de modo */}
-          <div className="form-group">
-            <label>Modo de configuración:</label>
-            <select
-              value={modo}
-              onChange={(e) => handleModoChange(e.target.value as any)}
-              disabled={disabled}
-            >
-              <option value="patrón_fijo">Patrón fijo semanal</option>
-              <option value="personalizado">Personalizado por día</option>
-            </select>
-          </div>
-
-          {/* Modo Patrón Fijo */}
-          {modo === 'patrón_fijo' && (
-            <div className="patron-container">
-              <label>Patrón semanal (C=Comercial, O=Operativo, G=Gerencia):</label>
-              <div className="patron-selector">
-                {diasSemana.map((dia, i) => (
-                  <div key={i} className="dia-input">
-                    <label>{dia}</label>
-                    <select
-                      value={patron[i] || 'C'}
-                      onChange={(e) => handlePatronChange(i, e.target.value)}
-                      disabled={disabled}
-                    >
-                      <option value="C">Comercial</option>
-                      <option value="O">Operativo</option>
-                      <option value="G">Gerencia</option>
-                    </select>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Modo Personalizado */}
-          {modo === 'personalizado' && (
-            <div className="personalizado-container">
-              <label>Cantidad por día y sector:</label>
-              <table className="distribucion-table">
-                <thead>
-                  <tr>
-                    <th>Día</th>
-                    {sectores.map((s) => (
-                      <th key={s}>{s}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {diasSemana.map((dia, i) => (
-                    <tr key={i}>
-                      <td>{dia}</td>
-                      {sectores.map((sector) => (
-                        <td key={`${i}-${sector}`}>
-                          <input
-                            type="number"
-                            min="0"
-                            max="5"
-                            value={
-                              distribucionPorDia[String(i)]?.[sector] || 0
-                            }
-                            onChange={(e) => {
-                              const newDistribucion = {
-                                ...distribucionPorDia,
-                                [String(i)]: {
-                                  ...(distribucionPorDia[String(i)] || {}),
-                                  [sector]: parseInt(e.target.value),
-                                },
-                              }
-                              setDistribucionPorDia(newDistribucion)
-                              onChange({
-                                modo,
-                                patrón_semanal: null,
-                                distribucion_por_dia: newDistribucion,
-                                distribuciones_sector: distribuciones,
-                              })
-                            }}
-                            disabled={disabled}
-                          />
-                        </td>
-                      ))}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-
-          {/* Resumen */}
-          <div className="resumen-distribuciones">
-            <h4>Resumen semanal:</h4>
-            <ul>
-              {Object.entries(distribuciones).map(([sector, cantidad]) => (
-                <li key={sector}>
-                  {sector}: <strong>{cantidad}</strong>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      )}
-    </div>
-  )
+  // Modo patrón fijo: un <select> por cada día aplicable, opciones = sectores cargados
+  // Modo personalizado: tabla diasOrdenados × sectores, inputs numéricos
+  // Resumen: muestra distribuciones_sector calculadas
 }
 ```
 
@@ -540,11 +510,38 @@ export const ConfiguracionRotacionMultiSector: React.FC<Props> = ({
 ```typescript
 <ConfiguracionRotacionMultiSector
   valor={formData.configuracion_rotacion}
+  diasAplicables={formData.dia_semana_aplicable}
   onChange={(config) =>
     setFormData({ ...formData, configuracion_rotacion: config })
   }
   disabled={isLoading}
 />
+```
+
+**Actualizar tipos en `frontend/src/api/tareasEspeciales.ts`:**
+
+```typescript
+export interface ConfiguracionRotacionMultiSector {
+  modo: 'patron_fijo' | 'personalizado'
+  patron_semanal: string[] | null
+  distribucion_por_dia: Record<string, Record<string, number>> | null
+  distribuciones_sector: Record<string, number>
+}
+
+export interface TareaEspecialTipo {
+  // ... campos existentes ...
+  configuracion_rotacion: ConfiguracionRotacionMultiSector | null  // ← NUEVO
+}
+
+export interface TareaEspecialTipoCreate {
+  // ... campos existentes ...
+  configuracion_rotacion?: ConfiguracionRotacionMultiSector | null
+}
+
+export interface TareaEspecialTipoUpdate {
+  // ... campos existentes ...
+  configuracion_rotacion?: ConfiguracionRotacionMultiSector | null
+}
 ```
 
 ---
@@ -556,31 +553,36 @@ export const ConfiguracionRotacionMultiSector: React.FC<Props> = ({
 **`tests/test_tareas_especiales_multisector.py`**
 
 1. Validación de configuración:
-   - Patrón fijo válido (5 caracteres COG)
-   - Patrón inválido (rechaza)
-   - Distribuciones que no suman 5 (rechaza)
+   - Patrón fijo válido (array de N sectores, N = len(dia_semana_aplicable))
+   - Patrón con largo incorrecto (rechaza)
+   - Distribuciones que no suman len(dia_semana_aplicable) (rechaza)
    - Personalizado con distribución inconsistente (rechaza)
 
 2. Generación de cronograma multi-sector:
    - Genera asignaciones correctas para patrón fijo
    - Genera asignaciones correctas para personalizado
    - Rota correctamente dentro de cada sector
-   - Excluye colaboradores inactivos
+   - Excluye colaboradores inactivos (`estado_atencion = 'desafectado'`)
    - Genera advertencias si pool insuficiente
    - No crea duplicados
+   - Con `cantidad_necesaria = 2`: asigna 2 colaboradores distintos el mismo día
 
 3. Compatibilidad hacia atrás:
    - Tareas sin `configuracion_rotacion` siguen usando round-robin simple
+
+4. Desactivar multi-sector:
+   - PUT con `configuracion_rotacion: null` limpia la config existente
 
 ### Integration Tests (E2E)
 
 1. Create tarea multi-sector → generar cronograma → verificar asignaciones
 2. Edit patrón → regenerar → verificar cambios
 3. Agregar/quitar colaborador del pool → regenerar → verificar rotación
+4. PUT con `configuracion_rotacion: null` → verificar que queda en null en BD
 
 ### Manual Testing
 
-1. Admin crea "Orientador" con patrón "C-O-C-O-G"
+1. Admin crea "Orientador" con patrón `["comerciales", "operativos", "comerciales", "operativos", "gerencia"]`
 2. Habilita 3 comerciales, 2 operativos, 2 gerentes
 3. Genera 4 semanas
 4. Verifica cronograma muestra patrón correcto
@@ -592,32 +594,35 @@ export const ConfiguracionRotacionMultiSector: React.FC<Props> = ({
 
 ### Orden de cambios recomendado
 
-1. **Migración SQL:** Agregar columna `configuracion_rotacion`
-2. **Schema Pydantic:** Definir `ConfiguracionRotacionMultiSector` y validadores
-3. **Modelo:** Actualizar `TareaEspecialTipo`
-4. **Motor:** Refactor `TaskRotationEngine` (mantener compatibilidad atrás)
-5. **API:** Actualizar create/update
-6. **Frontend:** Agregar componente `ConfiguracionRotacionMultiSector`
-7. **Tests:** Coverage completo
+1. **Migración SQL:** Agregar columna `configuracion_rotacion TEXT DEFAULT NULL`
+2. **Schema Pydantic:** Definir `ConfiguracionRotacionMultiSector`; mover validación de suma a model_validator en `TareaEspecialTipoCreate`
+3. **Modelo:** Agregar `configuracion_rotacion` a `TareaEspecialTipo`
+4. **Motor:** Refactor `TaskRotationEngine` con imports de `Colaborador`/`Sector`, usar `timedelta`, flush entre asignaciones múltiples
+5. **API:** Actualizar `create_tipo` (serializar a dict) y `update_tipo` (usar `model_fields_set`)
+6. **Frontend:** Agregar tipo `ConfiguracionRotacionMultiSector` en `tareasEspeciales.ts`; agregar campo en formulario admin con carga dinámica de sectores
+7. **Tests:** Coverage completo incluyendo caso `cantidad_necesaria > 1`
 8. **Docs:** Actualizar si aplica
 
 ### Mitigación de riesgos
 
-**Riesgo:** El cambio afecta tareas existentes
+**Riesgo:** El cambio afecta tareas existentes  
 **Mitigación:** `configuracion_rotacion` es NULL por defecto; se usa lógica antigua
 
-**Riesgo:** Join con Sector en el engine es lento
-**Mitigación:** El engine ya hace JOINs; usar índices existentes (sector_id en Colaborador)
+**Riesgo:** Join con Sector en el engine es lento  
+**Mitigación:** El engine ya hace JOINs; usar índices existentes (`sector_id` en `Colaborador`)
 
-**Riesgo:** Validación de patrón en frontend puede no coincidir con backend
-**Mitigación:** Backend es source of truth; frontend lo valida también para UX
+**Riesgo:** Validación de suma en frontend puede diferir del backend  
+**Mitigación:** Backend es source of truth; frontend valida también para UX pero el servidor rechaza con 400 + detail claro
+
+**Riesgo:** `update_tipo` ignora `configuracion_rotacion: null`  
+**Mitigación:** Usar `model_fields_set` para distinguir "campo no enviado" de "campo enviado como null"
 
 ---
 
 ## Casos de Uso Futuros
 
 Este diseño es extensible para:
-- Rotación por 3+ sectores (actual: 3, máximo teórico: ilimitado)
+- Rotación por 3+ sectores (actual: dinámico según sectores en BD)
 - Frecuencia personalizada por sector (ej: comerciales cada 2 semanas, operativos cada semana)
 - Prioridad o "peso" diferente por sector en la rotación
 - Exclusiones (ej: ciertos colaboradores no rotan en ciertos días)
@@ -627,4 +632,4 @@ Este diseño es extensible para:
 ## Aprobaciones
 
 - **Diseño:** ✅ Aprobado por usuario
-- **Spec:** ⏳ Pendiente revisión
+- **Spec:** ✅ Revisada y corregida (bugs identificados en revisión pre-implementación)
