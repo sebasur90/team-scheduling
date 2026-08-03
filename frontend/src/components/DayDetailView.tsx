@@ -32,40 +32,38 @@ export const DayDetailView: React.FC<DayDetailViewProps> = ({
   const dateStr = formatDate(selectedDate)
 
   return (
-    <div className="md:hidden space-y-2">
-      {/* Controls row - compact layout */}
+    <div className="md:hidden flex flex-col gap-2.5">
+      {/* Admin controls */}
       {isAdmin && (
-        <div className="flex gap-2 items-stretch">
-          {/* Día no laborable button */}
+        <div className="flex gap-2">
           <button
             onClick={() => onDiaNoLaborableClick?.(selectedDate)}
-            className={`flex-1 px-2 py-1.5 text-xs font-medium rounded transition whitespace-nowrap ${
+            className="flex-1 h-9 rounded-xl text-xs font-semibold transition"
+            style={
               isDiaNoLaborable
-                ? 'bg-amber-200 text-amber-900 hover:bg-amber-300'
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-            }`}
+                ? { background: '#fef3c7', color: '#92400e', border: '1.5px solid #fde68a' }
+                : { background: '#f5f5fa', color: '#6b7280', border: '1.5px solid rgba(0,0,0,.06)' }
+            }
           >
-            {isDiaNoLaborable ? 'Sin laborable' : 'No laborable'}
+            {isDiaNoLaborable ? 'Quitar no laborable' : 'Marcar no laborable'}
           </button>
-
-          {/* Generar día button */}
           <button
             onClick={() => onGenerarDesdeElDia?.(selectedDate)}
             disabled={isGenerating}
-            className={`flex-1 px-2 py-1.5 text-xs font-medium rounded transition ${
-              isGenerating
-                ? 'bg-gray-400 cursor-not-allowed'
-                : 'bg-sky-700 hover:bg-sky-800 text-white'
-            }`}
+            className="flex-1 h-9 rounded-xl text-xs font-semibold text-white transition disabled:opacity-50"
+            style={{ background: 'linear-gradient(135deg, #4f46e5, #7c3aed)' }}
           >
-            {isGenerating ? 'Gen...' : 'Regenerar'}
+            {isGenerating ? 'Generando...' : 'Regenerar día'}
           </button>
         </div>
       )}
 
-      {/* Vacaciones */}
-      <div className="bg-white rounded border border-gray-200 p-2">
-        <div className="text-xs font-semibold text-gray-600 mb-1">Vacaciones</div>
+      {/* Vacaciones card */}
+      <div
+        className="bg-white rounded-2xl p-3.5"
+        style={{ border: '1.5px solid rgba(0,0,0,.05)', boxShadow: '0 2px 8px rgba(0,0,0,.04)' }}
+      >
+        <div className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Vacaciones</div>
         <div className="text-xs">{renderVacacionesPills(selectedDate)}</div>
       </div>
 
@@ -77,25 +75,30 @@ export const DayDetailView: React.FC<DayDetailViewProps> = ({
         return (
           <div
             key={franja.id}
-            className={`rounded border p-2 ${
-              isSinTurno
-                ? 'bg-red-50 border-red-200'
-                : 'bg-white border-gray-200'
-            }`}
+            className="bg-white rounded-2xl p-3.5"
+            style={{
+              border: isSinTurno ? '1.5px solid #fecaca' : '1.5px solid rgba(0,0,0,.05)',
+              boxShadow: '0 2px 8px rgba(0,0,0,.04)',
+              background: isSinTurno ? '#fef2f2' : '#fff',
+            }}
           >
-            <div className="flex items-center justify-between mb-1">
-              <div className="text-xs font-semibold text-gray-900">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm font-bold text-gray-900">
                 {franja.hora_inicio.slice(0, 5)} – {franja.hora_fin.slice(0, 5)}
-              </div>
-              {turno && (
-                <div className="text-xs text-gray-500">
-                  {turno.asignaciones.length}
-                </div>
+              </span>
+              {turno && turno.asignaciones.length > 0 && (
+                <span
+                  className="text-xs font-semibold px-2 py-0.5 rounded-full"
+                  style={{ background: '#ede9fe', color: '#6d28d9' }}
+                >
+                  {turno.asignaciones.length} pers.
+                </span>
+              )}
+              {isSinTurno && (
+                <span className="text-xs font-semibold text-red-400">Sin asignar</span>
               )}
             </div>
-            <div className="text-xs">
-              {renderTurnoPills(selectedDate, franja.id)}
-            </div>
+            <div className="text-xs">{renderTurnoPills(selectedDate, franja.id)}</div>
           </div>
         )
       })}

@@ -17,7 +17,7 @@ export const AdminDashboard: React.FC = () => {
   const totalAlerts = (alerts?.swaps_pendientes?.count || 0) + (alerts?.cobertura_en_riesgo?.count || 0)
 
   const getStatBgColor = (count: number): string => {
-    return count > 0 ? 'bg-red-500' : 'bg-emerald-500'
+    return count > 0 ? 'bg-red-500' : 'bg-violet-600'
   }
 
   const getStatBorderColor = (type: string, count: number): string => {
@@ -30,25 +30,25 @@ export const AdminDashboard: React.FC = () => {
     switch (activeTab) {
       case 'resumen':
         return (
-          <div className="bg-white rounded-xl p-6 md:p-8">
-            <h2 className="text-2xl font-bold text-slate-900 mb-6">Panel de Resumen</h2>
+          <div className="bg-white rounded-3xl p-6 md:p-8" style={{ borderRadius: '20px', border: '1.5px solid rgba(0,0,0,.05)', boxShadow: '0 2px 8px rgba(0,0,0,.04)' }}>
+            <h2 className="text-2xl font-bold text-slate-900 mb-6" style={{ fontWeight: 700 }}>Panel de Resumen</h2>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-              <div className={`${getStatBgColor(alerts?.swaps_pendientes.count || 0)} rounded-lg p-4 text-white text-center`}>
-                <div className="text-3xl font-bold">{alerts?.swaps_pendientes.count || 0}</div>
-                <div className="text-sm opacity-90">Swaps pendientes</div>
+              <div className={`${getStatBgColor(alerts?.swaps_pendientes.count || 0)} p-5 text-white text-center`} style={{ borderRadius: '16px', boxShadow: '0 2px 12px rgba(0,0,0,.08)' }}>
+                <div className="text-4xl font-black">{alerts?.swaps_pendientes.count || 0}</div>
+                <div className="text-sm font-medium opacity-95 mt-2">Swaps pendientes</div>
               </div>
-              <div className={`${getStatBgColor(alerts?.turnos_sin_confirmar.count || 0)} rounded-lg p-4 text-white text-center`}>
-                <div className="text-3xl font-bold">{alerts?.turnos_sin_confirmar.count || 0}</div>
-                <div className="text-sm opacity-90">Sin confirmar</div>
+              <div className={`${getStatBgColor(alerts?.turnos_sin_confirmar.count || 0)} p-5 text-white text-center`} style={{ borderRadius: '16px', boxShadow: '0 2px 12px rgba(0,0,0,.08)' }}>
+                <div className="text-4xl font-black">{alerts?.turnos_sin_confirmar.count || 0}</div>
+                <div className="text-sm font-medium opacity-95 mt-2">Sin confirmar</div>
               </div>
-              <div className={`${getStatBgColor(alerts?.cobertura_en_riesgo.count || 0)} rounded-lg p-4 text-white text-center`}>
-                <div className="text-3xl font-bold">{alerts?.cobertura_en_riesgo.count || 0}</div>
-                <div className="text-sm opacity-90">Cobertura en riesgo</div>
+              <div className={`${getStatBgColor(alerts?.cobertura_en_riesgo.count || 0)} p-5 text-white text-center`} style={{ borderRadius: '16px', boxShadow: '0 2px 12px rgba(0,0,0,.08)' }}>
+                <div className="text-4xl font-black">{alerts?.cobertura_en_riesgo.count || 0}</div>
+                <div className="text-sm font-medium opacity-95 mt-2">Cobertura en riesgo</div>
               </div>
-              <div className="bg-emerald-500 rounded-lg p-4 text-white text-center">
-                <div className="text-3xl font-bold">{alerts?.colaboradores_activos || 0}</div>
-                <div className="text-sm opacity-90">Colaboradores activos</div>
+              <div className="bg-violet-600 p-5 text-white text-center" style={{ borderRadius: '16px', boxShadow: '0 2px 12px rgba(0,0,0,.08)' }}>
+                <div className="text-4xl font-black">{alerts?.colaboradores_activos || 0}</div>
+                <div className="text-sm font-medium opacity-95 mt-2">Colaboradores activos</div>
               </div>
             </div>
 
@@ -71,7 +71,8 @@ export const AdminDashboard: React.FC = () => {
                     </div>
                     <button
                       onClick={() => setActiveTab('notificaciones')}
-                      className="mt-3 w-full bg-sky-700 hover:bg-sky-800 text-white py-2 rounded-md text-sm font-medium transition"
+                      className="mt-3 w-full text-white py-2 text-sm font-medium transition"
+                      style={{ backgroundColor: '#7c3aed', borderRadius: '8px' }}
                     >
                       Ver →
                     </button>
@@ -93,7 +94,8 @@ export const AdminDashboard: React.FC = () => {
                     </div>
                     <button
                       onClick={() => setActiveTab('turnos')}
-                      className="mt-3 w-full bg-sky-700 hover:bg-sky-800 text-white py-2 rounded-md text-sm font-medium transition"
+                      className="mt-3 w-full text-white py-2 text-sm font-medium transition"
+                      style={{ backgroundColor: '#7c3aed', borderRadius: '8px' }}
                     >
                       Ver →
                     </button>
@@ -101,7 +103,7 @@ export const AdminDashboard: React.FC = () => {
                 )}
 
                 {(alerts?.turnos_sin_confirmar?.count || 0) > 0 && (
-                  <div className="bg-yellow-50 border-l-4 border-amber-500 rounded-lg p-4">
+                  <div className="border-l-4 border-amber-500 rounded-lg p-4" style={{ backgroundColor: '#fffbeb' }}>
                     <div className="font-semibold text-slate-900 mb-3">
                       ⏳ Sin confirmar ({alerts?.turnos_sin_confirmar?.count || 0})
                     </div>
@@ -115,7 +117,8 @@ export const AdminDashboard: React.FC = () => {
                     </div>
                     <button
                       onClick={() => setActiveTab('turnos')}
-                      className="mt-3 w-full bg-sky-700 hover:bg-sky-800 text-white py-2 rounded-md text-sm font-medium transition"
+                      className="mt-3 w-full text-white py-2 text-sm font-medium transition"
+                      style={{ backgroundColor: '#7c3aed', borderRadius: '8px' }}
                     >
                       Ver →
                     </button>
@@ -133,45 +136,45 @@ export const AdminDashboard: React.FC = () => {
 
       case 'colaboradores':
         return (
-          <div className="bg-white rounded-xl p-6 md:p-8">
+          <div className="bg-white p-6 md:p-8" style={{ borderRadius: '20px', border: '1.5px solid rgba(0,0,0,.05)', boxShadow: '0 2px 12px rgba(0,0,0,.06)' }}>
             <AdminPanel />
           </div>
         )
 
       case 'turnos':
         return (
-          <div className="bg-white rounded-xl p-6 md:p-8">
+          <div className="bg-white p-6 md:p-8" style={{ borderRadius: '20px', border: '1.5px solid rgba(0,0,0,.05)', boxShadow: '0 2px 12px rgba(0,0,0,.06)' }}>
             <CalendarView />
           </div>
         )
 
       case 'vacaciones':
         return (
-          <div className="bg-white rounded-xl p-6 md:p-8">
-            <h2 className="text-2xl font-bold text-slate-900 mb-6">Vacaciones de Colaboradores</h2>
+          <div className="bg-white p-6 md:p-8" style={{ borderRadius: '20px', border: '1.5px solid rgba(0,0,0,.05)', boxShadow: '0 2px 12px rgba(0,0,0,.06)' }}>
+            <h2 className="text-3xl font-black text-gray-900 mb-6 tracking-tight">Vacaciones de Colaboradores</h2>
             <Vacaciones mode="admin" />
           </div>
         )
 
       case 'preferencias':
         return (
-          <div className="bg-white rounded-xl p-6 md:p-8">
-            <h2 className="text-2xl font-bold text-slate-900 mb-6">Preferencias de Franja</h2>
+          <div className="bg-white p-6 md:p-8" style={{ borderRadius: '20px', border: '1.5px solid rgba(0,0,0,.05)', boxShadow: '0 2px 12px rgba(0,0,0,.06)' }}>
+            <h2 className="text-3xl font-black text-gray-900 mb-6 tracking-tight">Preferencias de Franja</h2>
             <PreferenciasUsuarios />
           </div>
         )
 
       case 'reportes':
         return (
-          <div className="bg-white rounded-xl p-6 md:p-8">
+          <div className="bg-white p-6 md:p-8" style={{ borderRadius: '20px', border: '1.5px solid rgba(0,0,0,.05)', boxShadow: '0 2px 12px rgba(0,0,0,.06)' }}>
             <ReportesPanel />
           </div>
         )
 
       case 'notificaciones':
         return (
-          <div className="bg-white rounded-xl p-6 md:p-8">
-            <h2 className="text-2xl font-bold text-slate-900 mb-6">Notificaciones y Swaps Pendientes</h2>
+          <div className="bg-white p-6 md:p-8" style={{ borderRadius: '20px', border: '1.5px solid rgba(0,0,0,.05)', boxShadow: '0 2px 12px rgba(0,0,0,.06)' }}>
+            <h2 className="text-3xl font-black text-gray-900 mb-6 tracking-tight">Notificaciones y Swaps Pendientes</h2>
             {alerts && alerts.swaps_pendientes.count > 0 ? (
               <div>
                 <h3 className="text-lg font-semibold text-slate-900 mb-4">↔️ Swaps Pendientes ({alerts.swaps_pendientes.count})</h3>
@@ -208,14 +211,14 @@ export const AdminDashboard: React.FC = () => {
   }
 
   return (
-    <div className="admin-dashboard flex flex-col h-screen bg-gray-50">
+    <div className="admin-dashboard flex flex-col h-screen bg-gray-100" style={{ background: '#f5f5fa !important' }}>
       <AdminTopBar user={user} onLogout={logout} />
 
       <div className="hidden md:block flex-shrink-0 pt-20 pb-4 px-6">
-        <h1 className="text-3xl font-bold text-slate-900">Panel de Administración</h1>
+        <h1 className="text-3xl font-bold text-slate-900" style={{ fontWeight: 700 }}>Panel de Administración</h1>
       </div>
 
-      <main className="flex-1 overflow-y-auto pt-16 md:pt-0 pb-24 md:pb-6 px-4 md:px-8">
+      <main className="flex-1 overflow-y-auto pt-16 md:pt-0 pb-24 md:pb-6 px-4 md:px-8" style={{ background: '#f5f5fa' }}>
         {renderContent()}
       </main>
 

@@ -1,0 +1,1642 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mockup Rediseño — Team Scheduling</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #0f0f14;
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px 80px;
+      gap: 60px;
+      min-height: 100vh;
+      color: #fff;
+    }
+
+    h1 {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #555;
+    }
+
+    .section-label {
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #444;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+
+    /* ─── Phone Frame ─── */
+    .phone {
+      width: 375px;
+      height: 812px;
+      background: #fff;
+      border-radius: 52px;
+      overflow: hidden;
+      position: relative;
+      box-shadow: 0 0 0 10px #1a1a22, 0 40px 120px rgba(0,0,0,.8), 0 0 80px rgba(99,102,241,.15);
+      flex-shrink: 0;
+    }
+
+    .phone-notch {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 120px;
+      height: 34px;
+      background: #0f0f14;
+      border-radius: 0 0 24px 24px;
+      z-index: 100;
+    }
+
+    .phone-screen {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* ─── SPLASH SCREEN ─── */
+    .splash {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(145deg, #4f46e5 0%, #7c3aed 50%, #6d28d9 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .splash::before {
+      content: '';
+      position: absolute;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(255,255,255,.08) 0%, transparent 70%);
+      top: -100px;
+      right: -100px;
+    }
+
+    .splash::after {
+      content: '';
+      position: absolute;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(255,255,255,.05) 0%, transparent 70%);
+      bottom: -80px;
+      left: -60px;
+    }
+
+    .splash-logo {
+      width: 80px;
+      height: 80px;
+      background: rgba(255,255,255,.15);
+      border-radius: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,.2);
+      position: relative;
+      z-index: 1;
+    }
+
+    .splash-logo svg { width: 44px; height: 44px; }
+
+    .splash-title {
+      font-size: 28px;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: -0.5px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .splash-subtitle {
+      font-size: 14px;
+      color: rgba(255,255,255,.65);
+      letter-spacing: 0.05em;
+      position: relative;
+      z-index: 1;
+    }
+
+    .splash-loader {
+      position: absolute;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 6px;
+    }
+
+    .splash-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.4);
+    }
+
+    .splash-dot.active {
+      background: #fff;
+      width: 20px;
+      border-radius: 3px;
+    }
+
+    /* ─── LOGIN SCREEN ─── */
+    .login {
+      width: 100%;
+      height: 100%;
+      background: #f8f8fb;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .login-top {
+      flex: 0 0 240px;
+      background: linear-gradient(145deg, #4f46e5, #7c3aed);
+      border-radius: 0 0 40px 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      padding-bottom: 32px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .login-top::before {
+      content: '';
+      position: absolute;
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, rgba(255,255,255,.1) 0%, transparent 70%);
+      top: -60px;
+      right: -60px;
+    }
+
+    .login-logo-sm {
+      width: 56px;
+      height: 56px;
+      background: rgba(255,255,255,.15);
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(255,255,255,.2);
+      margin-bottom: 12px;
+    }
+
+    .login-title-sm {
+      font-size: 22px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .login-sub {
+      font-size: 12px;
+      color: rgba(255,255,255,.65);
+      margin-top: 4px;
+    }
+
+    .login-form {
+      flex: 1;
+      padding: 32px 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .form-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #6b7280;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+      display: block;
+    }
+
+    .form-input {
+      width: 100%;
+      height: 50px;
+      background: #fff;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 14px;
+      padding: 0 16px;
+      font-size: 15px;
+      color: #1f2937;
+      outline: none;
+      box-shadow: 0 1px 3px rgba(0,0,0,.04);
+    }
+
+    .form-input.focused {
+      border-color: #6d28d9;
+      box-shadow: 0 0 0 3px rgba(109,40,217,.1);
+    }
+
+    .btn-login {
+      height: 54px;
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      border: none;
+      border-radius: 16px;
+      color: #fff;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      letter-spacing: -0.2px;
+      box-shadow: 0 8px 24px rgba(109,40,217,.35);
+      margin-top: 8px;
+    }
+
+    /* ─── DASHBOARD ─── */
+    .dash {
+      width: 100%;
+      height: 100%;
+      background: #f5f5fa;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .dash-header {
+      background: #fff;
+      padding: 52px 24px 20px;
+      border-bottom: 1px solid rgba(0,0,0,.05);
+    }
+
+    .dash-greeting {
+      font-size: 13px;
+      color: #9ca3af;
+      font-weight: 500;
+    }
+
+    .dash-name {
+      font-size: 24px;
+      font-weight: 700;
+      color: #111827;
+      letter-spacing: -0.5px;
+      margin-top: 2px;
+    }
+
+    .dash-notif-btn {
+      position: absolute;
+      top: 52px;
+      right: 24px;
+      width: 40px;
+      height: 40px;
+      background: #f5f5fa;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(0,0,0,.06);
+    }
+
+    .dash-notif-dot {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 8px;
+      height: 8px;
+      background: #ef4444;
+      border-radius: 50%;
+      border: 1.5px solid #fff;
+    }
+
+    /* Day strip */
+    .day-strip {
+      display: flex;
+      gap: 8px;
+      margin-top: 16px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+
+    .day-strip::-webkit-scrollbar { display: none; }
+
+    .day-chip {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      min-width: 44px;
+      flex-shrink: 0;
+    }
+
+    .day-chip-label {
+      font-size: 10px;
+      font-weight: 600;
+      color: #9ca3af;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .day-chip-num {
+      width: 36px;
+      height: 36px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      font-weight: 600;
+      color: #374151;
+    }
+
+    .day-chip-num.active {
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(109,40,217,.35);
+    }
+
+    .day-chip-dot {
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: #d1d5db;
+    }
+
+    .day-chip-dot.has-shift { background: #4f46e5; }
+
+    /* Main scroll */
+    .dash-scroll {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px 20px 100px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .dash-scroll::-webkit-scrollbar { display: none; }
+
+    /* Barometer card */
+    .baro-card {
+      background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+      border-radius: 24px;
+      padding: 20px;
+      color: #fff;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .baro-card::after {
+      content: '';
+      position: absolute;
+      width: 200px;
+      height: 200px;
+      background: radial-gradient(circle, rgba(255,255,255,.08) 0%, transparent 70%);
+      top: -60px;
+      right: -40px;
+    }
+
+    .baro-title {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      opacity: .65;
+    }
+
+    .baro-date {
+      font-size: 18px;
+      font-weight: 700;
+      margin-top: 4px;
+      letter-spacing: -0.3px;
+    }
+
+    .baro-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .baro-stat {
+      background: rgba(255,255,255,.12);
+      border-radius: 14px;
+      padding: 12px;
+      backdrop-filter: blur(8px);
+    }
+
+    .baro-stat-num {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+
+    .baro-stat-label {
+      font-size: 11px;
+      opacity: .7;
+      margin-top: 2px;
+    }
+
+    .baro-bar-wrap {
+      margin-top: 12px;
+      background: rgba(255,255,255,.15);
+      border-radius: 8px;
+      height: 6px;
+      overflow: hidden;
+    }
+
+    .baro-bar-fill {
+      height: 100%;
+      border-radius: 8px;
+      background: rgba(255,255,255,.9);
+    }
+
+    /* Shift card */
+    .section-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #111827;
+      letter-spacing: -0.2px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .section-title a {
+      font-size: 12px;
+      font-weight: 500;
+      color: #6d28d9;
+    }
+
+    .shift-card {
+      background: #fff;
+      border-radius: 20px;
+      padding: 16px;
+      border: 1.5px solid rgba(0,0,0,.05);
+      box-shadow: 0 2px 8px rgba(0,0,0,.04);
+      display: flex;
+      gap: 14px;
+      align-items: center;
+    }
+
+    .shift-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      flex-shrink: 0;
+    }
+
+    .shift-icon.comercial { background: #ede9fe; }
+    .shift-icon.operativo { background: #fff7ed; }
+    .shift-icon.libre { background: #f0fdf4; }
+
+    .shift-info { flex: 1; }
+
+    .shift-type {
+      font-size: 15px;
+      font-weight: 700;
+      color: #111827;
+      letter-spacing: -0.2px;
+    }
+
+    .shift-time {
+      font-size: 13px;
+      color: #6b7280;
+      margin-top: 2px;
+    }
+
+    .shift-badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 20px;
+    }
+
+    .shift-badge.comercial { background: #ede9fe; color: #6d28d9; }
+    .shift-badge.operativo { background: #fff7ed; color: #ea580c; }
+    .shift-badge.libre { background: #f0fdf4; color: #16a34a; }
+
+    /* Swap card */
+    .swap-alert {
+      background: #fff;
+      border-radius: 20px;
+      padding: 16px;
+      border: 1.5px solid #e0e7ff;
+      box-shadow: 0 2px 8px rgba(79,70,229,.08);
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .swap-alert-icon {
+      width: 36px;
+      height: 36px;
+      background: #ede9fe;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .swap-alert-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #111827;
+    }
+
+    .swap-alert-sub {
+      font-size: 12px;
+      color: #6b7280;
+      margin-top: 2px;
+    }
+
+    .swap-btns {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .swap-btn {
+      flex: 1;
+      height: 34px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+    }
+
+    .swap-btn.accept { background: #4f46e5; color: #fff; }
+    .swap-btn.reject { background: #f3f4f6; color: #6b7280; }
+
+    /* Quick actions */
+    .quick-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .quick-card {
+      background: #fff;
+      border-radius: 20px;
+      padding: 16px;
+      border: 1.5px solid rgba(0,0,0,.05);
+      box-shadow: 0 2px 8px rgba(0,0,0,.04);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .quick-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+
+    .quick-label {
+      font-size: 13px;
+      font-weight: 700;
+      color: #111827;
+      letter-spacing: -0.2px;
+    }
+
+    .quick-sub {
+      font-size: 11px;
+      color: #9ca3af;
+    }
+
+    /* ─── BOTTOM NAV ─── */
+    .bottom-nav {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 82px;
+      background: rgba(255,255,255,.92);
+      backdrop-filter: blur(20px);
+      border-top: 1px solid rgba(0,0,0,.06);
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      padding-bottom: 16px;
+      z-index: 50;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      position: relative;
+      flex: 1;
+    }
+
+    .nav-icon {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 10px;
+    }
+
+    .nav-icon.active {
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    }
+
+    .nav-label {
+      font-size: 10px;
+      font-weight: 600;
+      color: #9ca3af;
+    }
+
+    .nav-label.active { color: #4f46e5; }
+
+    .nav-badge {
+      position: absolute;
+      top: -2px;
+      right: 20px;
+      width: 16px;
+      height: 16px;
+      background: #ef4444;
+      border-radius: 50%;
+      border: 2px solid #fff;
+      font-size: 9px;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+    }
+
+    /* ─── CALENDAR SCREEN ─── */
+    .cal-month-header {
+      padding: 52px 24px 16px;
+      background: #fff;
+      border-bottom: 1px solid rgba(0,0,0,.05);
+    }
+
+    .cal-month-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .cal-month-name {
+      font-size: 20px;
+      font-weight: 700;
+      color: #111827;
+      letter-spacing: -0.4px;
+    }
+
+    .cal-nav-btn {
+      width: 36px;
+      height: 36px;
+      background: #f5f5fa;
+      border: 1px solid rgba(0,0,0,.06);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      color: #374151;
+    }
+
+    .cal-weekdays {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      margin-top: 14px;
+      gap: 2px;
+    }
+
+    .cal-wd {
+      text-align: center;
+      font-size: 10px;
+      font-weight: 700;
+      color: #9ca3af;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .cal-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 2px;
+      padding: 12px 20px;
+      background: #fff;
+    }
+
+    .cal-day {
+      aspect-ratio: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border-radius: 10px;
+      gap: 3px;
+      font-size: 13px;
+      font-weight: 500;
+      color: #374151;
+    }
+
+    .cal-day.today {
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      color: #fff;
+      font-weight: 700;
+    }
+
+    .cal-day.dim { color: #d1d5db; }
+
+    .cal-shift-dot {
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+    }
+
+    .cal-shift-dot.c { background: #6d28d9; }
+    .cal-shift-dot.o { background: #ea580c; }
+    .cal-shift-dot.l { background: #16a34a; }
+    .cal-shift-dot.today { background: rgba(255,255,255,.7); }
+
+    /* Legend */
+    .cal-legend {
+      display: flex;
+      gap: 16px;
+      padding: 12px 24px;
+      background: #fff;
+      border-bottom: 1px solid rgba(0,0,0,.05);
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: #6b7280;
+      font-weight: 500;
+    }
+
+    .legend-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    /* ─── PREFERENCES SCREEN ─── */
+    .pref-header {
+      background: #fff;
+      padding: 52px 24px 20px;
+      border-bottom: 1px solid rgba(0,0,0,.05);
+    }
+
+    .pref-screen-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: #111827;
+      letter-spacing: -0.5px;
+    }
+
+    .pref-sub {
+      font-size: 13px;
+      color: #9ca3af;
+      margin-top: 4px;
+    }
+
+    .pref-scroll {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 20px 100px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .pref-section-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: #9ca3af;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-top: 8px;
+      margin-bottom: 2px;
+    }
+
+    .pref-item {
+      background: #fff;
+      border-radius: 18px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border: 1.5px solid rgba(0,0,0,.05);
+      box-shadow: 0 1px 4px rgba(0,0,0,.03);
+    }
+
+    .pref-item-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .pref-item-text { flex: 1; }
+
+    .pref-item-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #111827;
+    }
+
+    .pref-item-sub {
+      font-size: 12px;
+      color: #9ca3af;
+      margin-top: 1px;
+    }
+
+    .pref-toggle {
+      width: 44px;
+      height: 26px;
+      border-radius: 13px;
+      position: relative;
+    }
+
+    .pref-toggle.on { background: #4f46e5; }
+    .pref-toggle.off { background: #e5e7eb; }
+
+    .pref-toggle-thumb {
+      position: absolute;
+      top: 3px;
+      width: 20px;
+      height: 20px;
+      background: #fff;
+      border-radius: 50%;
+      box-shadow: 0 1px 4px rgba(0,0,0,.2);
+    }
+
+    .pref-toggle.on .pref-toggle-thumb { left: 21px; }
+    .pref-toggle.off .pref-toggle-thumb { left: 3px; }
+
+    .pref-chevron {
+      color: #d1d5db;
+      font-size: 16px;
+    }
+
+    /* Row of phones */
+    .phones-row {
+      display: flex;
+      gap: 40px;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: flex-start;
+    }
+
+    .phone-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+
+    /* Color palette preview */
+    .palette {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-top: 4px;
+    }
+
+    .pal-swatch {
+      width: 32px;
+      height: 32px;
+      border-radius: 10px;
+    }
+
+    .pal-label {
+      font-size: 10px;
+      color: #555;
+      font-family: monospace;
+    }
+
+    /* Typography specimen */
+    .typo-box {
+      background: #1a1a22;
+      border-radius: 16px;
+      padding: 24px 28px;
+      max-width: 375px;
+      border: 1px solid #2a2a35;
+    }
+
+    .typo-h1 { font-size: 28px; font-weight: 800; color: #fff; letter-spacing: -0.8px; }
+    .typo-h2 { font-size: 20px; font-weight: 700; color: #e5e7eb; letter-spacing: -0.4px; margin-top: 8px; }
+    .typo-body { font-size: 14px; color: #9ca3af; margin-top: 8px; line-height: 1.6; }
+    .typo-caption { font-size: 11px; color: #555; margin-top: 6px; letter-spacing: 0.05em; }
+  </style>
+</head>
+<body>
+
+  <h1>Mockup · Rediseño Mobile-First</h1>
+
+  <!-- ── PALETA + TIPOGRAFÍA ── -->
+  <div style="text-align:center">
+    <div class="section-label">Paleta de colores</div>
+    <div class="palette" style="justify-content:center; flex-wrap:wrap; gap:16px">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+        <div class="pal-swatch" style="background:linear-gradient(135deg,#4f46e5,#7c3aed)"></div>
+        <span class="pal-label">Primary</span>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+        <div class="pal-swatch" style="background:#111827"></div>
+        <span class="pal-label">#111827</span>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+        <div class="pal-swatch" style="background:#f5f5fa"></div>
+        <span class="pal-label">#f5f5fa</span>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+        <div class="pal-swatch" style="background:#6d28d9;border:2px solid #333"></div>
+        <span class="pal-label">Comercial</span>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+        <div class="pal-swatch" style="background:#ea580c;border:2px solid #333"></div>
+        <span class="pal-label">Operativo</span>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+        <div class="pal-swatch" style="background:#16a34a;border:2px solid #333"></div>
+        <span class="pal-label">Libre</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── FILA 1: Splash + Login ── -->
+  <div class="phones-row">
+
+    <!-- SPLASH -->
+    <div class="phone-wrap">
+      <div class="section-label">1 · Splash Screen</div>
+      <div class="phone">
+        <div class="phone-notch"></div>
+        <div class="phone-screen">
+          <div class="splash">
+            <div class="splash-logo">
+              <svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="6" y="8" width="14" height="14" rx="4" fill="rgba(255,255,255,0.9)"/>
+                <rect x="24" y="8" width="14" height="14" rx="4" fill="rgba(255,255,255,0.5)"/>
+                <rect x="6" y="26" width="14" height="14" rx="4" fill="rgba(255,255,255,0.5)"/>
+                <rect x="24" y="26" width="14" height="14" rx="4" fill="rgba(255,255,255,0.75)"/>
+              </svg>
+            </div>
+            <div class="splash-title">Turnos</div>
+            <div class="splash-subtitle">Gestión de equipos</div>
+            <div class="splash-loader">
+              <div class="splash-dot active"></div>
+              <div class="splash-dot"></div>
+              <div class="splash-dot"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LOGIN -->
+    <div class="phone-wrap">
+      <div class="section-label">2 · Login</div>
+      <div class="phone">
+        <div class="phone-notch"></div>
+        <div class="phone-screen">
+          <div class="login">
+            <div class="login-top">
+              <div class="login-logo-sm">
+                <svg width="30" height="30" viewBox="0 0 44 44" fill="none">
+                  <rect x="6" y="8" width="14" height="14" rx="4" fill="rgba(255,255,255,0.9)"/>
+                  <rect x="24" y="8" width="14" height="14" rx="4" fill="rgba(255,255,255,0.5)"/>
+                  <rect x="6" y="26" width="14" height="14" rx="4" fill="rgba(255,255,255,0.5)"/>
+                  <rect x="24" y="26" width="14" height="14" rx="4" fill="rgba(255,255,255,0.75)"/>
+                </svg>
+              </div>
+              <div class="login-title-sm">Bienvenido</div>
+              <div class="login-sub">Ingresá con tu cuenta</div>
+            </div>
+            <div class="login-form">
+              <div>
+                <span class="form-label">Correo electrónico</span>
+                <input class="form-input focused" value="juan@empresa.com" readonly style="pointer-events:none" />
+              </div>
+              <div>
+                <span class="form-label">Contraseña</span>
+                <input class="form-input" type="password" value="••••••••" readonly style="pointer-events:none" />
+              </div>
+              <button class="btn-login">Ingresar</button>
+              <div style="text-align:center;font-size:12px;color:#9ca3af;margin-top:8px">
+                ¿Olvidaste tu contraseña? <span style="color:#6d28d9;font-weight:600">Recuperar</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── FILA 2: Dashboard home + Calendario ── -->
+  <div class="phones-row">
+
+    <!-- DASHBOARD HOME -->
+    <div class="phone-wrap">
+      <div class="section-label">3 · Dashboard (Inicio)</div>
+      <div class="phone">
+        <div class="phone-notch"></div>
+        <div class="phone-screen">
+          <div class="dash">
+            <div class="dash-header" style="position:relative">
+              <div class="dash-greeting">Lunes, 3 de agosto</div>
+              <div class="dash-name">Hola, Juan 👋</div>
+              <div class="dash-notif-btn">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#374151" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                  <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                </svg>
+                <div class="dash-notif-dot"></div>
+              </div>
+
+              <!-- Day strip -->
+              <div class="day-strip">
+                <div class="day-chip">
+                  <span class="day-chip-label">Lun</span>
+                  <div class="day-chip-num active">3</div>
+                  <div class="day-chip-dot has-shift today"></div>
+                </div>
+                <div class="day-chip">
+                  <span class="day-chip-label">Mar</span>
+                  <div class="day-chip-num">4</div>
+                  <div class="day-chip-dot has-shift"></div>
+                </div>
+                <div class="day-chip">
+                  <span class="day-chip-label">Mié</span>
+                  <div class="day-chip-num">5</div>
+                  <div class="day-chip-dot"></div>
+                </div>
+                <div class="day-chip">
+                  <span class="day-chip-label">Jue</span>
+                  <div class="day-chip-num">6</div>
+                  <div class="day-chip-dot has-shift"></div>
+                </div>
+                <div class="day-chip">
+                  <span class="day-chip-label">Vie</span>
+                  <div class="day-chip-num">7</div>
+                  <div class="day-chip-dot"></div>
+                </div>
+                <div class="day-chip">
+                  <span class="day-chip-label">Sáb</span>
+                  <div class="day-chip-num">8</div>
+                  <div class="day-chip-dot"></div>
+                </div>
+                <div class="day-chip">
+                  <span class="day-chip-label">Dom</span>
+                  <div class="day-chip-num">9</div>
+                  <div class="day-chip-dot"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="dash-scroll">
+              <!-- Barometer -->
+              <div class="baro-card">
+                <div class="baro-title">Cobertura hoy</div>
+                <div class="baro-date">Lunes 3 · Turno Comercial</div>
+                <div class="baro-grid">
+                  <div class="baro-stat">
+                    <div class="baro-stat-num">14</div>
+                    <div class="baro-stat-label">Personas activas</div>
+                  </div>
+                  <div class="baro-stat">
+                    <div class="baro-stat-num">87%</div>
+                    <div class="baro-stat-label">Cobertura</div>
+                  </div>
+                </div>
+                <div class="baro-bar-wrap" style="margin-top:14px">
+                  <div class="baro-bar-fill" style="width:87%"></div>
+                </div>
+              </div>
+
+              <!-- Mi turno hoy -->
+              <div>
+                <div class="section-title">
+                  Mi turno hoy
+                  <a href="#">Ver semana →</a>
+                </div>
+                <div class="shift-card">
+                  <div class="shift-icon comercial">🍽️</div>
+                  <div class="shift-info">
+                    <div class="shift-type">Almuerzo Comercial</div>
+                    <div class="shift-time">12:00 – 13:00 hs</div>
+                  </div>
+                  <div class="shift-badge comercial">Comercial</div>
+                </div>
+              </div>
+
+              <!-- Swap pendiente -->
+              <div>
+                <div class="section-title">Intercambio pendiente</div>
+                <div class="swap-alert">
+                  <div class="swap-alert-icon">🔄</div>
+                  <div style="flex:1">
+                    <div class="swap-alert-title">Solicitud de Ana García</div>
+                    <div class="swap-alert-sub">Quiere intercambiar Mié 6 → Jue 7</div>
+                    <div class="swap-btns">
+                      <button class="swap-btn accept">Aceptar</button>
+                      <button class="swap-btn reject">Rechazar</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Quick actions -->
+              <div>
+                <div class="section-title">Acciones rápidas</div>
+                <div class="quick-grid">
+                  <div class="quick-card">
+                    <div class="quick-icon" style="background:#ede9fe">📅</div>
+                    <div class="quick-label">Pedir swap</div>
+                    <div class="quick-sub">Intercambiar turno</div>
+                  </div>
+                  <div class="quick-card">
+                    <div class="quick-icon" style="background:#fef3c7">🏖️</div>
+                    <div class="quick-label">Vacaciones</div>
+                    <div class="quick-sub">Solicitar días</div>
+                  </div>
+                  <div class="quick-card">
+                    <div class="quick-icon" style="background:#f0fdf4">✨</div>
+                    <div class="quick-label">Preferencias</div>
+                    <div class="quick-sub">Franjas horarias</div>
+                  </div>
+                  <div class="quick-card">
+                    <div class="quick-icon" style="background:#fce7f3">📊</div>
+                    <div class="quick-label">Historial</div>
+                    <div class="quick-sub">Mis turnos</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Bottom Nav -->
+            <div class="bottom-nav">
+              <div class="nav-item">
+                <div class="nav-icon active">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                    <polyline points="9 22 9 12 15 12 15 22"/>
+                  </svg>
+                </div>
+                <span class="nav-label active">Inicio</span>
+              </div>
+              <div class="nav-item">
+                <div class="nav-icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                    <line x1="16" y1="2" x2="16" y2="6"/>
+                    <line x1="8" y1="2" x2="8" y2="6"/>
+                    <line x1="3" y1="10" x2="21" y2="10"/>
+                  </svg>
+                </div>
+                <span class="nav-label">Calendario</span>
+              </div>
+              <div class="nav-item">
+                <div class="nav-icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                  </svg>
+                </div>
+                <span class="nav-label">Vacaciones</span>
+              </div>
+              <div class="nav-item">
+                <div class="nav-icon" style="position:relative">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2">
+                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                    <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                  </svg>
+                </div>
+                <div class="nav-badge">2</div>
+                <span class="nav-label">Alertas</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CALENDARIO MENSUAL -->
+    <div class="phone-wrap">
+      <div class="section-label">4 · Calendario mensual</div>
+      <div class="phone">
+        <div class="phone-notch"></div>
+        <div class="phone-screen">
+          <div class="dash">
+            <div class="cal-month-header">
+              <div class="cal-month-nav">
+                <div class="cal-nav-btn">‹</div>
+                <div class="cal-month-name">Agosto 2026</div>
+                <div class="cal-nav-btn">›</div>
+              </div>
+              <div class="cal-weekdays" style="margin-top:16px">
+                <div class="cal-wd">L</div>
+                <div class="cal-wd">M</div>
+                <div class="cal-wd">M</div>
+                <div class="cal-wd">J</div>
+                <div class="cal-wd">V</div>
+                <div class="cal-wd" style="color:#6d28d9">S</div>
+                <div class="cal-wd" style="color:#ef4444">D</div>
+              </div>
+            </div>
+
+            <div class="cal-grid">
+              <!-- Week 1 -->
+              <div class="cal-day dim">28<div class="cal-shift-dot" style="background:transparent"></div></div>
+              <div class="cal-day dim">29<div class="cal-shift-dot" style="background:transparent"></div></div>
+              <div class="cal-day dim">30<div class="cal-shift-dot" style="background:transparent"></div></div>
+              <div class="cal-day dim">31<div class="cal-shift-dot" style="background:transparent"></div></div>
+              <div class="cal-day">1<div class="cal-shift-dot c"></div></div>
+              <div class="cal-day" style="color:#6d28d9">2<div class="cal-shift-dot" style="background:transparent"></div></div>
+              <div class="cal-day" style="color:#ef4444">3<div class="cal-shift-dot" style="background:transparent"></div></div>
+              <!-- Week 2 -->
+              <div class="cal-day today">4<div class="cal-shift-dot today"></div></div>
+              <div class="cal-day">5<div class="cal-shift-dot o"></div></div>
+              <div class="cal-day">6<div class="cal-shift-dot c"></div></div>
+              <div class="cal-day">7<div class="cal-shift-dot c"></div></div>
+              <div class="cal-day">8<div class="cal-shift-dot l"></div></div>
+              <div class="cal-day" style="color:#6d28d9">9<div class="cal-shift-dot" style="background:transparent"></div></div>
+              <div class="cal-day" style="color:#ef4444">10<div class="cal-shift-dot" style="background:transparent"></div></div>
+              <!-- Week 3 -->
+              <div class="cal-day">11<div class="cal-shift-dot c"></div></div>
+              <div class="cal-day">12<div class="cal-shift-dot o"></div></div>
+              <div class="cal-day">13<div class="cal-shift-dot c"></div></div>
+              <div class="cal-day">14<div class="cal-shift-dot o"></div></div>
+              <div class="cal-day">15<div class="cal-shift-dot l"></div></div>
+              <div class="cal-day" style="color:#6d28d9">16<div class="cal-shift-dot" style="background:transparent"></div></div>
+              <div class="cal-day" style="color:#ef4444">17<div class="cal-shift-dot" style="background:transparent"></div></div>
+              <!-- Week 4 -->
+              <div class="cal-day">18<div class="cal-shift-dot c"></div></div>
+              <div class="cal-day">19<div class="cal-shift-dot c"></div></div>
+              <div class="cal-day">20<div class="cal-shift-dot o"></div></div>
+              <div class="cal-day">21<div class="cal-shift-dot c"></div></div>
+              <div class="cal-day">22<div class="cal-shift-dot l"></div></div>
+              <div class="cal-day" style="color:#6d28d9">23<div class="cal-shift-dot" style="background:transparent"></div></div>
+              <div class="cal-day" style="color:#ef4444">24<div class="cal-shift-dot" style="background:transparent"></div></div>
+              <!-- Week 5 -->
+              <div class="cal-day">25<div class="cal-shift-dot c"></div></div>
+              <div class="cal-day">26<div class="cal-shift-dot o"></div></div>
+              <div class="cal-day">27<div class="cal-shift-dot c"></div></div>
+              <div class="cal-day">28<div class="cal-shift-dot c"></div></div>
+              <div class="cal-day">29<div class="cal-shift-dot l"></div></div>
+              <div class="cal-day" style="color:#6d28d9">30<div class="cal-shift-dot" style="background:transparent"></div></div>
+              <div class="cal-day" style="color:#ef4444">31<div class="cal-shift-dot" style="background:transparent"></div></div>
+            </div>
+
+            <!-- Legend -->
+            <div class="cal-legend">
+              <div class="legend-item">
+                <div class="legend-dot" style="background:#6d28d9"></div>
+                Comercial
+              </div>
+              <div class="legend-item">
+                <div class="legend-dot" style="background:#ea580c"></div>
+                Operativo
+              </div>
+              <div class="legend-item">
+                <div class="legend-dot" style="background:#16a34a"></div>
+                Libre
+              </div>
+            </div>
+
+            <!-- Day detail -->
+            <div style="padding:16px 20px;flex:1;overflow-y:auto">
+              <div style="font-size:13px;font-weight:700;color:#374151;margin-bottom:12px">Lunes 4 · Turno seleccionado</div>
+              <div class="shift-card" style="margin-bottom:10px">
+                <div class="shift-icon comercial">🍽️</div>
+                <div class="shift-info">
+                  <div class="shift-type">Almuerzo Comercial</div>
+                  <div class="shift-time">12:00 – 13:00 hs</div>
+                </div>
+                <div class="shift-badge comercial">Comercial</div>
+              </div>
+              <button style="width:100%;height:46px;border-radius:14px;background:#f5f5fa;border:1.5px solid rgba(0,0,0,.08);font-size:13px;font-weight:600;color:#4f46e5;cursor:pointer">
+                🔄 Solicitar intercambio
+              </button>
+            </div>
+
+            <!-- Bottom Nav -->
+            <div class="bottom-nav">
+              <div class="nav-item">
+                <div class="nav-icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                    <polyline points="9 22 9 12 15 12 15 22"/>
+                  </svg>
+                </div>
+                <span class="nav-label">Inicio</span>
+              </div>
+              <div class="nav-item">
+                <div class="nav-icon active">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                    <line x1="16" y1="2" x2="16" y2="6"/>
+                    <line x1="8" y1="2" x2="8" y2="6"/>
+                    <line x1="3" y1="10" x2="21" y2="10"/>
+                  </svg>
+                </div>
+                <span class="nav-label active">Calendario</span>
+              </div>
+              <div class="nav-item">
+                <div class="nav-icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                  </svg>
+                </div>
+                <span class="nav-label">Vacaciones</span>
+              </div>
+              <div class="nav-item">
+                <div class="nav-icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2">
+                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                    <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                  </svg>
+                </div>
+                <div class="nav-badge">2</div>
+                <span class="nav-label">Alertas</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── FILA 3: Preferencias ── -->
+  <div class="phones-row">
+
+    <!-- PREFERENCIAS -->
+    <div class="phone-wrap">
+      <div class="section-label">5 · Preferencias</div>
+      <div class="phone">
+        <div class="phone-notch"></div>
+        <div class="phone-screen">
+          <div class="dash">
+            <div class="pref-header">
+              <div class="pref-screen-title">Preferencias</div>
+              <div class="pref-sub">Personalizá tus franjas horarias</div>
+            </div>
+
+            <div class="pref-scroll">
+              <div class="pref-section-label">Turno preferido</div>
+
+              <div class="pref-item">
+                <div class="pref-item-icon" style="background:#ede9fe">🍽️</div>
+                <div class="pref-item-text">
+                  <div class="pref-item-title">Almuerzo Comercial</div>
+                  <div class="pref-item-sub">12:00 – 13:00 hs</div>
+                </div>
+                <div class="pref-toggle on">
+                  <div class="pref-toggle-thumb"></div>
+                </div>
+              </div>
+
+              <div class="pref-item">
+                <div class="pref-item-icon" style="background:#fff7ed">🔧</div>
+                <div class="pref-item-text">
+                  <div class="pref-item-title">Almuerzo Operativo</div>
+                  <div class="pref-item-sub">13:00 – 14:00 hs</div>
+                </div>
+                <div class="pref-toggle off">
+                  <div class="pref-toggle-thumb"></div>
+                </div>
+              </div>
+
+              <div class="pref-section-label" style="margin-top:16px">Notificaciones</div>
+
+              <div class="pref-item">
+                <div class="pref-item-icon" style="background:#ecfdf5">🔔</div>
+                <div class="pref-item-text">
+                  <div class="pref-item-title">Push notifications</div>
+                  <div class="pref-item-sub">Recordatorios de turno</div>
+                </div>
+                <div class="pref-toggle on">
+                  <div class="pref-toggle-thumb"></div>
+                </div>
+              </div>
+
+              <div class="pref-item">
+                <div class="pref-item-icon" style="background:#fef3c7">⏰</div>
+                <div class="pref-item-text">
+                  <div class="pref-item-title">Recordatorio previo</div>
+                  <div class="pref-item-sub">30 min antes del turno</div>
+                </div>
+                <span class="pref-chevron">›</span>
+              </div>
+
+              <div class="pref-section-label" style="margin-top:16px">Cuenta</div>
+
+              <div class="pref-item">
+                <div class="pref-item-icon" style="background:#f0f9ff">👤</div>
+                <div class="pref-item-text">
+                  <div class="pref-item-title">Perfil</div>
+                  <div class="pref-item-sub">juan@empresa.com</div>
+                </div>
+                <span class="pref-chevron">›</span>
+              </div>
+
+              <div class="pref-item" style="margin-top:4px">
+                <div class="pref-item-icon" style="background:#fef2f2">🚪</div>
+                <div class="pref-item-text">
+                  <div class="pref-item-title" style="color:#ef4444">Cerrar sesión</div>
+                </div>
+                <span class="pref-chevron">›</span>
+              </div>
+            </div>
+
+            <!-- Bottom Nav -->
+            <div class="bottom-nav">
+              <div class="nav-item">
+                <div class="nav-icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                    <polyline points="9 22 9 12 15 12 15 22"/>
+                  </svg>
+                </div>
+                <span class="nav-label">Inicio</span>
+              </div>
+              <div class="nav-item">
+                <div class="nav-icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                    <line x1="16" y1="2" x2="16" y2="6"/>
+                    <line x1="8" y1="2" x2="8" y2="6"/>
+                    <line x1="3" y1="10" x2="21" y2="10"/>
+                  </svg>
+                </div>
+                <span class="nav-label">Calendario</span>
+              </div>
+              <div class="nav-item">
+                <div class="nav-icon active">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                  </svg>
+                </div>
+                <span class="nav-label active">Vacaciones</span>
+              </div>
+              <div class="nav-item">
+                <div class="nav-icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2">
+                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                    <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                  </svg>
+                </div>
+                <div class="nav-badge">2</div>
+                <span class="nav-label">Alertas</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- VACACIONES -->
+    <div class="phone-wrap">
+      <div class="section-label">6 · Vacaciones</div>
+      <div class="phone">
+        <div class="phone-notch"></div>
+        <div class="phone-screen">
+          <div class="dash">
+            <div class="pref-header">
+              <div class="pref-screen-title">Vacaciones</div>
+              <div class="pref-sub">Gestioná tus días libres</div>
+            </div>
+
+            <div class="pref-scroll">
+              <!-- Balance card -->
+              <div style="background:linear-gradient(135deg,#4f46e5,#7c3aed);border-radius:24px;padding:20px;color:#fff">
+                <div style="font-size:12px;opacity:.7;font-weight:600;letter-spacing:.06em;text-transform:uppercase">Días disponibles</div>
+                <div style="font-size:48px;font-weight:800;letter-spacing:-2px;margin-top:4px">14</div>
+                <div style="display:flex;gap:16px;margin-top:12px">
+                  <div style="background:rgba(255,255,255,.12);border-radius:12px;padding:10px 14px">
+                    <div style="font-size:18px;font-weight:800">6</div>
+                    <div style="font-size:11px;opacity:.7;margin-top:2px">Usados</div>
+                  </div>
+                  <div style="background:rgba(255,255,255,.12);border-radius:12px;padding:10px 14px">
+                    <div style="font-size:18px;font-weight:800">20</div>
+                    <div style="font-size:11px;opacity:.7;margin-top:2px">Total</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Request button -->
+              <button style="width:100%;height:52px;border-radius:16px;background:linear-gradient(135deg,#4f46e5,#7c3aed);border:none;color:#fff;font-size:15px;font-weight:600;cursor:pointer;box-shadow:0 8px 24px rgba(109,40,217,.3)">
+                + Solicitar días de vacaciones
+              </button>
+
+              <div class="pref-section-label">Solicitudes</div>
+
+              <!-- Pending request -->
+              <div class="pref-item">
+                <div class="pref-item-icon" style="background:#fef3c7">⏳</div>
+                <div class="pref-item-text">
+                  <div class="pref-item-title">18 – 22 ago 2026</div>
+                  <div class="pref-item-sub">5 días · Pendiente aprobación</div>
+                </div>
+                <span style="font-size:11px;font-weight:700;color:#ea580c;background:#fff7ed;padding:4px 10px;border-radius:20px">Pendiente</span>
+              </div>
+
+              <!-- Approved -->
+              <div class="pref-item">
+                <div class="pref-item-icon" style="background:#ecfdf5">✅</div>
+                <div class="pref-item-text">
+                  <div class="pref-item-title">1 – 3 jul 2026</div>
+                  <div class="pref-item-sub">3 días · Aprobadas</div>
+                </div>
+                <span style="font-size:11px;font-weight:700;color:#16a34a;background:#f0fdf4;padding:4px 10px;border-radius:20px">Aprobado</span>
+              </div>
+            </div>
+
+            <!-- Bottom Nav -->
+            <div class="bottom-nav">
+              <div class="nav-item">
+                <div class="nav-icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                    <polyline points="9 22 9 12 15 12 15 22"/>
+                  </svg>
+                </div>
+                <span class="nav-label">Inicio</span>
+              </div>
+              <div class="nav-item">
+                <div class="nav-icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                    <line x1="16" y1="2" x2="16" y2="6"/>
+                    <line x1="8" y1="2" x2="8" y2="6"/>
+                    <line x1="3" y1="10" x2="21" y2="10"/>
+                  </svg>
+                </div>
+                <span class="nav-label">Calendario</span>
+              </div>
+              <div class="nav-item">
+                <div class="nav-icon active">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                  </svg>
+                </div>
+                <span class="nav-label active">Vacaciones</span>
+              </div>
+              <div class="nav-item">
+                <div class="nav-icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2">
+                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                    <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                  </svg>
+                </div>
+                <div class="nav-badge">2</div>
+                <span class="nav-label">Alertas</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Footer note -->
+  <div style="text-align:center;max-width:600px;color:#444;font-size:13px;line-height:1.8;border:1px solid #2a2a35;border-radius:16px;padding:24px 28px;background:#1a1a22">
+    <strong style="color:#e5e7eb;display:block;margin-bottom:8px">Resumen del rediseño</strong>
+    <strong style="color:#ccc">Identidad:</strong> Violeta-índigo como color primario, neutros fríos (#f5f5fa, #111827)<br>
+    <strong style="color:#ccc">Tipografía:</strong> SF Pro / system-ui, pesos 500–800, tracking negativo en títulos<br>
+    <strong style="color:#ccc">Cards:</strong> Fondo blanco, border-radius 20–24px, sombras sutiles<br>
+    <strong style="color:#ccc">Nav:</strong> 4 tabs con íconos SVG + glassmorphism, tab activo con pill gradiente<br>
+    <strong style="color:#ccc">Splash:</strong> Full-screen gradiente con logo glassmorphism + loader de dots<br>
+    <strong style="color:#ccc">Header:</strong> Saludo personalizado + day-strip con chips de días de la semana
+  </div>
+
+</body>
+</html>

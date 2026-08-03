@@ -1,52 +1,56 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { Login } from './components/Login'
 import { Dashboard } from './components/Dashboard'
+import { SplashScreen } from './components/SplashScreen'
 import './App.css'
 
 const AppContent: React.FC = () => {
   const { user, isLoading } = useAuth()
+  const [showSplash, setShowSplash] = useState(() => {
+    if (!sessionStorage.getItem('splash_shown')) {
+      sessionStorage.setItem('splash_shown', '1')
+      return true
+    }
+    return false
+  })
 
   useEffect(() => {
-    // Registrar service worker para push notifications
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker
         .register('/sw.js')
-        .then((reg) => {
-          console.log('Service Worker registrado:', reg);
-          // Solicitar permiso para notificaciones
+        .then(() => {
           if ('Notification' in window && Notification.permission === 'default') {
-            Notification.requestPermission();
+            Notification.requestPermission()
           }
         })
-        .catch((err) => console.error('Error registrando Service Worker:', err));
+        .catch(() => {})
     }
-  }, []);
+  }, [])
+
+  if (showSplash) {
+    return <SplashScreen onDone={() => setShowSplash(false)} />
+  }
 
   if (isLoading) {
     return (
-      <div className="app-loading">
-        <div className="spinner"></div>
-        <p>Cargando...</p>
+      <div
+        className="fixed inset-0 flex items-center justify-center"
+        style={{ background: 'linear-gradient(145deg, #4f46e5, #7c3aed)' }}
+      >
+        <div className="w-8 h-8 border-4 border-white/30 border-t-white rounded-full animate-spin" />
       </div>
     )
   }
 
-  if (!user) {
-    return <Login />
-  }
-
-  return (
-    <Dashboard />
-  )
+  if (!user) return <Login />
+  return <Dashboard />
 }
 
-const App: React.FC = () => {
-  return (
-    <AuthProvider>
-      <AppContent />
-    </AuthProvider>
-  )
-}
+const App: React.FC = () => (
+  <AuthProvider>
+    <AppContent />
+  </AuthProvider>
+)
 
 export default App

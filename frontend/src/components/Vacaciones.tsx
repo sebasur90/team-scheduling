@@ -147,110 +147,182 @@ export const Vacaciones: React.FC<VacacionesProps> = ({ mode }) => {
     return d.toLocaleDateString('es-AR', { weekday: 'short', month: 'short', day: 'numeric' })
   }
 
+  const totalDias = bloques.reduce((acc, b) => acc + b.dias.length, 0)
+
   return (
-    <div className="vacaciones-container">
-      {/* Form Section */}
-      <div className="vacaciones-form-section">
-        <h3>Cargar Vacaciones</h3>
-        <form onSubmit={handleCreate}>
+    <div className="flex flex-col gap-4">
+      {/* Balance card — solo para usuarios personales */}
+      {mode === 'personal' && (
+        <div
+          className="rounded-2xl p-5 relative overflow-hidden"
+          style={{ background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', boxShadow: '0 8px 24px rgba(79,70,229,.25)' }}
+        >
+          <div
+            className="absolute rounded-full pointer-events-none"
+            style={{ width: 200, height: 200, top: -60, right: -40, background: 'radial-gradient(circle, rgba(255,255,255,.08) 0%, transparent 70%)' }}
+          />
+          <div className="relative z-10">
+            <p className="text-xs font-semibold text-white/60 uppercase tracking-wider">Días en el sistema</p>
+            <div className="text-5xl font-extrabold text-white tracking-tight mt-1">{totalDias}</div>
+            <div className="flex gap-2 mt-3">
+              <div className="rounded-xl px-3 py-2" style={{ background: 'rgba(255,255,255,.12)' }}>
+                <div className="text-lg font-bold text-white">{bloques.length}</div>
+                <div className="text-xs text-white/60 mt-0.5">Bloques</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Form */}
+      <div
+        className="bg-white rounded-2xl p-4"
+        style={{ border: '1.5px solid rgba(0,0,0,.05)', boxShadow: '0 2px 8px rgba(0,0,0,.04)' }}
+      >
+        <h3 className="text-sm font-bold text-gray-900 mb-3">
+          {mode === 'admin' ? 'Cargar vacaciones' : 'Solicitar días'}
+        </h3>
+        <form onSubmit={handleCreate} className="flex flex-col gap-3">
           {mode === 'admin' && (
-            <div className="form-group">
-              <label>Colaborador:</label>
-              <select value={colaboradorId} onChange={(e) => setColaboradorId(Number(e.target.value))}>
-                <option value="">Selecciona un colaborador</option>
-                {colaboradores.map(c => (
-                  <option key={c.id} value={c.id}>{c.nombre}</option>
-                ))}
+            <div>
+              <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1.5">Colaborador</label>
+              <select
+                value={colaboradorId}
+                onChange={(e) => setColaboradorId(Number(e.target.value))}
+                className="w-full h-11 bg-gray-50 border border-gray-200 rounded-xl px-3 text-sm text-gray-900 outline-none focus:border-indigo-400"
+              >
+                <option value="">Seleccioná un colaborador</option>
+                {colaboradores.map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}
               </select>
             </div>
           )}
-          <div className="form-group">
-            <label>Desde:</label>
-            <input
-              type="date"
-              value={fechaInicio}
-              onChange={(e) => setFechaInicio(e.target.value)}
-            />
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1.5">Desde</label>
+              <input
+                type="date"
+                value={fechaInicio}
+                onChange={(e) => setFechaInicio(e.target.value)}
+                className="w-full h-11 bg-gray-50 border border-gray-200 rounded-xl px-3 text-sm text-gray-900 outline-none focus:border-indigo-400"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1.5">Hasta</label>
+              <input
+                type="date"
+                value={fechaFin}
+                onChange={(e) => setFechaFin(e.target.value)}
+                className="w-full h-11 bg-gray-50 border border-gray-200 rounded-xl px-3 text-sm text-gray-900 outline-none focus:border-indigo-400"
+              />
+            </div>
           </div>
-          <div className="form-group">
-            <label>Hasta:</label>
-            <input
-              type="date"
-              value={fechaFin}
-              onChange={(e) => setFechaFin(e.target.value)}
-            />
-          </div>
-          <button type="submit" disabled={loading}>
-            {loading ? 'Cargando...' : 'Cargar Vacaciones'}
+          <button
+            type="submit"
+            disabled={loading}
+            className="h-12 rounded-xl text-white text-sm font-semibold transition disabled:opacity-50"
+            style={{ background: 'linear-gradient(135deg, #4f46e5, #7c3aed)' }}
+          >
+            {loading ? 'Cargando...' : 'Cargar vacaciones'}
           </button>
         </form>
       </div>
 
-      {/* Messages */}
+      {/* Message */}
       {message && (
-        <div className={`message message-${message.type}`}>
-          {message.text}
-          <button onClick={() => setMessage(null)}>✕</button>
+        <div
+          className="rounded-2xl px-4 py-3 flex items-center justify-between text-sm font-medium"
+          style={
+            message.type === 'success'
+              ? { background: '#ecfdf5', color: '#065f46', border: '1.5px solid #a7f3d0' }
+              : { background: '#fef2f2', color: '#991b1b', border: '1.5px solid #fecaca' }
+          }
+        >
+          <span>{message.text}</span>
+          <button onClick={() => setMessage(null)} className="text-lg leading-none opacity-50 hover:opacity-100">×</button>
         </div>
       )}
 
-      {/* Vacation Blocks */}
-      <div className="vacaciones-list-section">
-        <h3>
-          {mode === 'admin' ? 'Vacaciones del Equipo' : 'Tus Vacaciones'}
+      {/* List */}
+      <div>
+        <h3 className="text-sm font-bold text-gray-900 mb-3">
+          {mode === 'admin' ? 'Vacaciones del equipo' : 'Tus bloques'}
         </h3>
         {bloques.length === 0 ? (
-          <p className="empty-message">Sin vacaciones cargadas</p>
-        ) : (
-          <div className={mode === 'admin' ? 'vacaciones-table' : 'vacaciones-blocks'}>
-            {mode === 'admin' ? (
-              <table>
-                <thead>
-                  <tr>
-                    <th>Colaborador</th>
-                    <th>Desde</th>
-                    <th>Hasta</th>
-                    <th>Acción</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {bloques.map((bloque, idx) => {
-                    const colab = colaboradores.find(c => c.id === bloque.colaborador_id)
-                    return (
-                      <tr key={idx}>
-                        <td>{colab?.nombre || `Col. ${bloque.colaborador_id}`}</td>
-                        <td>{formatFecha(bloque.fecha_inicio)}</td>
-                        <td>{formatFecha(bloque.fecha_fin)}</td>
-                        <td>
-                          <button
-                            className="btn-delete"
-                            onClick={() => handleDelete(bloque)}
-                            disabled={loading}
-                          >
-                            🗑️
-                          </button>
-                        </td>
-                      </tr>
-                    )
-                  })}
-                </tbody>
-              </table>
-            ) : (
-              bloques.map((bloque, idx) => (
-                <div key={idx} className="vacaciones-block">
-                  <span className="block-dates">
-                    {formatFecha(bloque.fecha_inicio)} – {formatFecha(bloque.fecha_fin)}
-                  </span>
+          <div
+            className="rounded-2xl p-6 text-center text-sm text-gray-400"
+            style={{ background: '#f9f9fb', border: '1.5px dashed #e5e7eb' }}
+          >
+            Sin vacaciones cargadas
+          </div>
+        ) : mode === 'admin' ? (
+          <div className="flex flex-col gap-2">
+            {bloques.map((bloque, idx) => {
+              const colab = colaboradores.find(c => c.id === bloque.colaborador_id)
+              return (
+                <div
+                  key={idx}
+                  className="bg-white rounded-2xl p-4 flex items-center gap-3"
+                  style={{ border: '1.5px solid rgba(0,0,0,.05)', boxShadow: '0 2px 8px rgba(0,0,0,.04)' }}
+                >
+                  <div
+                    className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold text-white flex-shrink-0"
+                    style={{ background: 'linear-gradient(135deg, #4f46e5, #7c3aed)' }}
+                  >
+                    {(colab?.nombre || 'X').charAt(0)}
+                  </div>
+                  <div className="flex-1">
+                    <div className="text-sm font-bold text-gray-900">{colab?.nombre || `Col. ${bloque.colaborador_id}`}</div>
+                    <div className="text-xs text-gray-400 mt-0.5">
+                      {formatFecha(bloque.fecha_inicio)} – {formatFecha(bloque.fecha_fin)}
+                    </div>
+                  </div>
                   <button
-                    className="btn-delete"
                     onClick={() => handleDelete(bloque)}
                     disabled={loading}
+                    className="w-8 h-8 rounded-xl flex items-center justify-center text-red-400 hover:text-red-600 transition"
+                    style={{ background: '#fef2f2' }}
                   >
-                    🗑️ Borrar
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                      <polyline points="3 6 5 6 21 6" />
+                      <path d="M19 6l-1 14H6L5 6" />
+                      <path d="M10 11v6M14 11v6" />
+                      <path d="M9 6V4h6v2" />
+                    </svg>
                   </button>
                 </div>
-              ))
-            )}
+              )
+            })}
+          </div>
+        ) : (
+          <div className="flex flex-col gap-2">
+            {bloques.map((bloque, idx) => (
+              <div
+                key={idx}
+                className="bg-white rounded-2xl p-4 flex items-center gap-3"
+                style={{ border: '1.5px solid rgba(0,0,0,.05)', boxShadow: '0 2px 8px rgba(0,0,0,.04)' }}
+              >
+                <div
+                  className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 text-lg"
+                  style={{ background: '#ede9fe' }}
+                >
+                  🏖️
+                </div>
+                <div className="flex-1">
+                  <div className="text-sm font-bold text-gray-900">
+                    {formatFecha(bloque.fecha_inicio)} – {formatFecha(bloque.fecha_fin)}
+                  </div>
+                  <div className="text-xs text-gray-400 mt-0.5">{bloque.dias.length} días</div>
+                </div>
+                <button
+                  onClick={() => handleDelete(bloque)}
+                  disabled={loading}
+                  className="text-xs font-semibold text-red-400 hover:text-red-600 px-3 py-1.5 rounded-xl transition"
+                  style={{ background: '#fef2f2' }}
+                >
+                  Borrar
+                </button>
+              </div>
+            ))}
           </div>
         )}
       </div>

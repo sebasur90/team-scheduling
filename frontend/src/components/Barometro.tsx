@@ -1,99 +1,118 @@
 import { useBarometro } from '../hooks/useBarometro'
 
+const gradients = {
+  verde: 'linear-gradient(135deg, #059669, #10b981)',
+  amarillo: 'linear-gradient(135deg, #d97706, #f59e0b)',
+  rojo: 'linear-gradient(135deg, #dc2626, #ef4444)',
+}
+
+const stateLabels = {
+  verde: 'Cobertura normal',
+  amarillo: 'Atención requerida',
+  rojo: 'Cobertura crítica',
+}
+
+const stateEmojis = {
+  verde: '✓',
+  amarillo: '⚠',
+  rojo: '✗',
+}
+
+const franjaStateColors = {
+  ok: { bg: 'rgba(255,255,255,.12)', text: 'rgba(255,255,255,.9)' },
+  riesgo: { bg: 'rgba(255,255,255,.08)', text: 'rgba(255,255,255,.7)' },
+  critico: { bg: 'rgba(220,38,38,.4)', text: '#fff' },
+}
+
 export function Barometro() {
   const { barometro, loading, error } = useBarometro()
 
   if (loading) {
     return (
-      <div className="p-4 rounded-lg bg-gray-100 text-gray-600">
-        Cargando barometro...
+      <div className="rounded-2xl p-5 animate-pulse" style={{ background: 'rgba(79,70,229,.08)', border: '1.5px solid rgba(79,70,229,.1)' }}>
+        <div className="h-4 bg-indigo-100 rounded w-32 mb-2" />
+        <div className="h-3 bg-indigo-100 rounded w-24" />
       </div>
     )
   }
 
-  if (error) {
+  if (error || !barometro) {
     return (
-      <div className="p-4 rounded-lg bg-red-50 text-red-600">
-        Error: {error}
+      <div className="rounded-2xl p-5 bg-gray-50" style={{ border: '1.5px solid rgba(0,0,0,.05)' }}>
+        <p className="text-sm text-gray-400">{error ? 'Error al cargar cobertura' : 'Sin datos de cobertura'}</p>
       </div>
     )
   }
 
-  if (!barometro) {
-    return (
-      <div className="p-4 rounded-lg bg-gray-100 text-gray-600">
-        Sin datos
-      </div>
-    )
-  }
+  const gradient = gradients[barometro.estado]
+  const label = stateLabels[barometro.estado]
+  const emoji = stateEmojis[barometro.estado]
 
-  const stateStyles = {
-    verde: {
-      border: 'border-l-4 border-green-500',
-      bg: 'bg-green-50',
-      indicator: 'bg-green-500',
-      glow: 'shadow-lg shadow-green-400/50',
-    },
-    amarillo: {
-      border: 'border-l-4 border-amber-500',
-      bg: 'bg-amber-50',
-      indicator: 'bg-amber-500',
-      glow: 'shadow-lg shadow-amber-400/50',
-    },
-    rojo: {
-      border: 'border-l-4 border-red-500',
-      bg: 'bg-red-50',
-      indicator: 'bg-red-500',
-      glow: 'shadow-lg shadow-red-400/50',
-    },
-  }
+  const today = new Date().toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'short' })
+  const todayStr = today.charAt(0).toUpperCase() + today.slice(1)
 
-  const styles = stateStyles[barometro.estado]
-
-  const stateLabel = {
-    verde: '✓ VERDE',
-    amarillo: '⚠ AMARILLO',
-    rojo: '✗ ROJO',
-  }[barometro.estado]
-
-  const franjaStyles = {
-    ok: { border: 'border-green-500', bg: 'bg-green-50' },
-    riesgo: { border: 'border-amber-500', bg: 'bg-amber-50' },
-    critico: { border: 'border-red-500', bg: 'bg-red-50' },
-  }
+  const franjaTotal = barometro.franjas.length
+  const franjaOk = barometro.franjas.filter(f => f.estado === 'ok').length
+  const coberturaPct = franjaTotal > 0 ? Math.round((franjaOk / franjaTotal) * 100) : 0
 
   return (
-    <div className={`${styles.border} ${styles.bg} rounded-lg p-4 mb-6`}>
-      {/* Header con indicador */}
-      <div className="flex flex-col md:flex-row md:items-center gap-4 mb-4">
-        <div className={`w-12 h-12 md:w-16 md:h-16 rounded-full ${styles.indicator} ${styles.glow}`}></div>
-        <div className="flex-1">
-          <div className="font-bold text-lg text-gray-900">{stateLabel}</div>
-          <div className="text-sm text-gray-600">{barometro.incidencias_activas} incidencias</div>
-        </div>
-      </div>
+    <div
+      className="rounded-2xl p-5 relative overflow-hidden"
+      style={{ background: gradient, boxShadow: '0 8px 24px rgba(0,0,0,.15)' }}
+    >
+      {/* Decorative circle */}
+      <div
+        className="absolute rounded-full pointer-events-none"
+        style={{ width: 200, height: 200, top: -60, right: -40, background: 'radial-gradient(circle, rgba(255,255,255,.08) 0%, transparent 70%)' }}
+      />
 
-      {/* Grid de franjas */}
-      <div className="grid grid-cols-3 md:grid-cols-5 gap-2">
-        {barometro.franjas.map((franja) => {
-          const style = franjaStyles[franja.estado]
-          return (
+      <div className="relative z-10">
+        <p className="text-xs font-semibold text-white/60 uppercase tracking-wider">Cobertura hoy</p>
+        <p className="text-white font-bold text-base mt-0.5 tracking-tight">{todayStr}</p>
+
+        <div className="grid grid-cols-2 gap-2.5 mt-3.5">
+          <div className="rounded-xl p-3" style={{ background: 'rgba(255,255,255,.12)' }}>
+            <div className="text-2xl font-extrabold text-white tracking-tight">{barometro.franjas.length}</div>
+            <div className="text-xs text-white/65 mt-0.5">Franjas activas</div>
+          </div>
+          <div className="rounded-xl p-3" style={{ background: 'rgba(255,255,255,.12)' }}>
+            <div className="text-2xl font-extrabold text-white tracking-tight">{emoji} {label.split(' ')[0]}</div>
+            <div className="text-xs text-white/65 mt-0.5">{barometro.incidencias_activas} incidencias</div>
+          </div>
+        </div>
+
+        {/* Progress bar */}
+        <div className="mt-3.5">
+          <div className="flex justify-between mb-1.5">
+            <span className="text-xs text-white/65">Franjas OK</span>
+            <span className="text-xs font-bold text-white">{coberturaPct}%</span>
+          </div>
+          <div className="h-1.5 rounded-full" style={{ background: 'rgba(255,255,255,.2)' }}>
             <div
-              key={franja.orden}
-              className={`${style.border} ${style.bg} border rounded p-2 text-center text-xs`}
-            >
-              <div className="font-bold text-gray-900">{franja.hora}</div>
-              <div className="text-lg">
-                {franja.estado === 'ok' && '✓'}
-                {franja.estado === 'riesgo' && '⚠'}
-                {franja.estado === 'critico' && '✗'}
+              className="h-full rounded-full transition-all"
+              style={{ width: `${coberturaPct}%`, background: 'rgba(255,255,255,.85)' }}
+            />
+          </div>
+        </div>
+
+        {/* Franjas grid */}
+        <div className="flex flex-wrap gap-1.5 mt-3.5">
+          {barometro.franjas.map((franja) => {
+            const fc = franjaStateColors[franja.estado]
+            return (
+              <div
+                key={franja.orden}
+                className="rounded-lg px-2 py-1 text-center"
+                style={{ background: fc.bg, minWidth: 52 }}
+              >
+                <div className="text-[11px] font-bold" style={{ color: fc.text }}>{franja.hora}</div>
+                <div className="text-[9px] mt-0.5" style={{ color: 'rgba(255,255,255,.6)' }}>
+                  C:{franja.comercial_libre} O:{franja.operativo_libre}
+                </div>
               </div>
-              <div className="text-gray-600 text-xs mt-1">
-                C:{franja.comercial_libre} O:{franja.operativo_libre}
-              </div>
-            </div>
-          )
-        })}
+            )
+          })}
+        </div>
       </div>
     </div>
   )

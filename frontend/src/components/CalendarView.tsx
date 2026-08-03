@@ -557,56 +557,68 @@ export const CalendarView: React.FC = () => {
 
   return (
     <div className="calendar-view">
-      <div className="flex flex-col gap-4 mb-4">
-        <h2 className="text-2xl font-bold text-slate-900">Calendario de Turnos</h2>
-
-        {/* Mobile week navigation - compact */}
-        <div className="md:hidden flex gap-2">
+      {/* ── Mobile week navigation ── */}
+      <div className="md:hidden mb-3">
+        <div className="flex items-center justify-between mb-2">
           <button
             onClick={handlePreviousWeek}
-            className="flex-1 px-3 py-2 bg-sky-700 hover:bg-sky-800 text-white text-sm font-medium rounded-md transition"
+            className="w-9 h-9 rounded-xl flex items-center justify-center text-gray-600 font-bold transition"
+            style={{ background: '#f5f5fa', border: '1.5px solid rgba(0,0,0,.06)' }}
           >
-            ← Ant
+            ‹
           </button>
-          <button
-            onClick={handleCurrentWeek}
-            className="flex-1 px-3 py-2 bg-gray-700 hover:bg-gray-800 text-white text-sm font-medium rounded-md transition"
-          >
-            Hoy
-          </button>
+          <div className="text-center">
+            <span className="text-sm font-bold text-gray-900">
+              {weekDays[0].toLocaleDateString('es-AR', { day: 'numeric', month: 'short' })}
+              {' – '}
+              {weekDays[4].toLocaleDateString('es-AR', { day: 'numeric', month: 'short' })}
+            </span>
+          </div>
           <button
             onClick={handleNextWeek}
-            className="flex-1 px-3 py-2 bg-sky-700 hover:bg-sky-800 text-white text-sm font-medium rounded-md transition"
+            className="w-9 h-9 rounded-xl flex items-center justify-center text-gray-600 font-bold transition"
+            style={{ background: '#f5f5fa', border: '1.5px solid rgba(0,0,0,.06)' }}
           >
-            Sig →
+            ›
           </button>
         </div>
-
-        {/* Desktop week navigation - full text */}
-        <div className="hidden md:flex gap-3">
-          <button
-            onClick={handlePreviousWeek}
-            className="px-4 py-2 bg-sky-700 hover:bg-sky-800 text-white font-medium rounded-md transition"
-          >
-            ← Semana Anterior
-          </button>
+        <div className="flex gap-2">
           <button
             onClick={handleCurrentWeek}
-            className="px-4 py-2 bg-gray-700 hover:bg-gray-800 text-white font-medium rounded-md transition"
+            className="flex-1 h-8 rounded-xl text-xs font-semibold transition"
+            style={{ background: '#ede9fe', color: '#4f46e5' }}
           >
+            Esta semana
+          </button>
+          {user?.rol === 'admin' && (
+            <button
+              onClick={handleGenerarSemana}
+              disabled={isGenerating}
+              className="flex-1 h-8 rounded-xl text-xs font-semibold text-white transition disabled:opacity-50"
+              style={{ background: 'linear-gradient(135deg, #4f46e5, #7c3aed)' }}
+            >
+              {isGenerating ? 'Generando...' : 'Generar semana'}
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* ── Desktop week navigation ── */}
+      <div className="hidden md:flex flex-col gap-4 mb-4">
+        <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Calendario de Turnos</h2>
+        <div className="flex gap-3">
+          <button onClick={handlePreviousWeek} className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-xl transition">
+            ← Semana Anterior
+          </button>
+          <button onClick={handleCurrentWeek} className="px-4 py-2 bg-gray-700 hover:bg-gray-800 text-white font-medium rounded-xl transition">
             Semana Actual
           </button>
-          <button
-            onClick={handleNextWeek}
-            className="px-4 py-2 bg-sky-700 hover:bg-sky-800 text-white font-medium rounded-md transition"
-          >
+          <button onClick={handleNextWeek} className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-xl transition">
             Semana Siguiente →
           </button>
         </div>
-
-        {/* Week info */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 bg-gray-100 rounded-lg p-2 md:p-3">
-          <span className="text-xs md:text-base text-slate-700 font-medium order-2 md:order-1">
+        <div className="flex items-center justify-between bg-gray-50 rounded-xl p-3" style={{ border: '1.5px solid rgba(0,0,0,.05)' }}>
+          <span className="text-sm text-gray-700 font-medium">
             Semana del {weekDays[0].toLocaleDateString('es-ES', { day: 'numeric', month: 'numeric' })} al{' '}
             {weekDays[4].toLocaleDateString('es-ES', { day: 'numeric', month: 'numeric' })}
           </span>
@@ -614,13 +626,9 @@ export const CalendarView: React.FC = () => {
             <button
               onClick={handleGenerarSemana}
               disabled={isGenerating}
-              className={`w-full md:w-auto px-3 md:px-4 py-1.5 md:py-2 text-white text-xs md:text-sm font-medium rounded-md transition order-1 md:order-2 ${
-                isGenerating
-                  ? 'bg-gray-400 cursor-not-allowed'
-                  : 'bg-sky-700 hover:bg-sky-800'
-              }`}
+              className={`px-4 py-1.5 text-white text-sm font-medium rounded-xl transition ${isGenerating ? 'bg-gray-400 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700'}`}
             >
-              {isGenerating ? 'Gen...' : 'Gen. Semana'}
+              {isGenerating ? 'Generando...' : 'Generar Semana'}
             </button>
           )}
         </div>

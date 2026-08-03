@@ -2,7 +2,7 @@ import React from 'react'
 
 interface DayStripProps {
   weekDays: Date[]
-  selectedDay: string // YYYY-MM-DD format
+  selectedDay: string
   onSelectDay: (dateStr: string) => void
   isDiaNoLaborable: (date: Date) => boolean
   formatDate: (date: Date) => string
@@ -17,25 +17,45 @@ export const DayStrip: React.FC<DayStripProps> = ({
   formatDate,
   getDayName,
 }) => {
+  const todayStr = formatDate(new Date())
+
   return (
-    <div className="md:hidden flex gap-2 overflow-x-auto pb-2 mb-4">
+    <div className="md:hidden flex gap-2 overflow-x-auto pb-1 mb-3 scrollbar-hide" style={{ scrollbarWidth: 'none' }}>
       {weekDays.map(date => {
         const dateStr = formatDate(date)
         const isSelected = dateStr === selectedDay
+        const isToday = dateStr === todayStr
         const isNoLaborable = isDiaNoLaborable(date)
 
         return (
           <button
             key={dateStr}
             onClick={() => onSelectDay(dateStr)}
-            className={`flex-shrink-0 py-2 px-3 rounded-lg text-center transition ${
-              isSelected
-                ? 'bg-sky-700 text-white'
-                : 'bg-white text-gray-700 border border-gray-200'
-            } ${isNoLaborable ? 'opacity-50' : ''}`}
+            className={`flex-shrink-0 flex flex-col items-center gap-1 transition-opacity ${isNoLaborable ? 'opacity-40' : ''}`}
+            style={{ minWidth: 44 }}
           >
-            <div className="text-xs font-medium">{getDayName(date)}</div>
-            <div className="text-lg font-bold">{date.getDate()}</div>
+            <span
+              className="text-[10px] font-bold uppercase tracking-wide"
+              style={{ color: isSelected ? '#4f46e5' : '#9ca3af' }}
+            >
+              {getDayName(date)}
+            </span>
+            <div
+              className="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-bold transition-all"
+              style={
+                isSelected
+                  ? { background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', color: '#fff', boxShadow: '0 4px 12px rgba(109,40,217,.35)' }
+                  : isToday
+                  ? { background: '#ede9fe', color: '#4f46e5' }
+                  : { background: 'transparent', color: '#374151' }
+              }
+            >
+              {date.getDate()}
+            </div>
+            <div
+              className="w-1 h-1 rounded-full"
+              style={{ background: isSelected ? 'rgba(255,255,255,.7)' : isToday ? '#4f46e5' : 'transparent' }}
+            />
           </button>
         )
       })}
