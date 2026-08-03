@@ -32,10 +32,10 @@ interface AdminPanelProps {
   activeTab?: Tab;
 }
 
-export function AdminPanel({ activeTab = 'colaboradores' }: AdminPanelProps) {
+export function AdminPanel({ activeTab: propActiveTab = 'colaboradores' }: AdminPanelProps) {
   const { user } = useAuthContext();
   const { incidencias, loading: incidenciasLoading, error: incidenciasError } = useIncidencias();
-  const setActiveTab = () => {};
+  const [activeTab, setActiveTab] = useState<Tab>(propActiveTab);
   const [selectedIncidencia, setSelectedIncidencia] = useState<IncidenciaData | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
 
@@ -814,8 +814,36 @@ export function AdminPanel({ activeTab = 'colaboradores' }: AdminPanelProps) {
     }
   };
 
+  const tabOptions: { id: Tab; label: string }[] = [
+    { id: 'colaboradores', label: 'Colaboradores' },
+    { id: 'sectores', label: 'Sectores' },
+    { id: 'franjas', label: 'Franjas' },
+    { id: 'tareas-especiales', label: 'Tareas Especiales' },
+    { id: 'asignacion', label: 'Asignación de Turnos' },
+    { id: 'dias-no-laborables', label: 'Días no Laborables' },
+    { id: 'vacaciones', label: 'Vacaciones' },
+    { id: 'preferencias', label: 'Preferencias' },
+    { id: 'configuracion', label: 'Configuración' },
+    { id: 'incidencias', label: 'Incidencias' },
+  ];
+
   return (
     <div className="admin-panel">
+      {/* TAB NAVIGATION */}
+      <div className="admin-tabs-nav">
+        <div className="admin-tabs-scroll">
+          {tabOptions.map((tab) => (
+            <button
+              key={tab.id}
+              className={`admin-tab-button ${activeTab === tab.id ? 'active' : ''}`}
+              onClick={() => setActiveTab(tab.id)}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* COLABORADORES TAB */}
       {activeTab === 'colaboradores' && (
         <div className="admin-tab-content">
