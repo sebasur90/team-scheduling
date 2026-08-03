@@ -6,6 +6,11 @@ export interface TareaEspecialTipo {
   dia_semana_aplicable: number[]
   hora_inicio: string
   hora_fin: string
+  frecuencia: string
+  inhabilita_almuerzo: boolean
+  fecha_inicio_ciclo: string | null
+  fija_almuerzo: boolean
+  franja_almuerzo_id: number | null
   created_at: string
   updated_at: string
 }
@@ -15,6 +20,11 @@ export interface TareaEspecialTipoCreate {
   dia_semana_aplicable: number[]
   hora_inicio: string
   hora_fin: string
+  frecuencia?: string
+  inhabilita_almuerzo?: boolean
+  fecha_inicio_ciclo?: string | null
+  fija_almuerzo?: boolean
+  franja_almuerzo_id?: number | null
 }
 
 export interface TareaEspecialTipoUpdate {
@@ -22,11 +32,50 @@ export interface TareaEspecialTipoUpdate {
   dia_semana_aplicable?: number[]
   hora_inicio?: string
   hora_fin?: string
+  frecuencia?: string
+  inhabilita_almuerzo?: boolean
+  fecha_inicio_ciclo?: string | null
+  fija_almuerzo?: boolean
+  franja_almuerzo_id?: number | null
 }
 
 export interface TareaEspecialAsignacion {
   fecha: string
   tarea_especial_tipo_id: number
+  colaborador_id: number
+}
+
+export interface TareaEspecialAsignacionDetalle {
+  id: number
+  fecha: string
+  tarea_especial_tipo_id: number
+  colaborador_id: number
+  tipo_nombre: string
+  colaborador_nombre: string
+}
+
+export interface GenerarCronogramaRequest {
+  fecha_inicio: string
+  fecha_fin: string
+  tipo_ids?: number[]
+}
+
+export interface GenerarCronogramaResponse {
+  asignaciones_creadas: number
+  asignaciones_saltadas: number
+  advertencias: string[]
+}
+
+export interface MiTareaResponse {
+  id: number
+  fecha: string
+  tipo_nombre: string
+  hora_inicio: string
+  hora_fin: string
+  inhabilita_almuerzo: boolean
+}
+
+export interface SwapAsignacionRequest {
   colaborador_id: number
 }
 
@@ -45,4 +94,12 @@ export const tareasEspecialesApi = {
     client.post('/tareas-especiales/asignaciones', data),
   desasignar: (tarea_id: number, fecha: string) =>
     client.delete(`/tareas-especiales/asignaciones/${tarea_id}/${fecha}`),
+  generarCronograma: (data: GenerarCronogramaRequest) =>
+    client.post<GenerarCronogramaResponse>('/tareas-especiales/generar-cronograma', data),
+  getCronograma: (params: { fecha_inicio: string; fecha_fin: string }) =>
+    client.get<TareaEspecialAsignacionDetalle[]>('/tareas-especiales/cronograma', { params }),
+  swapAsignacion: (id: number, data: SwapAsignacionRequest) =>
+    client.put<TareaEspecialAsignacionDetalle>(`/tareas-especiales/asignaciones/${id}`, data),
+  getMisTareas: (dias?: number) =>
+    client.get<MiTareaResponse[]>('/tareas-especiales/mis-tareas', { params: { dias: dias || 30 } }),
 }

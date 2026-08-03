@@ -44,6 +44,7 @@ class AssignmentEngine:
                 cronograma=cronograma,
                 asignaciones=asignaciones_all,
                 puntajes_actualizados=puntajes,
+                excluidos_por_tarea=list(context.usuarios_con_tarea_excluyente),
                 advertencias=advertencias,
             )
 
@@ -70,19 +71,21 @@ class AssignmentEngine:
         colaboradores = self.db.query(Colaborador).all()
         colab_map = {c.id: c for c in colaboradores}
 
-        # Find orientador (if assigned)
-        orientador_id = None
-        tarea_orient = (
+        # Find tareas excluyentes (inhabilita_almuerzo) and orientador for legacy compatibility
+        usuarios_con_tarea_excluyente = set()
+        tareas_excluyentes = (
             self.db.query(TareaEspecialAsignacion)
             .join(TareaEspecialTipo)
             .filter(
                 TareaEspecialAsignacion.fecha == self.fecha,
-                TareaEspecialTipo.nombre == "orientador",
-            )
-            .first()
+                TareaEspecialTipo.inhabilita_almuerzo == True,
+            ).all()
         )
-        if tarea_orient:
-            orientador_id = tarea_orient.colaborador_id
+        for tarea in tareas_excluyentes:
+            usuarios_con_tarea_excluyente.add(tarea.colaborador_id)
+
+        # Set orientador_id for legacy (take first from excluyentes or None)
+        orientador_id = next(iter(usuarios_con_tarea_excluyente), None)
 
         # Find municipalidad/gandulfo restrictions
         tareas_restringidas = {}
@@ -99,7 +102,7 @@ class AssignmentEngine:
         pool = []
         sector_map = {s.id: s for s in sectores}
         for colab in colaboradores:
-            if colab.id in ausentes_ids or colab.id == orientador_id:
+            if colab.id in ausentes_ids or colab.id in usuarios_con_tarea_excluyente:
                 continue
             tarea_tipos_ids = [t.tarea_tipo_id for t in colab.tareas_habilitadas]
             sector = sector_map.get(colab.sector_id)
@@ -119,13 +122,14 @@ class AssignmentEngine:
         # Load preferences from colaborador.franja_preferida_id (general preference, not per-date)
         preferencias = {}
         for colab in colaboradores:
-            if colab.id not in ausentes_ids and colab.id != orientador_id and colab.franja_preferida_id is not None:
+            if colab.id not in ausentes_ids and colab.id not in usuarios_con_tarea_excluyente and colab.franja_preferida_id is not None:
                 preferencias[colab.id] = colab.franja_preferida_id - 1  # Store as 0-indexed
 
         return ContextData(
             fecha=self.fecha,
             ausencias_colaborador_ids=ausentes_ids,
             orientador_id=orientador_id,
+            usuarios_con_tarea_excluyente=usuarios_con_tarea_excluyente,
             tareas_restringidas=tareas_restringidas,
             pool_disponible=pool,
             preferencias=preferencias,

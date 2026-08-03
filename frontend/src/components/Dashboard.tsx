@@ -11,6 +11,7 @@ import { NotificationCenter } from './NotificationCenter'
 import { Vacaciones } from './Vacaciones'
 import { AdminDashboard } from './AdminDashboard'
 import { ViewerPanel } from './ViewerPanel'
+import { MisTareasSection } from './MisTareasSection'
 import './Dashboard.css'
 
 type TabType = 'calendar' | 'preferences' | 'vacaciones' | 'notifications'
@@ -119,6 +120,7 @@ export const Dashboard: React.FC = () => {
             <div className="px-4 pt-4 flex flex-col gap-4 pb-4">
               <Barometro />
               <CalendarView />
+              <MisTareasSection />
             </div>
           )}
           {activeTab === 'preferences' && <div className="px-4 pt-4 pb-4"><Preferences /></div>}
@@ -142,7 +144,12 @@ export const Dashboard: React.FC = () => {
             ))}
           </div>
           <div className="tab-content">
-            {activeTab === 'calendar' && <CalendarView />}
+            {activeTab === 'calendar' && (
+              <div>
+                <CalendarView />
+                <MisTareasSection />
+              </div>
+            )}
             {activeTab === 'preferences' && <Preferences />}
             {activeTab === 'vacaciones' && <Vacaciones mode="personal" />}
             {activeTab === 'notifications' && <NotificationCenter />}

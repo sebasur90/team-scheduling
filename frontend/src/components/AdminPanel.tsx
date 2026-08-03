@@ -100,6 +100,8 @@ export function AdminPanel({ activeTab: propActiveTab = 'colaboradores' }: Admin
     frecuencia: 'semanal',
     inhabilita_almuerzo: false,
     fecha_inicio_ciclo: '',
+    fija_almuerzo: false,
+    franja_almuerzo_id: null,
   });
   const [editingTareaId, setEditingTareaId] = useState<number | null>(null);
   const [editingTareaData, setEditingTareaData] = useState<Partial<any> | null>(null);
@@ -401,6 +403,8 @@ export function AdminPanel({ activeTab: propActiveTab = 'colaboradores' }: Admin
         frecuencia: 'semanal',
         inhabilita_almuerzo: false,
         fecha_inicio_ciclo: '',
+        fija_almuerzo: false,
+        franja_almuerzo_id: null,
       });
       setShowTareaForm(false);
     } catch (err: any) {
@@ -421,6 +425,8 @@ export function AdminPanel({ activeTab: propActiveTab = 'colaboradores' }: Admin
       frecuencia: tarea.frecuencia || 'semanal',
       inhabilita_almuerzo: tarea.inhabilita_almuerzo || false,
       fecha_inicio_ciclo: tarea.fecha_inicio_ciclo || '',
+      fija_almuerzo: tarea.fija_almuerzo || false,
+      franja_almuerzo_id: tarea.franja_almuerzo_id || null,
     });
   };
 
@@ -1573,7 +1579,44 @@ export function AdminPanel({ activeTab: propActiveTab = 'colaboradores' }: Admin
                     Inhabilita turno de almuerzo
                   </label>
                 </div>
+
+                <div className="form-group" style={{ display: 'flex', alignItems: 'center' }}>
+                  <label htmlFor="fija_almuerzo">
+                    <input
+                      type="checkbox"
+                      id="fija_almuerzo"
+                      name="fija_almuerzo"
+                      checked={editingTareaId ? editingTareaData?.fija_almuerzo || false : tareaFormData.fija_almuerzo}
+                      onChange={editingTareaId ? handleEditTareaChange : handleTareaFormChange}
+                      disabled={tareaFormLoading}
+                    />
+                    Fija turno de almuerzo
+                  </label>
+                </div>
               </div>
+
+              {(editingTareaId ? editingTareaData?.fija_almuerzo : tareaFormData.fija_almuerzo) && (
+                <div className="form-row">
+                  <div className="form-group">
+                    <label htmlFor="franja_almuerzo_id">Franja de Almuerzo *</label>
+                    <select
+                      id="franja_almuerzo_id"
+                      name="franja_almuerzo_id"
+                      value={editingTareaId ? editingTareaData?.franja_almuerzo_id || '' : tareaFormData.franja_almuerzo_id || ''}
+                      onChange={editingTareaId ? handleEditTareaChange : handleTareaFormChange}
+                      disabled={tareaFormLoading || franjasLoading}
+                      required={editingTareaId ? editingTareaData?.fija_almuerzo : tareaFormData.fija_almuerzo}
+                    >
+                      <option value="">-- Seleccionar franja --</option>
+                      {franjas.map((franja) => (
+                        <option key={franja.id} value={franja.id}>
+                          {franja.hora_inicio} - {franja.hora_fin}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              )}
 
               <div className="form-actions">
                 <button type="submit" className="btn btn-primary" disabled={tareaFormLoading}>
@@ -1611,6 +1654,8 @@ export function AdminPanel({ activeTab: propActiveTab = 'colaboradores' }: Admin
                     <th>Días Aplicables</th>
                     <th>Frecuencia</th>
                     <th>Inhabilita Almuerzo</th>
+                    <th>Fija Almuerzo</th>
+                    <th>Franja Almuerzo</th>
                     <th>Acciones</th>
                   </tr>
                 </thead>
@@ -1621,6 +1666,7 @@ export function AdminPanel({ activeTab: propActiveTab = 'colaboradores' }: Admin
                       .map((d, idx) => (tarea.dia_semana_aplicable?.includes(idx) ? d : null))
                       .filter(Boolean)
                       .join(', ');
+                    const franjaAlmuerzo = franjas.find((f) => f.id === tarea.franja_almuerzo_id);
                     return (
                       <tr key={tarea.id}>
                         <td>{tarea.nombre}</td>
@@ -1629,6 +1675,8 @@ export function AdminPanel({ activeTab: propActiveTab = 'colaboradores' }: Admin
                         <td>{diasAplicables || '–'}</td>
                         <td>{tarea.frecuencia === 'quincenal' ? 'Quincenal' : 'Semanal'}</td>
                         <td>{tarea.inhabilita_almuerzo ? 'Sí' : 'No'}</td>
+                        <td>{tarea.fija_almuerzo ? 'Sí' : 'No'}</td>
+                        <td>{franjaAlmuerzo ? `${franjaAlmuerzo.hora_inicio} - ${franjaAlmuerzo.hora_fin}` : '–'}</td>
                         <td>
                           <button
                             className="btn btn-small btn-info"

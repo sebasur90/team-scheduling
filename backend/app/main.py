@@ -5,12 +5,16 @@ from app.database import engine
 from app.models.base import Base
 from app.api import auth, franjas, sectores, colaboradores, notificaciones, incidencias, admin_incidencias, preferencias, turnos, admin_turnos, dias_no_laborables, ausencias, configuracion, tareas_especiales, swap, admin_resumen, admin_reportes
 from app.services.task_scheduler import APSchedulerService
+from app.db_init import apply_migrations
 import logging
 
 logger = logging.getLogger(__name__)
 
 # Create tables if they don't exist
 Base.metadata.create_all(bind=engine)
+
+# Apply SQL migrations
+apply_migrations()
 
 app = FastAPI(
     title="Sistema de Gestión de Turnos de Almuerzo",

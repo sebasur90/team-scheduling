@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from datetime import date
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Set, Tuple
 from enum import Enum
 
 
@@ -42,7 +42,8 @@ class ContextData:
     fecha: date
     # Collaborative exclusions
     ausencias_colaborador_ids: set  # Who is absent that day
-    orientador_id: Optional[int] = None  # Excluded from almuerzo
+    orientador_id: Optional[int] = None  # Excluded from almuerzo (legacy)
+    usuarios_con_tarea_excluyente: Set[int] = field(default_factory=set)  # Excluded by special task
     # Special tasks with franja restrictions
     tareas_restringidas: Dict[int, List[int]] = field(default_factory=dict)  # colaborador_id -> allowed franjas
     # Available pool
@@ -72,4 +73,5 @@ class AssignmentResult:
     asignaciones: List[AsignacionResult] = field(default_factory=list)
     conflictos_pendientes: List[ConflictoEmpate] = field(default_factory=list)
     puntajes_actualizados: Dict[int, int] = field(default_factory=dict)  # colaborador_id -> new score
+    excluidos_por_tarea: List[int] = field(default_factory=list)  # Excluded by special task
     advertencias: List[str] = field(default_factory=list)
