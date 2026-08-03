@@ -196,9 +196,9 @@ export const ConfiguracionRotacionMultiSector: React.FC<Props> = ({
   }
 
   return (
-    <div className="configuracion-rotacion-multisector">
-      <div className="checkbox-group">
-        <label className="checkbox-label">
+    <div style={styles.root}>
+      <div style={styles.checkboxGroup}>
+        <label style={styles.checkboxLabel}>
           <input
             type="checkbox"
             checked={activa}
@@ -209,13 +209,13 @@ export const ConfiguracionRotacionMultiSector: React.FC<Props> = ({
         </label>
       </div>
 
-      {error && <div className="error-message">{error}</div>}
+      {error && <div style={styles.errorMessage}>{error}</div>}
 
       {activa && (
         <>
-          <div className="modo-selector">
-            <div className="radio-group">
-              <label className="radio-label">
+          <div style={styles.modoSelector}>
+            <div style={styles.radioGroup}>
+              <label style={styles.radioLabel}>
                 <input
                   type="radio"
                   name="modo"
@@ -226,7 +226,7 @@ export const ConfiguracionRotacionMultiSector: React.FC<Props> = ({
                 />
                 <span>Patrón Fijo</span>
               </label>
-              <label className="radio-label">
+              <label style={styles.radioLabel}>
                 <input
                   type="radio"
                   name="modo"
@@ -241,19 +241,19 @@ export const ConfiguracionRotacionMultiSector: React.FC<Props> = ({
           </div>
 
           {modo === 'patron_fijo' && (
-            <div className="patron-fijo">
-              <h4>Patrón Semanal</h4>
-              <div className="patron-grid">
+            <div style={styles.patronFijo}>
+              <h4 style={styles.patronH4}>Patrón Semanal</h4>
+              <div style={styles.patronGrid}>
                 {diasOrdenados.map((dia, idx) => (
-                  <div key={dia} className="patron-item">
-                    <label className="sector-label">
+                  <div key={dia} style={styles.patronItem}>
+                    <label style={styles.sectorLabel}>
                       {DIAS_SEMANA[dia]}
                     </label>
                     <select
                       value={patronSemanal[idx] || ''}
                       onChange={(e) => handlePatronChange(idx, e.target.value)}
                       disabled={disabled}
-                      className="sector-select"
+                      style={styles.sectorSelect}
                     >
                       <option value="">-- Seleccionar --</option>
                       {sectores.map((s) => (
@@ -269,15 +269,15 @@ export const ConfiguracionRotacionMultiSector: React.FC<Props> = ({
           )}
 
           {modo === 'personalizado' && (
-            <div className="personalizado">
-              <h4>Distribución por Día</h4>
-              <div className="distribucion-table-container">
-                <table className="distribucion-table">
+            <div style={styles.personalizado}>
+              <h4 style={styles.patronH4}>Distribución por Día</h4>
+              <div style={styles.distribucionTableContainer}>
+                <table style={styles.distribucionTable}>
                   <thead>
                     <tr>
-                      <th>Día</th>
+                      <th style={styles.distribucionTh}>Día</th>
                       {sectores.map((s) => (
-                        <th key={s} className="sector-header">
+                        <th key={s} style={styles.distribucionTh}>
                           {s}
                         </th>
                       ))}
@@ -286,9 +286,9 @@ export const ConfiguracionRotacionMultiSector: React.FC<Props> = ({
                   <tbody>
                     {diasOrdenados.map((dia) => (
                       <tr key={dia}>
-                        <td className="dia-cell">{DIAS_SEMANA[dia]}</td>
+                        <td style={{ ...styles.distribucionTd, ...styles.diaCell }}>{DIAS_SEMANA[dia]}</td>
                         {sectores.map((sector) => (
-                          <td key={`${dia}-${sector}`} className="input-cell">
+                          <td key={`${dia}-${sector}`} style={styles.distribucionTd}>
                             <input
                               type="number"
                               min="0"
@@ -302,7 +302,7 @@ export const ConfiguracionRotacionMultiSector: React.FC<Props> = ({
                                 )
                               }
                               disabled={disabled}
-                              className="cantidad-input"
+                              style={styles.cantidadInput}
                             />
                           </td>
                         ))}
@@ -314,24 +314,24 @@ export const ConfiguracionRotacionMultiSector: React.FC<Props> = ({
             </div>
           )}
 
-          <div className="resumen-distribuciones">
-            <h4>Distribución Total</h4>
-            <div className="distribuciones-list">
+          <div style={styles.resumenDistribuciones}>
+            <h4 style={styles.patronH4}>Distribución Total</h4>
+            <div style={styles.distribucionesList}>
               {sectores.map((sector) => (
-                <div key={sector} className="distribucion-item">
-                  <span className="sector-name">{sector}</span>
-                  <span className="sector-count">
+                <div key={sector} style={styles.distribucionItem}>
+                  <span style={styles.sectorName}>{sector}</span>
+                  <span style={styles.sectorCount}>
                     {distribuciones[sector] || 0} colaboradores
                   </span>
                 </div>
               ))}
             </div>
-            <div className={`validacion ${isValid ? 'valid' : 'invalid'}`}>
+            <div style={isValid ? styles.validacionValid : styles.validacionInvalid}>
               <span>
                 Total: <strong>{totalColaboradores}</strong> / {diasRequeridos} días
               </span>
               {!isValid && (
-                <span className="error-hint">
+                <span style={{ display: 'block', marginTop: '0.5rem', fontSize: '0.85rem' }}>
                   La suma debe ser igual a {diasRequeridos}
                 </span>
               )}
@@ -339,249 +339,176 @@ export const ConfiguracionRotacionMultiSector: React.FC<Props> = ({
           </div>
         </>
       )}
-
-      <style jsx>{`
-        .configuracion-rotacion-multisector {
-          padding: 1.5rem;
-          border: 1px solid #e0e0e0;
-          border-radius: 8px;
-          background: #f9f9f9;
-        }
-
-        .checkbox-group {
-          margin-bottom: 1.5rem;
-        }
-
-        .checkbox-label {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-          cursor: pointer;
-          font-weight: 500;
-        }
-
-        .checkbox-label input {
-          cursor: pointer;
-        }
-
-        .error-message {
-          padding: 0.75rem;
-          margin-bottom: 1rem;
-          background-color: #fee;
-          color: #c33;
-          border-radius: 4px;
-          font-size: 0.9rem;
-        }
-
-        .modo-selector {
-          margin: 1.5rem 0;
-          padding: 1rem;
-          background: white;
-          border-radius: 6px;
-        }
-
-        .radio-group {
-          display: flex;
-          gap: 2rem;
-        }
-
-        .radio-label {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-          cursor: pointer;
-        }
-
-        .radio-label input {
-          cursor: pointer;
-        }
-
-        .patron-fijo {
-          margin: 1.5rem 0;
-          padding: 1rem;
-          background: white;
-          border-radius: 6px;
-        }
-
-        .patron-fijo h4 {
-          margin-top: 0;
-          margin-bottom: 1rem;
-          font-size: 0.95rem;
-          color: #333;
-        }
-
-        .patron-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-          gap: 1rem;
-        }
-
-        .patron-item {
-          display: flex;
-          flex-direction: column;
-          gap: 0.5rem;
-        }
-
-        .sector-label {
-          font-size: 0.85rem;
-          font-weight: 500;
-          color: #666;
-        }
-
-        .sector-select {
-          padding: 0.5rem;
-          border: 1px solid #ccc;
-          border-radius: 4px;
-          font-size: 0.9rem;
-        }
-
-        .sector-select:disabled {
-          background-color: #f0f0f0;
-          cursor: not-allowed;
-        }
-
-        .personalizado {
-          margin: 1.5rem 0;
-          padding: 1rem;
-          background: white;
-          border-radius: 6px;
-        }
-
-        .personalizado h4 {
-          margin-top: 0;
-          margin-bottom: 1rem;
-          font-size: 0.95rem;
-          color: #333;
-        }
-
-        .distribucion-table-container {
-          overflow-x: auto;
-        }
-
-        .distribucion-table {
-          width: 100%;
-          border-collapse: collapse;
-          font-size: 0.9rem;
-        }
-
-        .distribucion-table th,
-        .distribucion-table td {
-          padding: 0.75rem;
-          text-align: center;
-          border-bottom: 1px solid #e0e0e0;
-        }
-
-        .distribucion-table th {
-          background: #f5f5f5;
-          font-weight: 600;
-          color: #333;
-        }
-
-        .distribucion-table tbody tr:hover {
-          background: #fafafa;
-        }
-
-        .dia-cell {
-          text-align: left;
-          font-weight: 500;
-          color: #333;
-        }
-
-        .sector-header {
-          color: #666;
-          font-size: 0.85rem;
-        }
-
-        .input-cell {
-          padding: 0.5rem;
-        }
-
-        .cantidad-input {
-          width: 60px;
-          padding: 0.5rem;
-          border: 1px solid #ccc;
-          border-radius: 4px;
-          text-align: center;
-          font-size: 0.9rem;
-        }
-
-        .cantidad-input:disabled {
-          background-color: #f0f0f0;
-          cursor: not-allowed;
-        }
-
-        .resumen-distribuciones {
-          margin-top: 1.5rem;
-          padding: 1rem;
-          background: white;
-          border-radius: 6px;
-          border-left: 4px solid #6366f1;
-        }
-
-        .resumen-distribuciones h4 {
-          margin-top: 0;
-          margin-bottom: 1rem;
-          font-size: 0.95rem;
-          color: #333;
-        }
-
-        .distribuciones-list {
-          margin-bottom: 1rem;
-          display: flex;
-          flex-direction: column;
-          gap: 0.5rem;
-        }
-
-        .distribucion-item {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding: 0.5rem;
-          background: #f9f9f9;
-          border-radius: 4px;
-          font-size: 0.9rem;
-        }
-
-        .sector-name {
-          font-weight: 500;
-          color: #333;
-        }
-
-        .sector-count {
-          background: #e8f5e9;
-          padding: 0.25rem 0.75rem;
-          border-radius: 20px;
-          font-weight: 600;
-          color: #2e7d32;
-          font-size: 0.85rem;
-        }
-
-        .validacion {
-          margin-top: 1rem;
-          padding: 0.75rem;
-          border-radius: 4px;
-          font-size: 0.9rem;
-          font-weight: 500;
-        }
-
-        .validacion.valid {
-          background: #e8f5e9;
-          color: #2e7d32;
-          border: 1px solid #4caf50;
-        }
-
-        .validacion.invalid {
-          background: #ffebee;
-          color: #c62828;
-          border: 1px solid #ef5350;
-        }
-
-        .error-hint {
-          display: block;
-          margin-top: 0.5rem;
-          font-size: 0.85rem;
-        }
-      `}</style>
     </div>
   )
+}
+
+const styles: Record<string, React.CSSProperties> = {
+  root: {
+    padding: '1.5rem',
+    border: '1px solid #e0e0e0',
+    borderRadius: '8px',
+    background: '#f9f9f9',
+  },
+  checkboxGroup: {
+    marginBottom: '1.5rem',
+  },
+  checkboxLabel: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    cursor: 'pointer',
+    fontWeight: 500,
+  },
+  errorMessage: {
+    padding: '0.75rem',
+    marginBottom: '1rem',
+    backgroundColor: '#fee',
+    color: '#c33',
+    borderRadius: '4px',
+    fontSize: '0.9rem',
+  },
+  modoSelector: {
+    margin: '1.5rem 0',
+    padding: '1rem',
+    background: 'white',
+    borderRadius: '6px',
+  },
+  radioGroup: {
+    display: 'flex',
+    gap: '2rem',
+  },
+  radioLabel: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    cursor: 'pointer',
+  },
+  patronFijo: {
+    margin: '1.5rem 0',
+    padding: '1rem',
+    background: 'white',
+    borderRadius: '6px',
+  },
+  patronH4: {
+    marginTop: 0,
+    marginBottom: '1rem',
+    fontSize: '0.95rem',
+    color: '#333',
+  },
+  patronGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
+    gap: '1rem',
+  },
+  patronItem: {
+    display: 'flex',
+    flexDirection: 'column' as const,
+    gap: '0.5rem',
+  },
+  sectorLabel: {
+    fontSize: '0.85rem',
+    fontWeight: 500,
+    color: '#666',
+  },
+  sectorSelect: {
+    padding: '0.5rem',
+    border: '1px solid #ccc',
+    borderRadius: '4px',
+    fontSize: '0.9rem',
+  },
+  personalizado: {
+    margin: '1.5rem 0',
+    padding: '1rem',
+    background: 'white',
+    borderRadius: '6px',
+  },
+  distribucionTableContainer: {
+    overflowX: 'auto' as const,
+  },
+  distribucionTable: {
+    width: '100%',
+    borderCollapse: 'collapse' as const,
+    fontSize: '0.9rem',
+  },
+  distribucionTh: {
+    padding: '0.75rem',
+    textAlign: 'center' as const,
+    borderBottom: '1px solid #e0e0e0',
+    background: '#f5f5f5',
+    fontWeight: 600,
+    color: '#333',
+  },
+  distribucionTd: {
+    padding: '0.75rem',
+    textAlign: 'center' as const,
+    borderBottom: '1px solid #e0e0e0',
+  },
+  diaCell: {
+    textAlign: 'left' as const,
+    fontWeight: 500,
+    color: '#333',
+  },
+  cantidadInput: {
+    width: '60px',
+    padding: '0.5rem',
+    border: '1px solid #ccc',
+    borderRadius: '4px',
+    textAlign: 'center' as const,
+    fontSize: '0.9rem',
+  },
+  resumenDistribuciones: {
+    marginTop: '1.5rem',
+    padding: '1rem',
+    background: 'white',
+    borderRadius: '6px',
+    borderLeft: '4px solid #6366f1',
+  },
+  distribucionesList: {
+    marginBottom: '1rem',
+    display: 'flex',
+    flexDirection: 'column' as const,
+    gap: '0.5rem',
+  },
+  distribucionItem: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: '0.5rem',
+    background: '#f9f9f9',
+    borderRadius: '4px',
+    fontSize: '0.9rem',
+  },
+  sectorName: {
+    fontWeight: 500,
+    color: '#333',
+  },
+  sectorCount: {
+    background: '#e8f5e9',
+    padding: '0.25rem 0.75rem',
+    borderRadius: '20px',
+    fontWeight: 600,
+    color: '#2e7d32',
+    fontSize: '0.85rem',
+  },
+  validacionValid: {
+    marginTop: '1rem',
+    padding: '0.75rem',
+    borderRadius: '4px',
+    fontSize: '0.9rem',
+    fontWeight: 500,
+    background: '#e8f5e9',
+    color: '#2e7d32',
+    border: '1px solid #4caf50',
+  },
+  validacionInvalid: {
+    marginTop: '1rem',
+    padding: '0.75rem',
+    borderRadius: '4px',
+    fontSize: '0.9rem',
+    fontWeight: 500,
+    background: '#ffebee',
+    color: '#c62828',
+    border: '1px solid #ef5350',
+  },
 }
