@@ -1,22 +1,6 @@
 version: '3.8'
 
 services:
-  postgres:
-    image: postgres:15
-    environment:
-      POSTGRES_USER: almuerzos_user
-      POSTGRES_PASSWORD: almuerzos_password
-      POSTGRES_DB: almuerzos_db
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U almuerzos_user -d almuerzos_db"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
   firebase-emulator:
     image: node:18
     working_dir: /firebase
@@ -40,8 +24,6 @@ services:
     build: ./backend
     image: organizacion:backend
     depends_on:
-      postgres:
-        condition: service_healthy
       firebase-emulator:
         condition: service_healthy
     env_file:
@@ -50,9 +32,11 @@ services:
       - "3001:8000"
     volumes:
       - ./backend:/app
+      - ./almuerzos.db:/app/almuerzos.db
+    working_dir: /app
     environment:
-      - NO_PROXY=localhost,127.0.0.1,firebase-emulator,postgres
-      - no_proxy=localhost,127.0.0.1,firebase-emulator,postgres
+      - NO_PROXY=localhost,127.0.0.1,firebase-emulator
+      - no_proxy=localhost,127.0.0.1,firebase-emulator
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 
   frontend:
@@ -70,8 +54,5 @@ services:
       - /app/node_modules
     environment:
       - VITE_API_URL=/api
-      - NO_PROXY=localhost,127.0.0.1,firebase-emulator,backend,postgres
-      - no_proxy=localhost,127.0.0.1,firebase-emulator,backend,postgres
-
-volumes:
-  postgres_data:
+      - NO_PROXY=localhost,127.0.0.1,firebase-emulator,backend
+      - no_proxy=localhost,127.0.0.1,firebase-emulator,backend

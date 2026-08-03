@@ -1,5 +1,5 @@
 from datetime import date, time
-from sqlalchemy import Column, Date, Integer, ForeignKey, String, Time, ARRAY
+from sqlalchemy import Column, Date, Integer, ForeignKey, String, Time, JSON
 from sqlalchemy.orm import relationship
 from app.models.base import BaseModel
 
@@ -8,7 +8,7 @@ class TareaEspecialTipo(BaseModel):
     __tablename__ = "tarea_especial_tipo"
 
     nombre = Column(String(100), nullable=False, unique=True)
-    dia_semana_aplicable = Column(ARRAY(Integer), nullable=False)  # [0,1,2,3,4] for Mon-Fri
+    dia_semana_aplicable = Column(JSON, nullable=False)  # [0,1,2,3,4] for Mon-Fri
     hora_inicio = Column(Time, nullable=False)
     hora_fin = Column(Time, nullable=False)
 

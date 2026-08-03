@@ -63,6 +63,10 @@ yarn-error.log*
 .claude/projects/
 .superpowers/
 
+# SQLite database file
+data/almuerzos.db
+*.db
+
 # OS
 .DS_Store
 Thumbs.db

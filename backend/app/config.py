@@ -1,12 +1,14 @@
 import os
+from pathlib import Path
 from dotenv import load_dotenv
 
 # En Docker, las variables ya están inyectadas vía env_file
 # En local, cargar desde .env
 if not os.getenv("DOCKER_CONTAINER"):
-    load_dotenv()
+    load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://almuerzos_user:almuerzos_password@localhost:5432/almuerzos_db")
+_project_root = Path(__file__).resolve().parent.parent.parent
+DATABASE_URL = os.getenv("DATABASE_URL", f"sqlite:///{_project_root}/almuerzos.db")
 SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret-key-change-in-production")
 DEBUG = os.getenv("DEBUG", "True").lower() == "true"
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")

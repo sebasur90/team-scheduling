@@ -15,6 +15,12 @@ import random
 backend_path = Path(__file__).parent.parent / "backend"
 sys.path.insert(0, str(backend_path))
 
+# Para SQLite: fijar path absoluto antes de importar app.config,
+# así el archivo se crea siempre en la raíz del proyecto sin importar el CWD.
+if not os.getenv("DATABASE_URL"):
+    project_root = Path(__file__).parent.parent
+    os.environ["DATABASE_URL"] = f"sqlite:///{project_root}/almuerzos.db"
+
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from app.database import SessionLocal, engine
