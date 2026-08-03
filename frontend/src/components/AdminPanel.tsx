@@ -10,11 +10,12 @@ import { tareasEspecialesApi, type TareaEspecialTipo } from '../api/tareasEspeci
 import { ConfiguracionCobertura } from './ConfiguracionCobertura';
 import { NotificacionesConfig } from './NotificacionesConfig';
 import { Vacaciones } from './Vacaciones';
+import { CronogramaTareasPanel } from './CronogramaTareasPanel';
 import { Colaborador } from '../api/auth';
 import client from '../api/client';
 import './AdminPanel.css';
 
-type Tab = 'colaboradores' | 'sectores' | 'franjas' | 'tareas-especiales' | 'asignacion' | 'dias-no-laborables' | 'vacaciones' | 'configuracion' | 'incidencias' | 'preferencias';
+type Tab = 'colaboradores' | 'sectores' | 'franjas' | 'tareas-especiales' | 'cronograma-tareas' | 'asignacion' | 'dias-no-laborables' | 'vacaciones' | 'configuracion' | 'incidencias' | 'preferencias';
 type ChipState = 'assigned' | 'available' | 'conflict' | 'disabled';
 
 interface OverrideModalState {
@@ -96,6 +97,9 @@ export function AdminPanel({ activeTab: propActiveTab = 'colaboradores' }: Admin
     dia_semana_aplicable: [],
     hora_inicio: '09:00',
     hora_fin: '10:00',
+    frecuencia: 'semanal',
+    inhabilita_almuerzo: false,
+    fecha_inicio_ciclo: '',
   });
   const [editingTareaId, setEditingTareaId] = useState<number | null>(null);
   const [editingTareaData, setEditingTareaData] = useState<Partial<any> | null>(null);
@@ -355,8 +359,8 @@ export function AdminPanel({ activeTab: propActiveTab = 'colaboradores' }: Admin
   };
 
   // Tareas Especiales handlers
-  const handleTareaFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
+  const handleTareaFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value, type } = e.target;
     const checked = (e.target as HTMLInputElement).checked;
 
     if (name.startsWith('dia_')) {
@@ -366,6 +370,11 @@ export function AdminPanel({ activeTab: propActiveTab = 'colaboradores' }: Admin
         dia_semana_aplicable: checked
           ? [...(prev.dia_semana_aplicable || []), dia]
           : (prev.dia_semana_aplicable || []).filter((d: number) => d !== dia),
+      }));
+    } else if (type === 'checkbox') {
+      setTareaFormData((prev: any) => ({
+        ...prev,
+        [name]: checked,
       }));
     } else {
       setTareaFormData((prev: any) => ({
@@ -389,6 +398,9 @@ export function AdminPanel({ activeTab: propActiveTab = 'colaboradores' }: Admin
         dia_semana_aplicable: [],
         hora_inicio: '09:00',
         hora_fin: '10:00',
+        frecuencia: 'semanal',
+        inhabilita_almuerzo: false,
+        fecha_inicio_ciclo: '',
       });
       setShowTareaForm(false);
     } catch (err: any) {
@@ -406,6 +418,9 @@ export function AdminPanel({ activeTab: propActiveTab = 'colaboradores' }: Admin
       dia_semana_aplicable: tarea.dia_semana_aplicable,
       hora_inicio: tarea.hora_inicio,
       hora_fin: tarea.hora_fin,
+      frecuencia: tarea.frecuencia || 'semanal',
+      inhabilita_almuerzo: tarea.inhabilita_almuerzo || false,
+      fecha_inicio_ciclo: tarea.fecha_inicio_ciclo || '',
     });
   };
 
@@ -429,8 +444,8 @@ export function AdminPanel({ activeTab: propActiveTab = 'colaboradores' }: Admin
     }
   };
 
-  const handleEditTareaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
+  const handleEditTareaChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value, type } = e.target;
     const checked = (e.target as HTMLInputElement).checked;
 
     if (name.startsWith('dia_')) {
@@ -440,6 +455,11 @@ export function AdminPanel({ activeTab: propActiveTab = 'colaboradores' }: Admin
         dia_semana_aplicable: checked
           ? [...(prev?.dia_semana_aplicable || []), dia]
           : (prev?.dia_semana_aplicable || []).filter((d: number) => d !== dia),
+      }));
+    } else if (type === 'checkbox') {
+      setEditingTareaData((prev: any) => ({
+        ...prev,
+        [name]: checked,
       }));
     } else {
       setEditingTareaData((prev: any) => ({
@@ -819,6 +839,7 @@ export function AdminPanel({ activeTab: propActiveTab = 'colaboradores' }: Admin
     { id: 'sectores', label: 'Sectores' },
     { id: 'franjas', label: 'Franjas' },
     { id: 'tareas-especiales', label: 'Tareas Especiales' },
+    { id: 'cronograma-tareas', label: 'Cronograma Tareas' },
     { id: 'asignacion', label: 'Asignación de Turnos' },
     { id: 'dias-no-laborables', label: 'Días no Laborables' },
     { id: 'vacaciones', label: 'Vacaciones' },
@@ -1512,6 +1533,48 @@ export function AdminPanel({ activeTab: propActiveTab = 'colaboradores' }: Admin
                 </fieldset>
               </div>
 
+              <div className="form-row">
+                <div className="form-group">
+                  <label htmlFor="frecuencia">Frecuencia *</label>
+                  <select
+                    id="frecuencia"
+                    name="frecuencia"
+                    value={editingTareaId ? editingTareaData?.frecuencia || 'semanal' : tareaFormData.frecuencia}
+                    onChange={editingTareaId ? handleEditTareaChange : handleTareaFormChange}
+                    disabled={tareaFormLoading}
+                  >
+                    <option value="semanal">Semanal</option>
+                    <option value="quincenal">Quincenal (Semana por medio)</option>
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="fecha_inicio_ciclo">Fecha Inicio Ciclo (Para tareas quincenales)</label>
+                  <input
+                    type="date"
+                    id="fecha_inicio_ciclo"
+                    name="fecha_inicio_ciclo"
+                    value={editingTareaId ? editingTareaData?.fecha_inicio_ciclo || '' : tareaFormData.fecha_inicio_ciclo}
+                    onChange={editingTareaId ? handleEditTareaChange : handleTareaFormChange}
+                    disabled={tareaFormLoading}
+                  />
+                </div>
+
+                <div className="form-group" style={{ display: 'flex', alignItems: 'center' }}>
+                  <label htmlFor="inhabilita_almuerzo">
+                    <input
+                      type="checkbox"
+                      id="inhabilita_almuerzo"
+                      name="inhabilita_almuerzo"
+                      checked={editingTareaId ? editingTareaData?.inhabilita_almuerzo || false : tareaFormData.inhabilita_almuerzo}
+                      onChange={editingTareaId ? handleEditTareaChange : handleTareaFormChange}
+                      disabled={tareaFormLoading}
+                    />
+                    Inhabilita turno de almuerzo
+                  </label>
+                </div>
+              </div>
+
               <div className="form-actions">
                 <button type="submit" className="btn btn-primary" disabled={tareaFormLoading}>
                   {tareaFormLoading ? 'Guardando...' : editingTareaId ? 'Actualizar Tarea' : 'Crear Tarea'}
@@ -1546,6 +1609,8 @@ export function AdminPanel({ activeTab: propActiveTab = 'colaboradores' }: Admin
                     <th>Hora Inicio</th>
                     <th>Hora Fin</th>
                     <th>Días Aplicables</th>
+                    <th>Frecuencia</th>
+                    <th>Inhabilita Almuerzo</th>
                     <th>Acciones</th>
                   </tr>
                 </thead>
@@ -1562,6 +1627,8 @@ export function AdminPanel({ activeTab: propActiveTab = 'colaboradores' }: Admin
                         <td>{tarea.hora_inicio}</td>
                         <td>{tarea.hora_fin}</td>
                         <td>{diasAplicables || '–'}</td>
+                        <td>{tarea.frecuencia === 'quincenal' ? 'Quincenal' : 'Semanal'}</td>
+                        <td>{tarea.inhabilita_almuerzo ? 'Sí' : 'No'}</td>
                         <td>
                           <button
                             className="btn btn-small btn-info"
@@ -1585,6 +1652,11 @@ export function AdminPanel({ activeTab: propActiveTab = 'colaboradores' }: Admin
             </div>
           )}
         </div>
+      )}
+
+      {/* CRONOGRAMA TAREAS TAB */}
+      {activeTab === 'cronograma-tareas' && (
+        <CronogramaTareasPanel />
       )}
 
       {/* ASIGNACIÓN DE TURNOS TAB */}
