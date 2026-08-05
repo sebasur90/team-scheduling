@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from typing import List
 from datetime import date
 from app.database import get_db
-from app.models import TareaEspecialTipo, ColaboradorTareaTipo, Colaborador, TareaEspecialAsignacion, AsignacionAlmuerzo, TurnoAlmuerzo
+from app.models import TareaEspecialTipo, ColaboradorTareaTipo, Colaborador, TareaEspecialAsignacion, AsignacionAlmuerzo, TurnoAlmuerzo, TareaEquipoCuota
 from app.schemas.tarea_especial import (
     TareaEspecialTipoResponse,
     TareaEspecialTipoCreate,
@@ -58,12 +58,29 @@ def create_tipo(
         fecha_inicio_ciclo=data.fecha_inicio_ciclo,
         fija_almuerzo=data.fija_almuerzo,
         franja_almuerzo_id=data.franja_almuerzo_id,
+        minimo_personas_dia=data.minimo_personas_dia,
+        politica_minimo=data.politica_minimo,
         configuracion_rotacion=(
             data.configuracion_rotacion.model_dump()
             if data.configuracion_rotacion else None
         ),
     )
     db.add(tipo)
+    db.flush()
+
+    if data.cuotas:
+        for cuota in data.cuotas:
+            tarea_cuota = TareaEquipoCuota(
+                tarea_tipo_id=tipo.id,
+                sector_id=cuota.sector_id,
+                personas_por_turno=cuota.personas_por_turno,
+                frecuencia=cuota.frecuencia,
+                veces_por_semana=cuota.veces_por_semana,
+                dia_tipo=cuota.dia_tipo,
+                dia_fijo=cuota.dia_fijo,
+            )
+            db.add(tarea_cuota)
+
     db.commit()
     db.refresh(tipo)
     return TareaEspecialTipoResponse.model_validate(tipo)
@@ -112,6 +129,10 @@ def update_tipo(
         tipo.fija_almuerzo = data.fija_almuerzo
     if data.franja_almuerzo_id is not None:
         tipo.franja_almuerzo_id = data.franja_almuerzo_id
+    if data.minimo_personas_dia is not None:
+        tipo.minimo_personas_dia = data.minimo_personas_dia
+    if data.politica_minimo is not None:
+        tipo.politica_minimo = data.politica_minimo
 
     # Handle configuracion_rotacion with model_fields_set to distinguish null from unset
     if 'configuracion_rotacion' in data.model_fields_set:
@@ -119,6 +140,22 @@ def update_tipo(
             data.configuracion_rotacion.model_dump()
             if data.configuracion_rotacion else None
         )
+
+    # Handle cuotas: replace-all strategy
+    if 'cuotas' in data.model_fields_set:
+        db.query(TareaEquipoCuota).filter_by(tarea_tipo_id=tipo_id).delete()
+        if data.cuotas:
+            for cuota in data.cuotas:
+                tarea_cuota = TareaEquipoCuota(
+                    tarea_tipo_id=tipo_id,
+                    sector_id=cuota.sector_id,
+                    personas_por_turno=cuota.personas_por_turno,
+                    frecuencia=cuota.frecuencia,
+                    veces_por_semana=cuota.veces_por_semana,
+                    dia_tipo=cuota.dia_tipo,
+                    dia_fijo=cuota.dia_fijo,
+                )
+                db.add(tarea_cuota)
 
     db.commit()
     db.refresh(tipo)

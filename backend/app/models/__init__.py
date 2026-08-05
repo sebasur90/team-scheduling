@@ -2,7 +2,7 @@ from app.models.sector import Sector
 from app.models.colaborador import Colaborador
 from app.models.franja_horaria import FranjaHoraria
 from app.models.turno import TurnoAlmuerzo, AsignacionAlmuerzo
-from app.models.tarea_especial import TareaEspecialTipo, TareaEspecialAsignacion, ColaboradorTareaTipo
+from app.models.tarea_especial import TareaEspecialTipo, TareaEspecialAsignacion, ColaboradorTareaTipo, TareaEquipoCuota
 from app.models.ausencia import Ausencia
 from app.models.swap import SwapSolicitud
 from app.models.notificacion import Notificacion
@@ -20,6 +20,7 @@ __all__ = [
     "TareaEspecialTipo",
     "TareaEspecialAsignacion",
     "ColaboradorTareaTipo",
+    "TareaEquipoCuota",
     "Ausencia",
     "SwapSolicitud",
     "Notificacion",

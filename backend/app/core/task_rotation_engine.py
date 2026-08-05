@@ -3,7 +3,7 @@ from typing import List, Optional, Tuple
 from sqlalchemy.orm import Session
 from app.models import (
     TareaEspecialTipo, TareaEspecialAsignacion, ColaboradorTareaTipo,
-    Colaborador, Sector
+    Colaborador, Sector, TareaEquipoCuota
 )
 
 
@@ -38,8 +38,13 @@ class TaskRotationEngine:
         tipos = query.all()
 
         for tipo in tipos:
-            if tipo.configuracion_rotacion:
-                # New route: multi-sector
+            if tipo.cuotas_equipo:
+                # New route: quota-based rotation
+                creadas, advs = TaskRotationEngine._generar_con_cuotas(
+                    db, tipo, fecha_inicio, fecha_fin
+                )
+            elif tipo.configuracion_rotacion:
+                # Existing route: multi-sector
                 creadas, advs = TaskRotationEngine._generar_multi_sector(
                     db, tipo, fecha_inicio, fecha_fin
                 )
@@ -289,6 +294,160 @@ class TaskRotationEngine:
                         asignaciones_creadas += 1
 
                     asignados_hoy.append(colaborador_id)
+
+            current += timedelta(days=1)
+
+        db.commit()
+        return asignaciones_creadas, advertencias
+
+    @staticmethod
+    def _generar_con_cuotas(
+        db: Session,
+        tipo: TareaEspecialTipo,
+        fecha_inicio: date,
+        fecha_fin: date
+    ) -> Tuple[int, List[str]]:
+        """
+        Generate assignments based on per-team quotas with variable frequencies.
+        Supports daily and weekly (fixed or rotating) quotas per sector.
+        """
+        asignaciones_creadas = 0
+        advertencias = []
+
+        current = fecha_inicio
+        while current <= fecha_fin:
+            weekday = current.weekday()
+
+            if weekday not in tipo.dia_semana_aplicable:
+                current += timedelta(days=1)
+                continue
+
+            if tipo.frecuencia == 'quincenal':
+                if not TaskRotationEngine._is_active_week(current, tipo.fecha_inicio_ciclo):
+                    current += timedelta(days=1)
+                    continue
+
+            asignados_hoy = []
+            total_asignados_dia = 0
+
+            for cuota in tipo.cuotas_equipo:
+                corresponde = False
+
+                if cuota.frecuencia == "diaria":
+                    corresponde = True
+
+                elif cuota.frecuencia == "semanal":
+                    if cuota.dia_tipo == "fijo":
+                        corresponde = (weekday == cuota.dia_fijo)
+                    elif cuota.dia_tipo == "rotativo":
+                        lunes_de_esta_semana = current - timedelta(days=weekday)
+                        ultima_asignacion = db.query(TareaEspecialAsignacion).join(
+                            Colaborador,
+                            TareaEspecialAsignacion.colaborador_id == Colaborador.id
+                        ).join(
+                            Sector,
+                            Colaborador.sector_id == Sector.id
+                        ).filter(
+                            TareaEspecialAsignacion.tarea_especial_tipo_id == tipo.id,
+                            Sector.id == cuota.sector_id,
+                            TareaEspecialAsignacion.fecha < lunes_de_esta_semana
+                        ).order_by(TareaEspecialAsignacion.fecha.desc()).first()
+
+                        if not ultima_asignacion:
+                            dia_designado = min(tipo.dia_semana_aplicable)
+                        else:
+                            dia_usado = ultima_asignacion.fecha.weekday()
+                            dias_ord = sorted(tipo.dia_semana_aplicable)
+                            idx = next((i for i, d in enumerate(dias_ord) if d > dia_usado), 0)
+                            dia_designado = dias_ord[idx]
+
+                        corresponde = (weekday == dia_designado)
+
+                if not corresponde:
+                    continue
+
+                pool = db.query(ColaboradorTareaTipo).join(
+                    Colaborador,
+                    ColaboradorTareaTipo.colaborador_id == Colaborador.id
+                ).join(
+                    Sector,
+                    Colaborador.sector_id == Sector.id
+                ).filter(
+                    ColaboradorTareaTipo.tarea_tipo_id == tipo.id,
+                    Colaborador.estado_atencion == 'activo',
+                    Sector.id == cuota.sector_id
+                ).order_by(ColaboradorTareaTipo.colaborador_id).all()
+
+                if not pool:
+                    advertencias.append(
+                        f"Tarea '{tipo.nombre}' sector {cuota.sector_id}: "
+                        f"sin colaboradores disponibles el {current.strftime('%d/%m/%Y')}"
+                    )
+                    continue
+
+                for i in range(cuota.personas_por_turno):
+                    last_asignacion = db.query(TareaEspecialAsignacion).join(
+                        Colaborador,
+                        TareaEspecialAsignacion.colaborador_id == Colaborador.id
+                    ).join(
+                        Sector,
+                        Colaborador.sector_id == Sector.id
+                    ).filter(
+                        TareaEspecialAsignacion.tarea_especial_tipo_id == tipo.id,
+                        Sector.id == cuota.sector_id
+                    ).order_by(TareaEspecialAsignacion.fecha.desc()).first()
+
+                    if last_asignacion:
+                        last_idx = next(
+                            (j for j, c in enumerate(pool)
+                             if c.colaborador_id == last_asignacion.colaborador_id),
+                            -1
+                        )
+                        for _ in range(len(pool)):
+                            last_idx = (last_idx + 1) % len(pool)
+                            if pool[last_idx].colaborador_id not in asignados_hoy:
+                                break
+                        next_idx = last_idx
+                    else:
+                        next_idx = next(
+                            (j for j, c in enumerate(pool)
+                             if c.colaborador_id not in asignados_hoy),
+                            0
+                        )
+
+                    colaborador_id = pool[next_idx].colaborador_id
+
+                    existing = db.query(TareaEspecialAsignacion).filter(
+                        TareaEspecialAsignacion.fecha == current,
+                        TareaEspecialAsignacion.tarea_especial_tipo_id == tipo.id,
+                        TareaEspecialAsignacion.colaborador_id == colaborador_id
+                    ).first()
+
+                    if not existing:
+                        asignacion = TareaEspecialAsignacion(
+                            fecha=current,
+                            tarea_especial_tipo_id=tipo.id,
+                            colaborador_id=colaborador_id
+                        )
+                        db.add(asignacion)
+                        db.flush()
+                        asignaciones_creadas += 1
+                        total_asignados_dia += 1
+
+                    asignados_hoy.append(colaborador_id)
+
+            if total_asignados_dia < tipo.minimo_personas_dia:
+                msg = (f"Tarea '{tipo.nombre}': "
+                       f"mínimo no alcanzado ({total_asignados_dia} < {tipo.minimo_personas_dia}) "
+                       f"el {current.strftime('%d/%m/%Y')}")
+                advertencias.append(msg)
+
+                if tipo.politica_minimo == "bloquear":
+                    db.query(TareaEspecialAsignacion).filter(
+                        TareaEspecialAsignacion.fecha == current,
+                        TareaEspecialAsignacion.tarea_especial_tipo_id == tipo.id
+                    ).delete()
+                    asignaciones_creadas -= total_asignados_dia
 
             current += timedelta(days=1)
 

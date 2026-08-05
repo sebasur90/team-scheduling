@@ -21,6 +21,34 @@ class ConfiguracionRotacionMultiSector(BaseModel):
         from_attributes = True
 
 
+class TareaEquipoCuotaCreate(BaseModel):
+    sector_id: int
+    personas_por_turno: int
+    frecuencia: Literal["diaria", "semanal"]
+    veces_por_semana: Optional[int] = None
+    dia_tipo: Optional[Literal["fijo", "rotativo"]] = None
+    dia_fijo: Optional[int] = None
+
+    @model_validator(mode='after')
+    def validar_frecuencia_semanal(self):
+        if self.frecuencia == "semanal":
+            if self.veces_por_semana is None:
+                raise ValueError("veces_por_semana es requerido cuando frecuencia='semanal'")
+            if self.dia_tipo is None:
+                raise ValueError("dia_tipo es requerido cuando frecuencia='semanal'")
+            if self.dia_tipo == "fijo" and self.dia_fijo is None:
+                raise ValueError("dia_fijo es requerido cuando dia_tipo='fijo'")
+        return self
+
+
+class TareaEquipoCuotaResponse(TareaEquipoCuotaCreate):
+    id: int
+    sector_nombre: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+
+
 class TareaEspecialTipoBase(BaseModel):
     nombre: str
     dia_semana_aplicable: List[int]
@@ -31,10 +59,13 @@ class TareaEspecialTipoBase(BaseModel):
     fecha_inicio_ciclo: Optional[date] = None
     fija_almuerzo: bool = False
     franja_almuerzo_id: Optional[int] = None
+    minimo_personas_dia: int = 1
+    politica_minimo: Literal["alertar", "bloquear"] = "alertar"
 
 
 class TareaEspecialTipoCreate(TareaEspecialTipoBase):
     configuracion_rotacion: Optional[ConfiguracionRotacionMultiSector] = None
+    cuotas: Optional[List["TareaEquipoCuotaCreate"]] = None
 
     @model_validator(mode='after')
     def validar_configuracion_rotacion(self):
@@ -84,12 +115,16 @@ class TareaEspecialTipoUpdate(BaseModel):
     fecha_inicio_ciclo: Optional[date] = None
     fija_almuerzo: Optional[bool] = None
     franja_almuerzo_id: Optional[int] = None
+    minimo_personas_dia: Optional[int] = None
+    politica_minimo: Optional[Literal["alertar", "bloquear"]] = None
     configuracion_rotacion: Optional[ConfiguracionRotacionMultiSector] = None
+    cuotas: Optional[List["TareaEquipoCuotaCreate"]] = None
 
 
 class TareaEspecialTipoResponse(TareaEspecialTipoBase):
     id: int
     configuracion_rotacion: Optional[ConfiguracionRotacionMultiSector] = None
+    cuotas_equipo: List["TareaEquipoCuotaResponse"] = []
     created_at: datetime
     updated_at: datetime
 

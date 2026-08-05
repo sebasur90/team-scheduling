@@ -7,6 +7,26 @@ export interface ConfiguracionRotacionMultiSector {
   distribuciones_sector: Record<string, number>
 }
 
+export interface TareaEquipoCuota {
+  id: number
+  sector_id: number
+  sector_nombre?: string
+  personas_por_turno: number
+  frecuencia: 'diaria' | 'semanal'
+  veces_por_semana: number | null
+  dia_tipo: 'fijo' | 'rotativo' | null
+  dia_fijo: number | null
+}
+
+export interface TareaEquipoCuotaCreate {
+  sector_id: number
+  personas_por_turno: number
+  frecuencia: 'diaria' | 'semanal'
+  veces_por_semana?: number
+  dia_tipo?: 'fijo' | 'rotativo'
+  dia_fijo?: number
+}
+
 export interface TareaEspecialTipo {
   id: number
   nombre: string
@@ -18,7 +38,10 @@ export interface TareaEspecialTipo {
   fecha_inicio_ciclo: string | null
   fija_almuerzo: boolean
   franja_almuerzo_id: number | null
+  minimo_personas_dia: number
+  politica_minimo: 'alertar' | 'bloquear'
   configuracion_rotacion: ConfiguracionRotacionMultiSector | null
+  cuotas_equipo: TareaEquipoCuota[]
   created_at: string
   updated_at: string
 }
@@ -33,7 +56,10 @@ export interface TareaEspecialTipoCreate {
   fecha_inicio_ciclo?: string | null
   fija_almuerzo?: boolean
   franja_almuerzo_id?: number | null
+  minimo_personas_dia?: number
+  politica_minimo?: 'alertar' | 'bloquear'
   configuracion_rotacion?: ConfiguracionRotacionMultiSector | null
+  cuotas?: TareaEquipoCuotaCreate[]
 }
 
 export interface TareaEspecialTipoUpdate {
@@ -46,7 +72,10 @@ export interface TareaEspecialTipoUpdate {
   fecha_inicio_ciclo?: string | null
   fija_almuerzo?: boolean
   franja_almuerzo_id?: number | null
+  minimo_personas_dia?: number
+  politica_minimo?: 'alertar' | 'bloquear'
   configuracion_rotacion?: ConfiguracionRotacionMultiSector | null
+  cuotas?: TareaEquipoCuotaCreate[]
 }
 
 export interface TareaEspecialAsignacion {

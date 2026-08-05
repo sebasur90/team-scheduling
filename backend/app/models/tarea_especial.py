@@ -17,9 +17,12 @@ class TareaEspecialTipo(BaseModel):
     fija_almuerzo = Column(Boolean, nullable=False, default=False)
     franja_almuerzo_id = Column(Integer, ForeignKey("franja_horaria.id"), nullable=True)
     configuracion_rotacion = Column(JSON, nullable=True)
+    minimo_personas_dia = Column(Integer, nullable=False, default=1)
+    politica_minimo = Column(String(10), nullable=False, default='alertar')
 
     asignaciones = relationship("TareaEspecialAsignacion", back_populates="tipo", cascade="all, delete-orphan")
     colaboradores_habilitados = relationship("ColaboradorTareaTipo", back_populates="tarea_tipo", cascade="all, delete-orphan")
+    cuotas_equipo = relationship("TareaEquipoCuota", back_populates="tarea_tipo", cascade="all, delete-orphan")
     franja_almuerzo = relationship("FranjaHoraria")
 
     def __repr__(self):
@@ -51,3 +54,21 @@ class TareaEspecialAsignacion(BaseModel):
 
     def __repr__(self):
         return f"<TareaEspecialAsignacion(fecha={self.fecha}, tipo_id={self.tarea_especial_tipo_id})>"
+
+
+class TareaEquipoCuota(BaseModel):
+    __tablename__ = "tarea_equipo_cuota"
+
+    tarea_tipo_id = Column(Integer, ForeignKey("tarea_especial_tipo.id", ondelete="CASCADE"), nullable=False, index=True)
+    sector_id = Column(Integer, ForeignKey("sector.id", ondelete="CASCADE"), nullable=False)
+    personas_por_turno = Column(Integer, nullable=False, default=1)
+    frecuencia = Column(String(10), nullable=False)
+    veces_por_semana = Column(Integer, nullable=True)
+    dia_tipo = Column(String(10), nullable=True)
+    dia_fijo = Column(Integer, nullable=True)
+
+    tarea_tipo = relationship("TareaEspecialTipo", back_populates="cuotas_equipo")
+    sector = relationship("Sector")
+
+    def __repr__(self):
+        return f"<TareaEquipoCuota(tarea_tipo_id={self.tarea_tipo_id}, sector_id={self.sector_id}, frecuencia={self.frecuencia})>"

@@ -1,0 +1,233 @@
+.cuotas-equipo-step {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.cuotas-equipo-step__header {
+  margin-bottom: 0.5rem;
+}
+
+.cuotas-equipo-step__title {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.cuotas-equipo-step__description {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.cuotas-equipo-step__list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.cuota-card {
+  border: 1.5px solid #e0e0e0;
+  border-radius: 12px;
+  overflow: hidden;
+  background: white;
+  transition: all 0.2s;
+}
+
+.cuota-card:hover {
+  border-color: #7c3aed;
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.1);
+}
+
+.cuota-card__header {
+  padding: 1rem 1.25rem;
+  background: #fafafa;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  user-select: none;
+  transition: background 0.2s;
+}
+
+.cuota-card__header:hover {
+  background: #f5f5fa;
+}
+
+.cuota-card__header.expanded {
+  background: #f0e6ff;
+  border-bottom: 1.5px solid #7c3aed;
+}
+
+.cuota-card__title {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 1;
+}
+
+.cuota-card__title strong {
+  color: #333;
+  font-size: 0.95rem;
+}
+
+.cuota-card__info {
+  color: #666;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.cuota-card__remove-btn {
+  padding: 0.4rem 0.8rem;
+  background: #fee;
+  color: #c33;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 500;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.cuota-card__remove-btn:hover {
+  background: #fdd;
+  color: #b22;
+}
+
+.cuota-card__body {
+  padding: 1.25rem;
+  border-top: 1.5px solid #e0e0e0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.cuota-card__section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.cuota-card__label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #333;
+  font-size: 0.9rem;
+}
+
+.cuota-card__input,
+.cuota-card__select {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1.5px solid #ddd;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  transition: all 0.2s;
+}
+
+.cuota-card__input:focus,
+.cuota-card__select:focus {
+  outline: none;
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+}
+
+.cuota-card__radio-group,
+.cuota-card__checkbox-group {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.cuota-card__radio-label,
+.cuota-card__checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: #333;
+  user-select: none;
+}
+
+.cuota-card__radio-label input,
+.cuota-card__checkbox-label input {
+  cursor: pointer;
+  accent-color: #7c3aed;
+}
+
+.cuotas-equipo-step__add-btn {
+  padding: 0.75rem 1rem;
+  background: #7c3aed;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 0.95rem;
+  transition: all 0.2s;
+}
+
+.cuotas-equipo-step__add-btn:hover {
+  background: #6d28d9;
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+}
+
+.cuotas-equipo-step__add-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.cuotas-equipo-step__summary {
+  padding: 1rem;
+  background: #f0e6ff;
+  border: 1.5px solid #d9c9ff;
+  border-radius: 10px;
+  font-size: 0.9rem;
+}
+
+.cuotas-equipo-step__summary strong {
+  display: block;
+  color: #7c3aed;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.cuotas-equipo-step__summary ul {
+  margin: 0.5rem 0 0 1.25rem;
+  padding: 0;
+}
+
+.cuotas-equipo-step__summary li {
+  margin-bottom: 0.25rem;
+  color: #333;
+}
+
+.cuotas-equipo-step__summary .success {
+  color: #10b981;
+}
+
+.cuotas-equipo-step__summary .danger {
+  color: #ef4444;
+}
+
+@media (max-width: 768px) {
+  .cuota-card__header {
+    padding: 0.75rem 1rem;
+  }
+
+  .cuota-card__body {
+    padding: 1rem;
+  }
+
+  .cuota-card__radio-group,
+  .cuota-card__checkbox-group {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+}
