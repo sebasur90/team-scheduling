@@ -197,6 +197,15 @@
   border: 1px solid #e0e0e0;
 }
 
+@media (max-width: 768px) {
+  .admin-form {
+    padding: 1rem;
+    background: white;
+    border: none;
+    border-radius: 12px;
+  }
+}
+
 .form-group {
   margin-bottom: 1rem;
   display: flex;
@@ -252,6 +261,80 @@
   display: flex;
   align-items: center;
   cursor: pointer;
+}
+
+.dias-checkbox-group {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(75px, 1fr));
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.checkbox-inline {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.625rem 0.5rem;
+  background: white;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  user-select: none;
+  flex: 0 1 auto;
+  min-height: 48px;
+}
+
+.checkbox-inline:hover {
+  border-color: #7c3aed;
+  background: rgba(124, 58, 237, 0.02);
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.12);
+}
+
+.checkbox-inline:active {
+  background: rgba(124, 58, 237, 0.08);
+  transform: scale(0.98);
+}
+
+.checkbox-inline input[type="checkbox"] {
+  cursor: pointer;
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  accent-color: #7c3aed;
+  flex-shrink: 0;
+}
+
+.checkbox-inline input[type="checkbox"]:checked + label,
+.checkbox-inline input[type="checkbox"]:checked {
+  /* Intentionally empty - browser handles checked state */
+}
+
+@media (max-width: 768px) {
+  .dias-checkbox-group {
+    grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
+    gap: 0.5rem;
+  }
+
+  .checkbox-inline {
+    padding: 0.625rem 0.5rem;
+    font-size: 0.8rem;
+    border-radius: 8px;
+    min-height: 48px;
+  }
+
+  .checkbox-inline input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+  }
+
+  .checkbox-inline:active {
+    background: rgba(124, 58, 237, 0.12);
+  }
 }
 
 .form-row {
@@ -779,6 +862,20 @@
   .tab-header {
     flex-direction: column;
     gap: 1rem;
+    align-items: stretch;
+  }
+
+  .tab-header h3 {
+    font-size: 1.1rem;
+    margin: 0;
+    font-weight: 700;
+  }
+
+  .tab-header button {
+    width: 100%;
+    min-height: 48px;
+    font-size: 1rem;
+    font-weight: 600;
   }
 
   .table-container {
@@ -812,15 +909,82 @@
 
   .form-row {
     grid-template-columns: 1fr;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
   }
 
   .form-actions {
     flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+  }
+
+  .form-actions .btn {
+    width: 100%;
+    padding: 0.875rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    min-height: 48px;
+  }
+
+  .form-group {
+    margin-bottom: 1rem;
+  }
+
+  .form-group label {
+    font-size: 0.95rem;
+    margin-bottom: 0.625rem;
+    font-weight: 600;
+    color: #1a1a1a;
+    display: block;
   }
 
   .form-group input,
   .form-group select {
     font-size: 16px;
+    padding: 0.875rem 1rem;
+    min-height: 48px;
+    border-width: 1.5px;
+  }
+
+  .form-group input::placeholder {
+    color: #ccc;
+  }
+
+  .form-error {
+    font-size: 0.9rem;
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  fieldset.form-group {
+    margin-bottom: 1rem;
+  }
+
+  fieldset.form-group legend {
+    font-size: 0.9rem;
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+  }
+
+  .dias-checkbox-group {
+    gap: 0.5rem;
+  }
+
+  .checkbox-inline {
+    flex: 1 1 calc(50% - 0.25rem);
+    min-height: 44px;
+    padding: 0.625rem;
+    font-size: 0.9rem;
+    justify-content: center;
+  }
+
+  .checkbox-inline input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+    min-height: 20px;
   }
 
   .incidencia-card__header {
@@ -1090,6 +1254,23 @@
   border-top: 1px solid #eee;
 }
 
+/* Fieldset Styles */
+fieldset.form-group {
+  border: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+fieldset.form-group legend {
+  padding: 0 0 0.5rem 0;
+  font-weight: 600;
+  color: #333;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
 @media (max-width: 768px) {
   .configuracion-form {
     grid-template-columns: 1fr;
@@ -1098,5 +1279,31 @@
   .modal-content {
     width: 95%;
     max-height: 90vh;
+  }
+
+  fieldset.form-group legend {
+    font-size: 0.85rem;
+  }
+
+  .form-group {
+    margin-bottom: 0.75rem;
+  }
+
+  .form-row {
+    gap: 0.75rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .tab-header {
+    gap: 0.75rem;
+  }
+
+  .tab-header h3 {
+    font-size: 1rem;
+  }
+
+  .btn-small {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
   }
 }
