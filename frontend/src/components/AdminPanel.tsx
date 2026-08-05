@@ -12,9 +12,14 @@ import { NotificacionesConfig } from './NotificacionesConfig';
 import { Vacaciones } from './Vacaciones';
 import { CronogramaTareasPanel } from './CronogramaTareasPanel';
 import { ConfiguracionRotacionMultiSector } from './ConfiguracionRotacionMultiSector';
+import FormTareaEspecial from './FormTareaEspecial';
 import { Colaborador } from '../api/auth';
 import client from '../api/client';
 import './AdminPanel.css';
+import './FormColaborador.css';
+import './FormSector.css';
+import './FormFranja.css';
+import './CronogramaTareasPanel.css';
 
 type Tab = 'colaboradores' | 'sectores' | 'franjas' | 'tareas-especiales' | 'cronograma-tareas' | 'asignacion' | 'dias-no-laborables' | 'vacaciones' | 'configuracion' | 'incidencias' | 'preferencias';
 type ChipState = 'assigned' | 'available' | 'conflict' | 'disabled';
@@ -91,22 +96,7 @@ export function AdminPanel({ activeTab: propActiveTab = 'colaboradores' }: Admin
   // Tareas Especiales state
   const [tareasLoading, setTareasLoading] = useState(true);
   const [showTareaForm, setShowTareaForm] = useState(false);
-  const [tareaFormError, setTareaFormError] = useState<string | null>(null);
-  const [tareaFormLoading, setTareaFormLoading] = useState(false);
-  const [tareaFormData, setTareaFormData] = useState<any>({
-    nombre: '',
-    dia_semana_aplicable: [],
-    hora_inicio: '09:00',
-    hora_fin: '10:00',
-    frecuencia: 'semanal',
-    inhabilita_almuerzo: false,
-    fecha_inicio_ciclo: '',
-    fija_almuerzo: false,
-    franja_almuerzo_id: null,
-    configuracion_rotacion: null,
-  });
   const [editingTareaId, setEditingTareaId] = useState<number | null>(null);
-  const [editingTareaData, setEditingTareaData] = useState<Partial<any> | null>(null);
 
   // Colaboradores edit state
   const [editingColabId, setEditingColabId] = useState<number | null>(null);
@@ -889,135 +879,145 @@ export function AdminPanel({ activeTab: propActiveTab = 'colaboradores' }: Admin
           </div>
 
           {(showColabForm || editingColabId) && (
-            <form onSubmit={editingColabId ? handleUpdateColaborador : handleCreateColaborador} className="admin-form">
-              {colabFormError && <div className="form-error">{colabFormError}</div>}
-
-              <div className="form-row">
-                <div className="form-group">
-                  <label htmlFor="nombre">Nombre *</label>
-                  <input
-                    type="text"
-                    id="nombre"
-                    name="nombre"
-                    value={editingColabId ? editingColabData?.nombre || '' : colabFormData.nombre}
-                    onChange={editingColabId ? handleEditColabChange : handleColabFormChange}
-                    required
-                    disabled={colabFormLoading}
-                    placeholder="Ej: Juan Pérez"
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="email">Email *</label>
-                  <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    value={editingColabId ? editingColabData?.email || '' : colabFormData.email}
-                    onChange={editingColabId ? handleEditColabChange : handleColabFormChange}
-                    required={!editingColabId}
-                    disabled={!!editingColabId || colabFormLoading}
-                    placeholder="Ej: juan@example.com"
-                  />
-                </div>
+            <div className="admin-form-card">
+              <div className="admin-form-header">
+                <h3 className="admin-form-title">
+                  {editingColabId ? 'Editar Colaborador' : 'Nuevo Colaborador'}
+                </h3>
+                <p className="admin-form-subtitle">Completa los campos para {editingColabId ? 'actualizar' : 'crear'} un colaborador</p>
               </div>
+              <div className="admin-form-body">
+                <form onSubmit={editingColabId ? handleUpdateColaborador : handleCreateColaborador}>
+                  {colabFormError && <div className="form-error">{colabFormError}</div>}
 
-              <div className="form-row">
-                <div className="form-group">
-                  <label htmlFor="sector_id">Sector *</label>
-                  <select
-                    id="sector_id"
-                    name="sector_id"
-                    value={editingColabId ? editingColabData?.sector_id || '' : colabFormData.sector_id}
-                    onChange={editingColabId ? handleEditColabChange : handleColabFormChange}
-                    required
-                    disabled={colabFormLoading || sectoresLoading}
-                  >
-                    <option value="">-- Seleccionar sector --</option>
-                    {sectores.map((s) => (
-                      <option key={s.id} value={s.id}>
-                        {s.nombre}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label htmlFor="nombre">Nombre *</label>
+                      <input
+                        type="text"
+                        id="nombre"
+                        name="nombre"
+                        value={editingColabId ? editingColabData?.nombre || '' : colabFormData.nombre}
+                        onChange={editingColabId ? handleEditColabChange : handleColabFormChange}
+                        required
+                        disabled={colabFormLoading}
+                        placeholder="Ej: Juan Pérez"
+                      />
+                    </div>
 
-                <div className="form-group">
-                  <label htmlFor="rol">Rol</label>
-                  <select
-                    id="rol"
-                    name="rol"
-                    value={editingColabId ? editingColabData?.rol || '' : colabFormData.rol}
-                    onChange={editingColabId ? handleEditColabChange : handleColabFormChange}
-                    disabled={colabFormLoading}
-                  >
-                    <option value="usuario">Usuario</option>
-                    <option value="admin">Admin</option>
-                  </select>
-                </div>
+                    <div className="form-group">
+                      <label htmlFor="email">Email *</label>
+                      <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        value={editingColabId ? editingColabData?.email || '' : colabFormData.email}
+                        onChange={editingColabId ? handleEditColabChange : handleColabFormChange}
+                        required={!editingColabId}
+                        disabled={!!editingColabId || colabFormLoading}
+                        placeholder="Ej: juan@example.com"
+                      />
+                    </div>
+                  </div>
 
-                <div className="form-group">
-                  <label htmlFor="estado_atencion">Estado</label>
-                  <select
-                    id="estado_atencion"
-                    name="estado_atencion"
-                    value={editingColabId ? editingColabData?.estado_atencion || '' : colabFormData.estado_atencion}
-                    onChange={editingColabId ? handleEditColabChange : handleColabFormChange}
-                    disabled={colabFormLoading}
-                  >
-                    <option value="activo">Activo</option>
-                    <option value="desafectado">Desafectado</option>
-                  </select>
-                </div>
+                  <div className="form-row form-row--3col">
+                    <div className="form-group">
+                      <label htmlFor="sector_id">Sector *</label>
+                      <select
+                        id="sector_id"
+                        name="sector_id"
+                        value={editingColabId ? editingColabData?.sector_id || '' : colabFormData.sector_id}
+                        onChange={editingColabId ? handleEditColabChange : handleColabFormChange}
+                        required
+                        disabled={colabFormLoading || sectoresLoading}
+                      >
+                        <option value="">-- Seleccionar sector --</option>
+                        {sectores.map((s) => (
+                          <option key={s.id} value={s.id}>
+                            {s.nombre}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="form-group">
+                      <label htmlFor="rol">Rol</label>
+                      <select
+                        id="rol"
+                        name="rol"
+                        value={editingColabId ? editingColabData?.rol || '' : colabFormData.rol}
+                        onChange={editingColabId ? handleEditColabChange : handleColabFormChange}
+                        disabled={colabFormLoading}
+                      >
+                        <option value="usuario">Usuario</option>
+                        <option value="admin">Admin</option>
+                      </select>
+                    </div>
+
+                    <div className="form-group">
+                      <label htmlFor="estado_atencion">Estado</label>
+                      <select
+                        id="estado_atencion"
+                        name="estado_atencion"
+                        value={editingColabId ? editingColabData?.estado_atencion || '' : colabFormData.estado_atencion}
+                        onChange={editingColabId ? handleEditColabChange : handleColabFormChange}
+                        disabled={colabFormLoading}
+                      >
+                        <option value="activo">Activo</option>
+                        <option value="desafectado">Desafectado</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="form-row form-row--full">
+                    <fieldset>
+                      <legend>Tareas Especiales Habilitadas</legend>
+                      {tareasEspeciales.length === 0 ? (
+                        <p style={{ fontSize: '0.9em', color: '#666' }}>No hay tareas especiales disponibles</p>
+                      ) : (
+                        tareasEspeciales.map((tarea) => {
+                          const tareaIds = editingColabId ? (editingColabData?.tarea_tipo_ids || []) : (colabFormData.tarea_tipo_ids || []);
+                          return (
+                            <div key={tarea.id} className="form-group checkbox">
+                              <label htmlFor={`tarea_tipo_${tarea.id}`}>
+                                <input
+                                  type="checkbox"
+                                  id={`tarea_tipo_${tarea.id}`}
+                                  name={`tarea_tipo_${tarea.id}`}
+                                  checked={tareaIds.includes(tarea.id)}
+                                  onChange={editingColabId ? handleEditColabChange : handleColabFormChange}
+                                  disabled={colabFormLoading}
+                                />
+                                {tarea.nombre}
+                              </label>
+                            </div>
+                          );
+                        })
+                      )}
+                    </fieldset>
+                  </div>
+
+                  <div className="admin-form-actions">
+                    <button
+                      type="button"
+                      className="btn btn-secondary"
+                      onClick={() => {
+                        setShowColabForm(false);
+                        setEditingColabId(null);
+                        setEditingColabData(null);
+                        setColabFormError(null);
+                      }}
+                      disabled={colabFormLoading}
+                    >
+                      Cancelar
+                    </button>
+                    <button type="submit" className="btn btn-primary" disabled={colabFormLoading}>
+                      {colabFormLoading ? 'Guardando...' : editingColabId ? 'Actualizar Colaborador' : 'Crear Colaborador'}
+                    </button>
+                  </div>
+                </form>
               </div>
-
-              <div className="form-row">
-                <fieldset className="form-group">
-                  <legend>Tareas Especiales Habilitadas</legend>
-                  {tareasEspeciales.length === 0 ? (
-                    <p style={{ fontSize: '0.9em', color: '#666' }}>No hay tareas especiales disponibles</p>
-                  ) : (
-                    tareasEspeciales.map((tarea) => {
-                      const tareaIds = editingColabId ? (editingColabData?.tarea_tipo_ids || []) : (colabFormData.tarea_tipo_ids || []);
-                      return (
-                        <div key={tarea.id} className="form-group checkbox">
-                          <label htmlFor={`tarea_tipo_${tarea.id}`}>
-                            <input
-                              type="checkbox"
-                              id={`tarea_tipo_${tarea.id}`}
-                              name={`tarea_tipo_${tarea.id}`}
-                              checked={tareaIds.includes(tarea.id)}
-                              onChange={editingColabId ? handleEditColabChange : handleColabFormChange}
-                              disabled={colabFormLoading}
-                            />
-                            {tarea.nombre}
-                          </label>
-                        </div>
-                      );
-                    })
-                  )}
-                </fieldset>
-              </div>
-
-              <div className="form-actions">
-                <button type="submit" className="btn btn-primary" disabled={colabFormLoading}>
-                  {colabFormLoading ? 'Guardando...' : editingColabId ? 'Actualizar Colaborador' : 'Crear Colaborador'}
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={() => {
-                    setShowColabForm(false);
-                    setEditingColabId(null);
-                    setEditingColabData(null);
-                    setColabFormError(null);
-                  }}
-                  disabled={colabFormLoading}
-                >
-                  Cancelar
-                </button>
-              </div>
-            </form>
+            </div>
           )}
 
           {colabLoading ? (
@@ -1165,112 +1165,125 @@ export function AdminPanel({ activeTab: propActiveTab = 'colaboradores' }: Admin
           </div>
 
           {(showSectorForm || editingSectorId) && (
-            <form onSubmit={editingSectorId ? handleUpdateSector : handleCreateSector} className="admin-form">
-              {sectorFormError && <div className="form-error">{sectorFormError}</div>}
-
-              <div className="form-row">
-                <div className="form-group">
-                  <label htmlFor="nombre">Nombre *</label>
-                  <input
-                    type="text"
-                    id="nombre"
-                    name="nombre"
-                    value={editingSectorId ? editingSectorData?.nombre || '' : sectorFormData.nombre}
-                    onChange={editingSectorId ? handleEditSectorChange : handleSectorFormChange}
-                    required
-                    disabled={sectorFormLoading}
-                    placeholder="Ej: Operativos A"
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="capacidad_maxima">Capacidad Máxima *</label>
-                  <input
-                    type="number"
-                    id="capacidad_maxima"
-                    name="capacidad_maxima"
-                    value={editingSectorId ? editingSectorData?.capacidad_maxima || 10 : sectorFormData.capacidad_maxima}
-                    onChange={editingSectorId ? handleEditSectorChange : handleSectorFormChange}
-                    required
-                    disabled={sectorFormLoading}
-                    min="1"
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="minimo_cobertura">Mínimo de Cobertura *</label>
-                  <input
-                    type="number"
-                    id="minimo_cobertura"
-                    name="minimo_cobertura"
-                    value={editingSectorId ? editingSectorData?.minimo_cobertura || 1 : sectorFormData.minimo_cobertura}
-                    onChange={editingSectorId ? handleEditSectorChange : handleSectorFormChange}
-                    required
-                    disabled={sectorFormLoading}
-                    min="1"
-                  />
-                </div>
+            <div className="admin-form-card">
+              <div className="admin-form-header">
+                <h3 className="admin-form-title">
+                  {editingSectorId ? 'Editar Sector' : 'Nuevo Sector'}
+                </h3>
+                <p className="admin-form-subtitle">Completa los campos para {editingSectorId ? 'actualizar' : 'crear'} un sector</p>
               </div>
+              <div className="admin-form-body">
+                <form onSubmit={editingSectorId ? handleUpdateSector : handleCreateSector}>
+                  {sectorFormError && <div className="form-error">{sectorFormError}</div>}
 
-              <div className="form-row">
-                <div className="form-group">
-                  <label htmlFor="acceso_rol">Acceso al Sistema</label>
-                  <select
-                    id="acceso_rol"
-                    name="acceso_rol"
-                    value={editingSectorId ? editingSectorData?.acceso_rol || 'gestion' : sectorFormData.acceso_rol}
-                    onChange={editingSectorId ? handleEditSectorChange : handleSectorFormChange}
-                    disabled={sectorFormLoading}
-                  >
-                    <option value="gestion">Gestión Completa</option>
-                    <option value="viewer">Solo Lectura</option>
-                  </select>
-                </div>
+                  <div className="form-row form-row--1col">
+                    <div className="form-group">
+                      <label htmlFor="nombre">Nombre *</label>
+                      <input
+                        type="text"
+                        id="nombre"
+                        name="nombre"
+                        value={editingSectorId ? editingSectorData?.nombre || '' : sectorFormData.nombre}
+                        onChange={editingSectorId ? handleEditSectorChange : handleSectorFormChange}
+                        required
+                        disabled={sectorFormLoading}
+                        placeholder="Ej: Operativos A"
+                      />
+                    </div>
+                  </div>
 
-                <div className="form-group">
-                  <label htmlFor="color">Color Identificador</label>
-                  <input
-                    type="color"
-                    id="color"
-                    name="color"
-                    value={editingSectorId ? editingSectorData?.color || '#000000' : sectorFormData.color}
-                    onChange={editingSectorId ? handleEditSectorChange : handleSectorFormChange}
-                    disabled={sectorFormLoading}
-                  />
-                </div>
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label htmlFor="capacidad_maxima">Capacidad Máxima *</label>
+                      <input
+                        type="number"
+                        id="capacidad_maxima"
+                        name="capacidad_maxima"
+                        value={editingSectorId ? editingSectorData?.capacidad_maxima || 10 : sectorFormData.capacidad_maxima}
+                        onChange={editingSectorId ? handleEditSectorChange : handleSectorFormChange}
+                        required
+                        disabled={sectorFormLoading}
+                        min="1"
+                      />
+                    </div>
 
-                <div className="form-group">
-                  <label>
-                    <input
-                      type="checkbox"
-                      name="participa_almuerzo"
-                      checked={editingSectorId ? editingSectorData?.participa_almuerzo || false : sectorFormData.participa_almuerzo}
-                      onChange={editingSectorId ? handleEditSectorChange : handleSectorFormChange}
+                    <div className="form-group">
+                      <label htmlFor="minimo_cobertura">Mínimo de Cobertura *</label>
+                      <input
+                        type="number"
+                        id="minimo_cobertura"
+                        name="minimo_cobertura"
+                        value={editingSectorId ? editingSectorData?.minimo_cobertura || 1 : sectorFormData.minimo_cobertura}
+                        onChange={editingSectorId ? handleEditSectorChange : handleSectorFormChange}
+                        required
+                        disabled={sectorFormLoading}
+                        min="1"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="form-row form-row--3col">
+                    <div className="form-group">
+                      <label htmlFor="acceso_rol">Acceso al Sistema</label>
+                      <select
+                        id="acceso_rol"
+                        name="acceso_rol"
+                        value={editingSectorId ? editingSectorData?.acceso_rol || 'gestion' : sectorFormData.acceso_rol}
+                        onChange={editingSectorId ? handleEditSectorChange : handleSectorFormChange}
+                        disabled={sectorFormLoading}
+                      >
+                        <option value="gestion">Gestión Completa</option>
+                        <option value="viewer">Solo Lectura</option>
+                      </select>
+                    </div>
+
+                    <div className="form-group">
+                      <label htmlFor="color">Color Identificador</label>
+                      <input
+                        type="color"
+                        id="color"
+                        name="color"
+                        value={editingSectorId ? editingSectorData?.color || '#000000' : sectorFormData.color}
+                        onChange={editingSectorId ? handleEditSectorChange : handleSectorFormChange}
+                        disabled={sectorFormLoading}
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '1.5rem' }}>
+                        <input
+                          type="checkbox"
+                          name="participa_almuerzo"
+                          checked={editingSectorId ? editingSectorData?.participa_almuerzo || false : sectorFormData.participa_almuerzo}
+                          onChange={editingSectorId ? handleEditSectorChange : handleSectorFormChange}
+                          disabled={sectorFormLoading}
+                          style={{ width: 'auto', margin: 0 }}
+                        />
+                        Participa en turnos
+                      </label>
+                    </div>
+                  </div>
+
+                  <div className="admin-form-actions">
+                    <button
+                      type="button"
+                      className="btn btn-secondary"
+                      onClick={() => {
+                        setShowSectorForm(false);
+                        setEditingSectorId(null);
+                        setEditingSectorData(null);
+                      }}
                       disabled={sectorFormLoading}
-                    />
-                    Participa en turnos
-                  </label>
-                </div>
+                    >
+                      Cancelar
+                    </button>
+                    <button type="submit" className="btn btn-primary" disabled={sectorFormLoading}>
+                      {sectorFormLoading ? 'Guardando...' : editingSectorId ? 'Actualizar' : 'Crear'}
+                    </button>
+                  </div>
+                </form>
               </div>
-
-              <div className="form-actions">
-                <button type="submit" className="btn btn-success" disabled={sectorFormLoading}>
-                  {sectorFormLoading ? 'Guardando...' : editingSectorId ? 'Actualizar' : 'Crear'}
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={() => {
-                    setShowSectorForm(false);
-                    setEditingSectorId(null);
-                    setEditingSectorData(null);
-                  }}
-                  disabled={sectorFormLoading}
-                >
-                  Cancelar
-                </button>
-              </div>
-            </form>
+            </div>
           )}
 
           {sectoresLoading ? (
@@ -1349,70 +1362,80 @@ export function AdminPanel({ activeTab: propActiveTab = 'colaboradores' }: Admin
           </div>
 
           {(showFranjaForm || editingFranjaId) && (
-            <form onSubmit={editingFranjaId ? handleUpdateFranja : handleCreateFranja} className="admin-form">
-              {franjaFormError && <div className="form-error">{franjaFormError}</div>}
-
-              <div className="form-row">
-                <div className="form-group">
-                  <label htmlFor="orden">Orden *</label>
-                  <input
-                    type="number"
-                    id="orden"
-                    name="orden"
-                    value={editingFranjaId ? editingFranjaData?.orden || 1 : franjaFormData.orden}
-                    onChange={editingFranjaId ? handleEditFranjaChange : handleFranjaFormChange}
-                    required
-                    disabled={franjaFormLoading}
-                    min="1"
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="hora_inicio">Hora Inicio *</label>
-                  <input
-                    type="time"
-                    id="hora_inicio"
-                    name="hora_inicio"
-                    value={editingFranjaId ? editingFranjaData?.hora_inicio || '' : franjaFormData.hora_inicio}
-                    onChange={editingFranjaId ? handleEditFranjaChange : handleFranjaFormChange}
-                    required
-                    disabled={franjaFormLoading}
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="hora_fin">Hora Fin *</label>
-                  <input
-                    type="time"
-                    id="hora_fin"
-                    name="hora_fin"
-                    value={editingFranjaId ? editingFranjaData?.hora_fin || '' : franjaFormData.hora_fin}
-                    onChange={editingFranjaId ? handleEditFranjaChange : handleFranjaFormChange}
-                    required
-                    disabled={franjaFormLoading}
-                  />
-                </div>
+            <div className="admin-form-card">
+              <div className="admin-form-header">
+                <h3 className="admin-form-title">
+                  {editingFranjaId ? 'Editar Franja Horaria' : 'Nueva Franja Horaria'}
+                </h3>
+                <p className="admin-form-subtitle">Completa los campos para {editingFranjaId ? 'actualizar' : 'crear'} una franja horaria</p>
               </div>
+              <div className="admin-form-body">
+                <form onSubmit={editingFranjaId ? handleUpdateFranja : handleCreateFranja}>
+                  {franjaFormError && <div className="form-error">{franjaFormError}</div>}
 
-              <div className="form-actions">
-                <button type="submit" className="btn btn-primary" disabled={franjaFormLoading}>
-                  {franjaFormLoading ? 'Guardando...' : editingFranjaId ? 'Actualizar Franja' : 'Crear Franja'}
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={() => {
-                    setShowFranjaForm(false);
-                    setEditingFranjaId(null);
-                    setEditingFranjaData(null);
-                    setFranjaFormError(null);
-                  }}
-                  disabled={franjaFormLoading}
-                >
-                  Cancelar
-                </button>
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label htmlFor="orden">Orden *</label>
+                      <input
+                        type="number"
+                        id="orden"
+                        name="orden"
+                        value={editingFranjaId ? editingFranjaData?.orden || 1 : franjaFormData.orden}
+                        onChange={editingFranjaId ? handleEditFranjaChange : handleFranjaFormChange}
+                        required
+                        disabled={franjaFormLoading}
+                        min="1"
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label htmlFor="hora_inicio">Hora Inicio *</label>
+                      <input
+                        type="time"
+                        id="hora_inicio"
+                        name="hora_inicio"
+                        value={editingFranjaId ? editingFranjaData?.hora_inicio || '' : franjaFormData.hora_inicio}
+                        onChange={editingFranjaId ? handleEditFranjaChange : handleFranjaFormChange}
+                        required
+                        disabled={franjaFormLoading}
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label htmlFor="hora_fin">Hora Fin *</label>
+                      <input
+                        type="time"
+                        id="hora_fin"
+                        name="hora_fin"
+                        value={editingFranjaId ? editingFranjaData?.hora_fin || '' : franjaFormData.hora_fin}
+                        onChange={editingFranjaId ? handleEditFranjaChange : handleFranjaFormChange}
+                        required
+                        disabled={franjaFormLoading}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="admin-form-actions">
+                    <button
+                      type="button"
+                      className="btn btn-secondary"
+                      onClick={() => {
+                        setShowFranjaForm(false);
+                        setEditingFranjaId(null);
+                        setEditingFranjaData(null);
+                        setFranjaFormError(null);
+                      }}
+                      disabled={franjaFormLoading}
+                    >
+                      Cancelar
+                    </button>
+                    <button type="submit" className="btn btn-primary" disabled={franjaFormLoading}>
+                      {franjaFormLoading ? 'Guardando...' : editingFranjaId ? 'Actualizar Franja' : 'Crear Franja'}
+                    </button>
+                  </div>
+                </form>
               </div>
-            </form>
+            </div>
           )}
 
           {franjasLoading ? (
@@ -1473,189 +1496,32 @@ export function AdminPanel({ activeTab: propActiveTab = 'colaboradores' }: Admin
           </div>
 
           {(showTareaForm || editingTareaId) && (
-            <form onSubmit={editingTareaId ? handleUpdateTarea : handleCreateTarea} className="admin-form">
-              {tareaFormError && <div className="form-error">{tareaFormError}</div>}
-
-              <div className="form-row">
-                <div className="form-group">
-                  <label htmlFor="nombre">Nombre *</label>
-                  <input
-                    type="text"
-                    id="nombre"
-                    name="nombre"
-                    value={editingTareaId ? editingTareaData?.nombre || '' : tareaFormData.nombre}
-                    onChange={editingTareaId ? handleEditTareaChange : handleTareaFormChange}
-                    required
-                    disabled={tareaFormLoading}
-                    placeholder="Ej: Supervisión"
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="hora_inicio">Hora Inicio *</label>
-                  <input
-                    type="time"
-                    id="hora_inicio"
-                    name="hora_inicio"
-                    value={editingTareaId ? editingTareaData?.hora_inicio || '' : tareaFormData.hora_inicio}
-                    onChange={editingTareaId ? handleEditTareaChange : handleTareaFormChange}
-                    required
-                    disabled={tareaFormLoading}
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="hora_fin">Hora Fin *</label>
-                  <input
-                    type="time"
-                    id="hora_fin"
-                    name="hora_fin"
-                    value={editingTareaId ? editingTareaData?.hora_fin || '' : tareaFormData.hora_fin}
-                    onChange={editingTareaId ? handleEditTareaChange : handleTareaFormChange}
-                    required
-                    disabled={tareaFormLoading}
-                  />
-                </div>
-              </div>
-
-              <div className="form-row">
-                <fieldset className="form-group">
-                  <legend>Días Aplicables *</legend>
-                  <div className="dias-checkbox-group">
-                    {['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'].map((dia, idx) => {
-                      const diasArray = editingTareaId
-                        ? (editingTareaData?.dia_semana_aplicable || [])
-                        : (tareaFormData.dia_semana_aplicable || []);
-                      return (
-                        <label key={idx} className="checkbox-inline">
-                          <input
-                            type="checkbox"
-                            name={`dia_${idx}`}
-                            checked={diasArray.includes(idx)}
-                            onChange={editingTareaId ? handleEditTareaChange : handleTareaFormChange}
-                            disabled={tareaFormLoading}
-                          />
-                          {dia}
-                        </label>
-                      );
-                    })}
-                  </div>
-                </fieldset>
-              </div>
-
-              <div className="form-row">
-                <div className="form-group">
-                  <label htmlFor="frecuencia">Frecuencia *</label>
-                  <select
-                    id="frecuencia"
-                    name="frecuencia"
-                    value={editingTareaId ? editingTareaData?.frecuencia || 'semanal' : tareaFormData.frecuencia}
-                    onChange={editingTareaId ? handleEditTareaChange : handleTareaFormChange}
-                    disabled={tareaFormLoading}
-                  >
-                    <option value="semanal">Semanal</option>
-                    <option value="quincenal">Quincenal (Semana por medio)</option>
-                  </select>
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="fecha_inicio_ciclo">Fecha Inicio Ciclo (Para tareas quincenales)</label>
-                  <input
-                    type="date"
-                    id="fecha_inicio_ciclo"
-                    name="fecha_inicio_ciclo"
-                    value={editingTareaId ? editingTareaData?.fecha_inicio_ciclo || '' : tareaFormData.fecha_inicio_ciclo}
-                    onChange={editingTareaId ? handleEditTareaChange : handleTareaFormChange}
-                    disabled={tareaFormLoading}
-                  />
-                </div>
-
-                <div className="form-group" style={{ display: 'flex', alignItems: 'center' }}>
-                  <label htmlFor="inhabilita_almuerzo">
-                    <input
-                      type="checkbox"
-                      id="inhabilita_almuerzo"
-                      name="inhabilita_almuerzo"
-                      checked={editingTareaId ? editingTareaData?.inhabilita_almuerzo || false : tareaFormData.inhabilita_almuerzo}
-                      onChange={editingTareaId ? handleEditTareaChange : handleTareaFormChange}
-                      disabled={tareaFormLoading}
-                    />
-                    Inhabilita turno de almuerzo
-                  </label>
-                </div>
-
-                <div className="form-group" style={{ display: 'flex', alignItems: 'center' }}>
-                  <label htmlFor="fija_almuerzo">
-                    <input
-                      type="checkbox"
-                      id="fija_almuerzo"
-                      name="fija_almuerzo"
-                      checked={editingTareaId ? editingTareaData?.fija_almuerzo || false : tareaFormData.fija_almuerzo}
-                      onChange={editingTareaId ? handleEditTareaChange : handleTareaFormChange}
-                      disabled={tareaFormLoading}
-                    />
-                    Fija turno de almuerzo
-                  </label>
-                </div>
-              </div>
-
-              {(editingTareaId ? editingTareaData?.fija_almuerzo : tareaFormData.fija_almuerzo) && (
-                <div className="form-row">
-                  <div className="form-group">
-                    <label htmlFor="franja_almuerzo_id">Franja de Almuerzo *</label>
-                    <select
-                      id="franja_almuerzo_id"
-                      name="franja_almuerzo_id"
-                      value={editingTareaId ? editingTareaData?.franja_almuerzo_id || '' : tareaFormData.franja_almuerzo_id || ''}
-                      onChange={editingTareaId ? handleEditTareaChange : handleTareaFormChange}
-                      disabled={tareaFormLoading || franjasLoading}
-                      required={editingTareaId ? editingTareaData?.fija_almuerzo : tareaFormData.fija_almuerzo}
-                    >
-                      <option value="">-- Seleccionar franja --</option>
-                      {franjas.map((franja) => (
-                        <option key={franja.id} value={franja.id}>
-                          {franja.hora_inicio} - {franja.hora_fin}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-              )}
-
-              <div className="form-row">
-                <ConfiguracionRotacionMultiSector
-                  valor={editingTareaId ? editingTareaData?.configuracion_rotacion : tareaFormData.configuracion_rotacion}
-                  diasAplicables={editingTareaId ? (editingTareaData?.dia_semana_aplicable || []) : tareaFormData.dia_semana_aplicable}
-                  onChange={(config) => {
+            <div style={{ backgroundColor: '#f5f5f5', padding: '20px', borderRadius: '8px', marginBottom: '24px' }}>
+              <FormTareaEspecial
+                sectores={sectores}
+                initialData={editingTareaId ? tareasEspeciales.find((t) => t.id === editingTareaId) : undefined}
+                onSave={async (data) => {
+                  try {
                     if (editingTareaId) {
-                      setEditingTareaData({ ...editingTareaData, configuracion_rotacion: config });
+                      await tareasEspecialesApi.updateTipo(editingTareaId, data);
                     } else {
-                      setTareaFormData({ ...tareaFormData, configuracion_rotacion: config });
+                      await tareasEspecialesApi.createTipo(data);
                     }
-                  }}
-                  disabled={tareaFormLoading}
-                />
-              </div>
-
-              <div className="form-actions">
-                <button type="submit" className="btn btn-primary" disabled={tareaFormLoading}>
-                  {tareaFormLoading ? 'Guardando...' : editingTareaId ? 'Actualizar Tarea' : 'Crear Tarea'}
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={() => {
                     setShowTareaForm(false);
                     setEditingTareaId(null);
-                    setEditingTareaData(null);
-                    setTareaFormError(null);
-                  }}
-                  disabled={tareaFormLoading}
-                >
-                  Cancelar
-                </button>
-              </div>
-            </form>
+                    setTareasLoading(true);
+                    const res = await tareasEspecialesApi.listTipos();
+                    setTareasEspeciales(res.data);
+                  } catch (err) {
+                    throw err;
+                  }
+                }}
+                onCancel={() => {
+                  setShowTareaForm(false);
+                  setEditingTareaId(null);
+                }}
+              />
+            </div>
           )}
 
           {tareasLoading ? (

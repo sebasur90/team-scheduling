@@ -106,59 +106,68 @@ export const CronogramaTareasPanel: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6 p-6">
-      {/* Header */}
-      <div className="flex justify-between items-center border-b border-gray-200 pb-4">
-        <h2 className="text-2xl font-bold text-gray-900">Cronograma de Tareas</h2>
-        <button
-          onClick={() => setShowGenerador(!showGenerador)}
-          className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition disabled:opacity-50"
-          disabled={isLoading}
-        >
-          {showGenerador ? 'Cerrar' : '+ Generar Cronograma'}
-        </button>
+    <div className="cronograma-panel">
+      <div className="cronograma-header">
+        <h2 className="cronograma-header__title">Cronograma de Tareas</h2>
+        <div className="cronograma-header__actions">
+          <button
+            onClick={() => setShowGenerador(!showGenerador)}
+            className="btn-generar"
+            disabled={isLoading}
+          >
+            {showGenerador ? 'Cerrar' : '+ Generar Cronograma'}
+          </button>
+        </div>
       </div>
 
-      {/* Generador */}
       {showGenerador && (
-        <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 space-y-4">
-          <h3 className="font-semibold text-gray-900">Generar Cronograma</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Fecha Inicio</label>
+        <div className="cronograma-controls">
+          <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '0.95rem', fontWeight: 600, color: '#333' }}>
+            Generar Cronograma
+          </h3>
+          <div className="cronograma-controls__row">
+            <div className="cronograma-controls__group">
+              <label className="cronograma-controls__label">Fecha Inicio</label>
               <input
                 type="date"
                 value={fechaInicio}
                 onChange={(e) => setFechaInicio(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="cronograma-controls__input"
               />
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Fecha Fin</label>
+            <div className="cronograma-controls__group">
+              <label className="cronograma-controls__label">Fecha Fin</label>
               <input
                 type="date"
                 value={fechaFin}
                 onChange={(e) => setFechaFin(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="cronograma-controls__input"
               />
             </div>
+            <div style={{ display: 'flex', alignItems: 'flex-end' }}>
+              <button
+                onClick={handleGenerarCronograma}
+                disabled={isLoading}
+                className="btn-generar"
+                style={{ width: '100%' }}
+              >
+                {isLoading ? 'Generando...' : 'Generar'}
+              </button>
+            </div>
           </div>
-          <button
-            onClick={handleGenerarCronograma}
-            disabled={isLoading}
-            className="w-full px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition disabled:opacity-50"
-          >
-            {isLoading ? 'Generando...' : 'Generar'}
-          </button>
 
           {generationResult && (
-            <div className="bg-white border border-green-200 rounded-lg p-3 text-sm space-y-1">
-              <p className="text-green-800">✓ Asignaciones creadas: <strong>{generationResult.asignaciones_creadas}</strong></p>
-              <p className="text-gray-700">Asignaciones saltadas: {generationResult.asignaciones_saltadas}</p>
+            <div className="cronograma-result">
+              <p className="cronograma-result__message">
+                ✓ Asignaciones creadas: <strong>{generationResult.asignaciones_creadas}</strong>
+              </p>
+              <p className="cronograma-result__detail">
+                Asignaciones saltadas: {generationResult.asignaciones_saltadas}
+              </p>
               {generationResult.advertencias.length > 0 && (
-                <div className="mt-2 text-amber-700 space-y-1">
+                <div className="cronograma-result__warning">
                   {generationResult.advertencias.map((adv: string, i: number) => (
-                    <p key={i}>⚠️ {adv}</p>
+                    <div key={i}>⚠️ {adv}</div>
                   ))}
                 </div>
               )}
@@ -167,69 +176,78 @@ export const CronogramaTareasPanel: React.FC = () => {
         </div>
       )}
 
-      {/* Cronograma Table */}
       {isLoading && !showGenerador ? (
-        <div className="text-center text-gray-500 py-8">Cargando...</div>
+        <div className="cronograma-loading">Cargando...</div>
       ) : fechasOrdenadas.length === 0 ? (
-        <div className="text-center text-gray-500 py-8">Sin asignaciones en el rango seleccionado</div>
+        <div className="cronograma-empty">Sin asignaciones en el rango seleccionado</div>
       ) : (
-        <div className="overflow-x-auto border border-gray-200 rounded-lg">
-          <table className="w-full">
-            <thead className="bg-gray-100 border-b border-gray-200">
-              <tr>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">Fecha</th>
-                {tipos.map((tipo) => (
-                  <th key={tipo.id} className="px-4 py-3 text-left text-sm font-semibold text-gray-900">
-                    {tipo.nombre}
-                    {tipo.inhabilita_almuerzo && <span className="text-xs text-red-600 ml-1">*Sin almuerzo</span>}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {fechasOrdenadas.map((fecha) => {
-                const asignacionesDia = cronogramaByFecha[fecha]
-                const fechaObj = new Date(fecha + 'T00:00:00')
-                const fechaStr = fechaObj.toLocaleDateString('es-ES', {
-                  weekday: 'short',
-                  year: 'numeric',
-                  month: 'short',
-                  day: 'numeric',
-                })
+        <div className="cronograma-list">
+          {fechasOrdenadas.map((fecha) => {
+            const asignacionesDia = cronogramaByFecha[fecha]
+            const fechaObj = new Date(fecha + 'T00:00:00')
+            const fechaStr = fechaObj.toLocaleDateString('es-ES', {
+              weekday: 'short',
+              year: 'numeric',
+              month: 'short',
+              day: 'numeric',
+            })
 
-                return (
-                  <tr key={fecha} className="border-b border-gray-100 hover:bg-gray-50">
-                    <td className="px-4 py-3 text-sm font-medium text-gray-900">{fechaStr}</td>
-                    {tipos.map((tipo) => {
-                      const asignacion = asignacionesDia.find((a) => a.tarea_especial_tipo_id === tipo.id)
-                      return (
-                        <td key={`${fecha}-${tipo.id}`} className="px-4 py-3 text-sm">
-                          {asignacion ? (
-                            <div className="flex items-center justify-between gap-2">
-                              <span className="text-gray-900">{asignacion.colaborador_nombre}</span>
-                              <button
-                                onClick={() => {
-                                  const nuevoId = prompt(`Cambiar a colaborador ID:`)
-                                  if (nuevoId) {
-                                    handleSwapAsignacion(asignacion.id, parseInt(nuevoId))
-                                  }
-                                }}
-                                className="text-indigo-600 hover:text-indigo-800 text-xs"
-                              >
-                                ✎
-                              </button>
-                            </div>
-                          ) : (
-                            <span className="text-gray-400">—</span>
+            return (
+              <div key={fecha}>
+                <div style={{ fontSize: '0.95rem', fontWeight: 600, color: '#333', marginBottom: '0.75rem', marginTop: '1rem' }}>
+                  {fechaStr}
+                </div>
+                {tipos.map((tipo) => {
+                  const asignacion = asignacionesDia.find((a) => a.tarea_especial_tipo_id === tipo.id)
+                  return (
+                    <div key={`${fecha}-${tipo.id}`} className="cronograma-item-card">
+                      <div className="cronograma-item-card__header">
+                        <div>
+                          <h4 className="cronograma-item-card__title">{tipo.nombre}</h4>
+                          {tipo.inhabilita_almuerzo && (
+                            <span className="cronograma-item-card__chip" style={{ marginTop: '0.5rem' }}>
+                              Sin almuerzo
+                            </span>
                           )}
-                        </td>
-                      )
-                    })}
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
+                        </div>
+                      </div>
+                      <div className="cronograma-item-card__info">
+                        {asignacion ? (
+                          <>
+                            <div className="cronograma-item-card__person">
+                              <span>{asignacion.colaborador_nombre}</span>
+                            </div>
+                            <button
+                              onClick={() => {
+                                const nuevoId = prompt(`Cambiar a colaborador ID:`)
+                                if (nuevoId) {
+                                  handleSwapAsignacion(asignacion.id, parseInt(nuevoId))
+                                }
+                              }}
+                              style={{
+                                background: 'none',
+                                border: 'none',
+                                color: '#7c3aed',
+                                cursor: 'pointer',
+                                fontSize: '0.9rem',
+                                textDecoration: 'underline',
+                                padding: 0,
+                                textAlign: 'left',
+                              }}
+                            >
+                              ✎ Cambiar asignación
+                            </button>
+                          </>
+                        ) : (
+                          <span style={{ color: '#999' }}>—</span>
+                        )}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            )
+          })}
         </div>
       )}
     </div>
