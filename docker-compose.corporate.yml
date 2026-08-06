@@ -1,0 +1,26 @@
+version: '3.8'
+
+# Overrides for corporate network (smoa7001lx)
+services:
+  firebase-emulator:
+    build:
+      args:
+        HTTP_PROXY: ${HTTP_PROXY:-}
+        HTTPS_PROXY: ${HTTPS_PROXY:-}
+        NO_PROXY: ${NO_PROXY:-}
+    environment:
+      - HTTP_PROXY=${HTTP_PROXY:-}
+      - HTTPS_PROXY=${HTTPS_PROXY:-}
+      - NO_PROXY=${NO_PROXY:-}
+
+  backend:
+    environment:
+      - HTTP_PROXY=${HTTP_PROXY:-}
+      - HTTPS_PROXY=${HTTPS_PROXY:-}
+      - NO_PROXY=localhost,127.0.0.1,firebase-emulator,${NO_PROXY:-}
+      - no_proxy=localhost,127.0.0.1,firebase-emulator,${NO_PROXY:-}
+
+  frontend:
+    environment:
+      - NO_PROXY=localhost,127.0.0.1,firebase-emulator,backend,${NO_PROXY:-}
+      - no_proxy=localhost,127.0.0.1,firebase-emulator,backend,${NO_PROXY:-}

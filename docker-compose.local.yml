@@ -1,0 +1,4 @@
+version: '3.8'
+
+# Overrides for local development (no proxies)
+# Use: docker-compose -f docker-compose.yml -f docker-compose.local.yml up

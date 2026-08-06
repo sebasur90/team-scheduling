@@ -2,9 +2,9 @@ version: '3.8'
 
 services:
   firebase-emulator:
-    image: node:18
-    working_dir: /firebase
-    command: sh -c "apt-get update && apt-get install -y openjdk-17-jre-headless curl && npm install -g firebase-tools && firebase emulators:start --only firestore"
+    build:
+      context: .
+      dockerfile: Dockerfile.firebase
     environment:
       - FIREBASE_EMULATOR_FIRESTORE_HOST=0.0.0.0:8080
     ports:
@@ -34,9 +34,6 @@ services:
       - ./backend:/app
       - ./almuerzos.db:/app/almuerzos.db
     working_dir: /app
-    environment:
-      - NO_PROXY=localhost,127.0.0.1,firebase-emulator
-      - no_proxy=localhost,127.0.0.1,firebase-emulator
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 
   frontend:
@@ -54,5 +51,3 @@ services:
       - /app/node_modules
     environment:
       - VITE_API_URL=/api
-      - NO_PROXY=localhost,127.0.0.1,firebase-emulator,backend
-      - no_proxy=localhost,127.0.0.1,firebase-emulator,backend
