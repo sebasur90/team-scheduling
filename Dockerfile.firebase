@@ -1,0 +1,20 @@
+FROM node:18
+
+ARG HTTP_PROXY
+ARG HTTPS_PROXY
+ARG NO_PROXY
+
+ENV HTTP_PROXY=${HTTP_PROXY}
+ENV HTTPS_PROXY=${HTTPS_PROXY}
+ENV NO_PROXY=${NO_PROXY}
+
+WORKDIR /firebase
+
+RUN apt-get update && apt-get install -y openjdk-17-jre-headless && rm -rf /var/lib/apt/lists/*
+
+RUN npm install -g firebase-tools
+
+COPY firebase.json .
+COPY firestore.rules .
+
+CMD ["firebase", "emulators:start", "--only", "firestore"]
