@@ -196,7 +196,14 @@ def load_tareas_especiales(db: Session, data: dict):
             nombre=tarea_data["nombre"],
             dia_semana_aplicable=dias_semana,
             hora_inicio=datetime.strptime(tarea_data["hora_inicio"], "%H:%M").time(),
-            hora_fin=datetime.strptime(tarea_data["hora_fin"], "%H:%M").time()
+            hora_fin=datetime.strptime(tarea_data["hora_fin"], "%H:%M").time(),
+            frecuencia=tarea_data.get("frecuencia", "semanal"),
+            inhabilita_almuerzo=tarea_data.get("inhabilita_almuerzo", False),
+            fecha_inicio_ciclo=None,
+            fija_almuerzo=tarea_data.get("fija_almuerzo", False),
+            franja_almuerzo_id=None,
+            minimo_personas_dia=tarea_data.get("minimo_personas_dia", 1),
+            politica_minimo=tarea_data.get("politica_minimo", "alertar")
         )
         db.add(tarea)
         db.flush()
