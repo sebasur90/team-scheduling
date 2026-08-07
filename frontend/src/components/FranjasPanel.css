@@ -1,0 +1,6 @@
+/*
+ * Estilos específicos de FranjasPanel.
+ * El grueso del estilo (admin-tab-content, admin-table, tarjetas mobile,
+ * admin-form-card) vive en AdminPanel.css y FormFranja.css, importados
+ * junto a este archivo desde FranjasPanel.tsx.
+ */

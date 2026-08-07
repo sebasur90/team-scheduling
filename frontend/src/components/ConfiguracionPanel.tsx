@@ -1,44 +1,20 @@
-import React, { useState } from 'react'
-import { ConfiguracionCobertura } from './ConfiguracionCobertura'
-import { NotificacionesConfig } from './NotificacionesConfig'
-import './ConfiguracionPanel.css'
-
-type ConfigTab = 'cobertura' | 'notificaciones'
+import React from 'react';
+import { ConfiguracionCobertura } from './ConfiguracionCobertura';
+import { NotificacionesConfig } from './NotificacionesConfig';
+import './AdminPanel.css';
+import './ConfiguracionPanel.css';
 
 export const ConfiguracionPanel: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<ConfigTab>('cobertura')
-
   return (
-    <div className="configuracion-panel">
-      <h2>Configuración</h2>
-
-      <div className="config-tabs">
-        <button
-          className={`tab-button ${activeTab === 'cobertura' ? 'active' : ''}`}
-          onClick={() => setActiveTab('cobertura')}
-        >
-          📊 Mínimo de Cobertura
-        </button>
-        <button
-          className={`tab-button ${activeTab === 'notificaciones' ? 'active' : ''}`}
-          onClick={() => setActiveTab('notificaciones')}
-        >
-          🔔 Notificaciones
-        </button>
+    <div className="admin-tab-content">
+      <div style={{ marginBottom: '40px' }}>
+        <h3>Configuración de Cobertura</h3>
+        <ConfiguracionCobertura />
       </div>
-
-      <div className="config-content">
-        {activeTab === 'cobertura' && (
-          <div className="config-section">
-            <ConfiguracionCobertura />
-          </div>
-        )}
-        {activeTab === 'notificaciones' && (
-          <div className="config-section">
-            <NotificacionesConfig />
-          </div>
-        )}
+      <div style={{ borderTop: '1px solid #ddd', paddingTop: '40px' }}>
+        <h3>Configuración de Notificaciones</h3>
+        <NotificacionesConfig />
       </div>
     </div>
-  )
-}
+  );
+};

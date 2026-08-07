@@ -8,11 +8,60 @@ import { ReportesPanel } from './ReportesPanel'
 import { useAdminAlerts } from '../hooks/useAdminAlerts'
 import { AdminTopBar } from './AdminTopBar'
 import { AdminBottomNav, type AdminTabType } from './AdminBottomNav'
+import { AdminMasPanel, type AdminSubScreen } from './AdminMasPanel'
+import { SectoresPanel } from './SectoresPanel'
+import { FranjasPanel } from './FranjasPanel'
+import { TareasEspecialesPanel } from './TareasEspecialesPanel'
+import { CronogramaTareasScreen } from './CronogramaTareasScreen'
+import { AsignacionTurnosPanel } from './AsignacionTurnosPanel'
+import { DiasNoLaborablesPanel } from './DiasNoLaborablesPanel'
+import { ConfiguracionPanel } from './ConfiguracionPanel'
+import { IncidenciasPanel } from './IncidenciasPanel'
+
+const ADMIN_SUB_SCREEN_LABELS: Record<AdminSubScreen, string> = {
+  'sectores': 'Sectores',
+  'franjas': 'Franjas',
+  'tareas-especiales': 'Tareas Especiales',
+  'cronograma-tareas': 'Cronograma de Tareas',
+  'asignacion-turnos': 'Asignación de Turnos',
+  'dias-no-laborables': 'Días No Laborables',
+  'configuracion': 'Configuración',
+  'incidencias': 'Incidencias',
+}
 
 export const AdminDashboard: React.FC = () => {
   const { user, logout } = useAuthContext()
   const [activeTab, setActiveTab] = useState<AdminTabType>('resumen')
+  const [adminSubScreen, setAdminSubScreen] = useState<AdminSubScreen | null>(null)
   const { alerts } = useAdminAlerts(true)
+
+  const handleTabChange = (tab: AdminTabType) => {
+    setAdminSubScreen(null)
+    setActiveTab(tab)
+  }
+
+  const renderAdminSubScreen = (screen: AdminSubScreen) => {
+    switch (screen) {
+      case 'sectores':
+        return <SectoresPanel />
+      case 'franjas':
+        return <FranjasPanel />
+      case 'tareas-especiales':
+        return <TareasEspecialesPanel />
+      case 'cronograma-tareas':
+        return <CronogramaTareasScreen />
+      case 'asignacion-turnos':
+        return <AsignacionTurnosPanel />
+      case 'dias-no-laborables':
+        return <DiasNoLaborablesPanel />
+      case 'configuracion':
+        return <ConfiguracionPanel />
+      case 'incidencias':
+        return <IncidenciasPanel />
+      default:
+        return null
+    }
+  }
 
   const totalAlerts = (alerts?.swaps_pendientes?.count || 0) + (alerts?.cobertura_en_riesgo?.count || 0)
 
@@ -201,6 +250,30 @@ export const AdminDashboard: React.FC = () => {
           </div>
         )
 
+      case 'admin-mas':
+        if (!adminSubScreen) {
+          return (
+            <div className="bg-white p-6 md:p-8" style={{ borderRadius: '20px', border: '1.5px solid rgba(0,0,0,.05)', boxShadow: '0 2px 12px rgba(0,0,0,.06)' }}>
+              <AdminMasPanel onSelect={setAdminSubScreen} />
+            </div>
+          )
+        }
+        return (
+          <div className="bg-white p-6 md:p-8" style={{ borderRadius: '20px', border: '1.5px solid rgba(0,0,0,.05)', boxShadow: '0 2px 12px rgba(0,0,0,.06)' }}>
+            <button
+              onClick={() => setAdminSubScreen(null)}
+              className="mb-4 flex items-center gap-1 text-sm font-semibold transition"
+              style={{ color: '#7c3aed' }}
+            >
+              ‹ Volver
+            </button>
+            <h2 className="text-2xl font-bold text-slate-900 mb-6" style={{ fontWeight: 700 }}>
+              {ADMIN_SUB_SCREEN_LABELS[adminSubScreen]}
+            </h2>
+            {renderAdminSubScreen(adminSubScreen)}
+          </div>
+        )
+
       default:
         return null
     }
@@ -224,7 +297,7 @@ export const AdminDashboard: React.FC = () => {
 
       <AdminBottomNav
         activeTab={activeTab}
-        onTabChange={setActiveTab}
+        onTabChange={handleTabChange}
       />
     </div>
   )

@@ -1,6 +1,6 @@
 import React from 'react'
 
-export type AdminTabType = 'resumen' | 'colaboradores' | 'turnos' | 'vacaciones' | 'preferencias' | 'notificaciones' | 'reportes'
+export type AdminTabType = 'resumen' | 'colaboradores' | 'turnos' | 'vacaciones' | 'preferencias' | 'notificaciones' | 'reportes' | 'admin-mas'
 
 interface AdminBottomNavProps {
   activeTab: AdminTabType
@@ -66,6 +66,15 @@ const NotificacionesIcon = ({ active }: { active: boolean }) => (
   </svg>
 )
 
+const MasIcon = ({ active }: { active: boolean }) => (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={active ? '#fff' : '#9ca3af'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="3" width="7" height="7" />
+    <rect x="14" y="3" width="7" height="7" />
+    <rect x="3" y="14" width="7" height="7" />
+    <rect x="14" y="14" width="7" height="7" />
+  </svg>
+)
+
 export const AdminBottomNav: React.FC<AdminBottomNavProps> = ({
   activeTab,
   onTabChange,
@@ -78,6 +87,7 @@ export const AdminBottomNav: React.FC<AdminBottomNavProps> = ({
     { id: 'preferencias', label: 'Pref', Icon: PreferenciasIcon },
     { id: 'reportes', label: 'Report', Icon: ReportesIcon },
     { id: 'notificaciones', label: 'Notif', Icon: NotificacionesIcon },
+    { id: 'admin-mas', label: 'Más', Icon: MasIcon },
   ]
 
   return (
