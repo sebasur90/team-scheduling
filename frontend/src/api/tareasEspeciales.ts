@@ -39,6 +39,7 @@ export interface TareaEspecialTipo {
   fija_almuerzo: boolean
   franja_almuerzo_id: number | null
   minimo_personas_dia: number
+  maximo_personas_dia: number | null
   politica_minimo: 'alertar' | 'bloquear'
   configuracion_rotacion: ConfiguracionRotacionMultiSector | null
   cuotas_equipo: TareaEquipoCuota[]
@@ -57,6 +58,7 @@ export interface TareaEspecialTipoCreate {
   fija_almuerzo?: boolean
   franja_almuerzo_id?: number | null
   minimo_personas_dia?: number
+  maximo_personas_dia?: number | null
   politica_minimo?: 'alertar' | 'bloquear'
   configuracion_rotacion?: ConfiguracionRotacionMultiSector | null
   cuotas?: TareaEquipoCuotaCreate[]
@@ -73,6 +75,7 @@ export interface TareaEspecialTipoUpdate {
   fija_almuerzo?: boolean
   franja_almuerzo_id?: number | null
   minimo_personas_dia?: number
+  maximo_personas_dia?: number | null
   politica_minimo?: 'alertar' | 'bloquear'
   configuracion_rotacion?: ConfiguracionRotacionMultiSector | null
   cuotas?: TareaEquipoCuotaCreate[]

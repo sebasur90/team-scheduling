@@ -18,6 +18,7 @@ class TareaEspecialTipo(BaseModel):
     franja_almuerzo_id = Column(Integer, ForeignKey("franja_horaria.id"), nullable=True)
     configuracion_rotacion = Column(JSON, nullable=True)
     minimo_personas_dia = Column(Integer, nullable=False, default=1)
+    maximo_personas_dia = Column(Integer, nullable=True)
     politica_minimo = Column(String(10), nullable=False, default='alertar')
 
     asignaciones = relationship("TareaEspecialAsignacion", back_populates="tipo", cascade="all, delete-orphan")

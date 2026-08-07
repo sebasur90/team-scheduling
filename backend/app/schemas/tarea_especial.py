@@ -60,12 +60,19 @@ class TareaEspecialTipoBase(BaseModel):
     fija_almuerzo: bool = False
     franja_almuerzo_id: Optional[int] = None
     minimo_personas_dia: int = 1
+    maximo_personas_dia: Optional[int] = None
     politica_minimo: Literal["alertar", "bloquear"] = "alertar"
 
 
 class TareaEspecialTipoCreate(TareaEspecialTipoBase):
     configuracion_rotacion: Optional[ConfiguracionRotacionMultiSector] = None
     cuotas: Optional[List["TareaEquipoCuotaCreate"]] = None
+
+    @model_validator(mode='after')
+    def validar_minimo_maximo(self):
+        if self.maximo_personas_dia is not None and self.maximo_personas_dia < self.minimo_personas_dia:
+            raise ValueError("maximo_personas_dia debe ser mayor o igual a minimo_personas_dia")
+        return self
 
     @model_validator(mode='after')
     def validar_efecto_almuerzo(self):
@@ -124,6 +131,7 @@ class TareaEspecialTipoUpdate(BaseModel):
     fija_almuerzo: Optional[bool] = None
     franja_almuerzo_id: Optional[int] = None
     minimo_personas_dia: Optional[int] = None
+    maximo_personas_dia: Optional[int] = None
     politica_minimo: Optional[Literal["alertar", "bloquear"]] = None
     configuracion_rotacion: Optional[ConfiguracionRotacionMultiSector] = None
     cuotas: Optional[List["TareaEquipoCuotaCreate"]] = None

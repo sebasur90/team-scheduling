@@ -59,6 +59,7 @@ def create_tipo(
         fija_almuerzo=data.fija_almuerzo,
         franja_almuerzo_id=data.franja_almuerzo_id,
         minimo_personas_dia=data.minimo_personas_dia,
+        maximo_personas_dia=data.maximo_personas_dia,
         politica_minimo=data.politica_minimo,
         configuracion_rotacion=(
             data.configuracion_rotacion.model_dump()
@@ -131,6 +132,8 @@ def update_tipo(
         tipo.franja_almuerzo_id = data.franja_almuerzo_id
     if data.minimo_personas_dia is not None:
         tipo.minimo_personas_dia = data.minimo_personas_dia
+    if data.maximo_personas_dia is not None:
+        tipo.maximo_personas_dia = data.maximo_personas_dia
     if data.politica_minimo is not None:
         tipo.politica_minimo = data.politica_minimo
 

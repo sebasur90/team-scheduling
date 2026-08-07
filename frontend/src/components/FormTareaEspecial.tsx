@@ -27,6 +27,7 @@ interface WizardState {
   hora_inicio: string
   hora_fin: string
   minimo_personas_dia: number
+  maximo_personas_dia: number | null
   frecuencia: 'semanal' | 'quincenal'
   fecha_inicio_ciclo: string | null
   cuotas: TareaEquipoCuotaCreate[]
@@ -55,6 +56,7 @@ export default function FormTareaEspecial({
     hora_inicio: initialData?.hora_inicio || '09:00',
     hora_fin: initialData?.hora_fin || '17:00',
     minimo_personas_dia: initialData?.minimo_personas_dia || 1,
+    maximo_personas_dia: initialData?.maximo_personas_dia || null,
     frecuencia: (initialData?.frecuencia as 'semanal' | 'quincenal') || 'semanal',
     fecha_inicio_ciclo: initialData?.fecha_inicio_ciclo || null,
     cuotas: initialData?.cuotas_equipo || [],
@@ -139,6 +141,7 @@ export default function FormTareaEspecial({
         fija_almuerzo: form.fija_almuerzo,
         franja_almuerzo_id: form.fija_almuerzo ? form.franja_almuerzo_id : null,
         minimo_personas_dia: form.minimo_personas_dia,
+        maximo_personas_dia: form.maximo_personas_dia,
         politica_minimo: form.politica_minimo,
         cuotas: cuotasNormalizadas.length > 0 ? cuotasNormalizadas : undefined,
       }
@@ -281,20 +284,40 @@ export default function FormTareaEspecial({
               </div>
             </div>
 
-            <div className="form-tarea-especial__field-group">
-              <label htmlFor="minimo_personas_dia" className="form-tarea-especial__label">
-                Mínimo de personas por día
-              </label>
-              <input
-                id="minimo_personas_dia"
-                type="number"
-                name="minimo_personas_dia"
-                min="1"
-                max="20"
-                value={form.minimo_personas_dia}
-                onChange={handleInputChange}
-                className="form-tarea-especial__input"
-              />
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div className="form-tarea-especial__field-group">
+                <label htmlFor="minimo_personas_dia" className="form-tarea-especial__label">
+                  Mínimo de personas por día
+                </label>
+                <input
+                  id="minimo_personas_dia"
+                  type="number"
+                  name="minimo_personas_dia"
+                  min="1"
+                  max="20"
+                  value={form.minimo_personas_dia}
+                  onChange={handleInputChange}
+                  className="form-tarea-especial__input"
+                />
+              </div>
+              <div className="form-tarea-especial__field-group">
+                <label htmlFor="maximo_personas_dia" className="form-tarea-especial__label">
+                  Máximo de personas por día
+                </label>
+                <input
+                  id="maximo_personas_dia"
+                  type="number"
+                  name="maximo_personas_dia"
+                  min="1"
+                  max="20"
+                  value={form.maximo_personas_dia ?? ''}
+                  onChange={(e) => {
+                    const value = e.target.value ? parseInt(e.target.value, 10) : null
+                    setForm((prev) => ({ ...prev, maximo_personas_dia: value }))
+                  }}
+                  className="form-tarea-especial__input"
+                />
+              </div>
             </div>
 
             <div className="form-tarea-especial__field-group">
