@@ -165,6 +165,10 @@ export default function CuotasEquipoStep({
                                   dia_tipo: undefined,
                                   dia_fijo: undefined,
                                 }),
+                                ...(e.target.value === 'semanal' && {
+                                  veces_por_semana: cuota.veces_por_semana || 1,
+                                  dia_tipo: cuota.dia_tipo || 'rotativo',
+                                }),
                               })
                             }
                           />

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { TareaEspecialTipo, TareaEspecialTipoCreate, TareaEquipoCuotaCreate } from '../api/tareasEspeciales'
+import { FranjaHoraria } from '../api/franjas'
 import CuotasEquipoStep from './CuotasEquipoStep'
 import './FormTareaEspecial.css'
 
@@ -10,10 +11,13 @@ interface Sector {
 
 interface FormTareaEspecialProps {
   sectores: Sector[]
+  franjas: FranjaHoraria[]
   initialData?: TareaEspecialTipo
   onSave: (data: TareaEspecialTipoCreate) => Promise<void>
   onCancel: () => void
 }
+
+type EfectoAlmuerzo = 'ninguno' | 'inhabilita' | 'fija'
 
 interface WizardState {
   nombre: string
@@ -34,6 +38,7 @@ interface WizardState {
 
 export default function FormTareaEspecial({
   sectores,
+  franjas,
   initialData,
   onSave,
   onCancel,
@@ -59,6 +64,21 @@ export default function FormTareaEspecial({
     politica_minimo: (initialData?.politica_minimo as 'alertar' | 'bloquear') || 'alertar',
   })
 
+  const efectoAlmuerzo: EfectoAlmuerzo = form.fija_almuerzo
+    ? 'fija'
+    : form.inhabilita_almuerzo
+    ? 'inhabilita'
+    : 'ninguno'
+
+  const handleEfectoAlmuerzoChange = (efecto: EfectoAlmuerzo) => {
+    setForm((prev) => ({
+      ...prev,
+      inhabilita_almuerzo: efecto === 'inhabilita',
+      fija_almuerzo: efecto === 'fija',
+      franja_almuerzo_id: efecto === 'fija' ? prev.franja_almuerzo_id : null,
+    }))
+  }
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target
     const finalValue = type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
@@ -77,9 +97,37 @@ export default function FormTareaEspecial({
   }
 
   const handleSave = async () => {
+    console.log('handleSave called with form:', {
+      fija_almuerzo: form.fija_almuerzo,
+      franja_almuerzo_id: form.franja_almuerzo_id,
+      inhabilita_almuerzo: form.inhabilita_almuerzo,
+    })
+
+    if (form.inhabilita_almuerzo && form.fija_almuerzo) {
+      setError('Una tarea no puede inhabilitar y fijar el almuerzo a la vez')
+      setStep(4)
+      return
+    }
+    if (form.fija_almuerzo && !form.franja_almuerzo_id) {
+      setError('Seleccioná una franja para fijar el horario de almuerzo')
+      setStep(4)
+      return
+    }
     setLoading(true)
     setError(null)
     try {
+      // Validate and normalize cuotas
+      const cuotasNormalizadas = form.cuotas.map((c) => {
+        if (c.frecuencia === 'semanal') {
+          return {
+            ...c,
+            veces_por_semana: c.veces_por_semana || 1,
+            dia_tipo: c.dia_tipo || 'rotativo',
+          }
+        }
+        return c
+      })
+
       const payload: TareaEspecialTipoCreate = {
         nombre: form.nombre,
         dia_semana_aplicable: form.dia_semana_aplicable,
@@ -92,11 +140,28 @@ export default function FormTareaEspecial({
         franja_almuerzo_id: form.fija_almuerzo ? form.franja_almuerzo_id : null,
         minimo_personas_dia: form.minimo_personas_dia,
         politica_minimo: form.politica_minimo,
-        cuotas: form.cuotas.length > 0 ? form.cuotas : undefined,
+        cuotas: cuotasNormalizadas.length > 0 ? cuotasNormalizadas : undefined,
       }
+      console.log('Sending payload:', payload)
       await onSave(payload)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error al guardar')
+    } catch (err: any) {
+      let errorMsg = 'Error al guardar'
+
+      // Handle Pydantic validation errors
+      if (err.response?.data?.detail) {
+        const detail = err.response.data.detail
+        if (Array.isArray(detail)) {
+          // Pydantic ValidationError returns an array of error objects
+          errorMsg = detail.map((d: any) => d.msg || JSON.stringify(d)).join('; ')
+        } else if (typeof detail === 'string') {
+          errorMsg = detail
+        } else {
+          errorMsg = 'Error de validación en el servidor'
+        }
+      } else if (err instanceof Error) {
+        errorMsg = err.message
+      }
+      setError(errorMsg)
     } finally {
       setLoading(false)
     }
@@ -280,28 +345,65 @@ export default function FormTareaEspecial({
         {step === 4 && (
           <div className="form-tarea-especial__section">
             <div className="form-tarea-especial__field-group">
-              <label className="form-tarea-especial__checkbox-label">
-                <input
-                  type="checkbox"
-                  name="inhabilita_almuerzo"
-                  checked={form.inhabilita_almuerzo}
-                  onChange={handleInputChange}
-                />
-                <span>Inhabilita almuerzo durante la tarea</span>
-              </label>
+              <label className="form-tarea-especial__label">Efecto sobre el almuerzo</label>
+              <div className="form-tarea-especial__radio-group">
+                <label className="form-tarea-especial__radio-label">
+                  <input
+                    type="radio"
+                    name="efecto_almuerzo"
+                    checked={efectoAlmuerzo === 'ninguno'}
+                    onChange={() => handleEfectoAlmuerzoChange('ninguno')}
+                  />
+                  <span>Sin efecto — se reparte normalmente en el calendario</span>
+                </label>
+                <label className="form-tarea-especial__radio-label">
+                  <input
+                    type="radio"
+                    name="efecto_almuerzo"
+                    checked={efectoAlmuerzo === 'inhabilita'}
+                    onChange={() => handleEfectoAlmuerzoChange('inhabilita')}
+                  />
+                  <span>Inhabilita el almuerzo durante la tarea</span>
+                </label>
+                <label className="form-tarea-especial__radio-label">
+                  <input
+                    type="radio"
+                    name="efecto_almuerzo"
+                    checked={efectoAlmuerzo === 'fija'}
+                    onChange={() => handleEfectoAlmuerzoChange('fija')}
+                  />
+                  <span>Fija un horario de almuerzo</span>
+                </label>
+              </div>
             </div>
 
-            {form.inhabilita_almuerzo && (
+            {efectoAlmuerzo === 'fija' && (
               <div className="form-tarea-especial__field-group">
-                <label className="form-tarea-especial__checkbox-label">
-                  <input
-                    type="checkbox"
-                    name="fija_almuerzo"
-                    checked={form.fija_almuerzo}
-                    onChange={handleInputChange}
-                  />
-                  <span>Fijar horario de almuerzo</span>
+                <label htmlFor="franja_almuerzo_id" className="form-tarea-especial__label">
+                  Franja de almuerzo fija *
                 </label>
+                <select
+                  id="franja_almuerzo_id"
+                  name="franja_almuerzo_id"
+                  value={form.franja_almuerzo_id?.toString() ?? ''}
+                  onChange={(e) =>
+                    setForm((prev) => ({
+                      ...prev,
+                      franja_almuerzo_id: e.target.value ? parseInt(e.target.value, 10) : null,
+                    }))
+                  }
+                  className="form-tarea-especial__input"
+                >
+                  <option value="">Seleccionar franja...</option>
+                  {franjas
+                    .slice()
+                    .sort((a, b) => a.orden - b.orden)
+                    .map((f) => (
+                      <option key={f.id} value={f.id.toString()}>
+                        {f.hora_inicio.slice(0, 5)} - {f.hora_fin.slice(0, 5)}
+                      </option>
+                    ))}
+                </select>
               </div>
             )}
 

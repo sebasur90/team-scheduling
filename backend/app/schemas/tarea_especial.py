@@ -68,6 +68,14 @@ class TareaEspecialTipoCreate(TareaEspecialTipoBase):
     cuotas: Optional[List["TareaEquipoCuotaCreate"]] = None
 
     @model_validator(mode='after')
+    def validar_efecto_almuerzo(self):
+        if self.inhabilita_almuerzo and self.fija_almuerzo:
+            raise ValueError("Una tarea no puede inhabilitar y fijar el almuerzo a la vez")
+        if self.fija_almuerzo and self.franja_almuerzo_id is None:
+            raise ValueError("franja_almuerzo_id es requerido cuando fija_almuerzo=True")
+        return self
+
+    @model_validator(mode='after')
     def validar_configuracion_rotacion(self):
         config = self.configuracion_rotacion
         if config is None:
@@ -120,6 +128,18 @@ class TareaEspecialTipoUpdate(BaseModel):
     configuracion_rotacion: Optional[ConfiguracionRotacionMultiSector] = None
     cuotas: Optional[List["TareaEquipoCuotaCreate"]] = None
 
+    @model_validator(mode='after')
+    def validar_efecto_almuerzo_update(self):
+        # Validate only when both fields are explicitly being changed
+        if self.inhabilita_almuerzo is True and self.fija_almuerzo is True:
+            raise ValueError("Una tarea no puede inhabilitar y fijar el almuerzo a la vez")
+
+        # If changing fija_almuerzo to True, franja_almuerzo_id must be provided
+        if self.fija_almuerzo is True and (self.franja_almuerzo_id is None or self.franja_almuerzo_id == 0):
+            raise ValueError("franja_almuerzo_id es requerido cuando fija_almuerzo=True")
+
+        return self
+
 
 class TareaEspecialTipoResponse(TareaEspecialTipoBase):
     id: int
@@ -149,6 +169,9 @@ class TareaEspecialAsignacionResponse(BaseModel):
     colaborador_id: int
     tipo_nombre: str
     colaborador_nombre: str
+    inhabilita_almuerzo: bool = False
+    fija_almuerzo: bool = False
+    franja_almuerzo_id: Optional[int] = None
 
     class Config:
         from_attributes = True
