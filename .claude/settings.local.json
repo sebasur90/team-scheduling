@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Bash(/home/mlrsrv/anaconda3/envs/entorno_flask/bin/python app/run.py)"
+      "Bash(/home/mlrsrv/anaconda3/envs/entorno_flask/bin/python app/run.py)",
+      "Bash(docker compose *)"
     ]
   }
 }

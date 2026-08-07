@@ -7,13 +7,11 @@ import './App.css'
 
 const AppContent: React.FC = () => {
   const { user, isLoading } = useAuth()
-  const [showSplash, setShowSplash] = useState(() => {
-    if (!sessionStorage.getItem('splash_shown')) {
-      sessionStorage.setItem('splash_shown', '1')
-      return true
-    }
-    return false
-  })
+  const [showSplash, setShowSplash] = useState(() => !sessionStorage.getItem('splash_shown'))
+
+  useEffect(() => {
+    sessionStorage.setItem('splash_shown', '1')
+  }, [])
 
   useEffect(() => {
     if ('serviceWorker' in navigator) {

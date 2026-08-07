@@ -14,6 +14,14 @@ export const AdminTopBar: React.FC<AdminTopBarProps> = ({ user, onLogout }) => {
     .toUpperCase()
     .slice(0, 2)
 
+  const LogoutIcon = () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+      <polyline points="16 17 21 12 16 7" />
+      <line x1="21" y1="12" x2="9" y2="12" />
+    </svg>
+  )
+
   return (
     <>
       {/* Mobile AdminTopBar */}
@@ -25,8 +33,16 @@ export const AdminTopBar: React.FC<AdminTopBarProps> = ({ user, onLogout }) => {
               ADMIN
             </span>
           </div>
-          <div className="w-10 h-10 text-white rounded-full flex items-center justify-center text-sm font-black" style={{ background: 'rgba(255,255,255,.2)', border: '1.5px solid rgba(255,255,255,.3)' }}>
-            {initials}
+          <div className="flex items-center gap-3">
+            <button
+              onClick={onLogout}
+              className="w-10 h-10 text-white rounded-full flex items-center justify-center hover:bg-white/10 transition"
+            >
+              <LogoutIcon />
+            </button>
+            <div className="w-10 h-10 text-white rounded-full flex items-center justify-center text-sm font-black" style={{ background: 'rgba(255,255,255,.2)', border: '1.5px solid rgba(255,255,255,.3)' }}>
+              {initials}
+            </div>
           </div>
         </div>
       </div>
