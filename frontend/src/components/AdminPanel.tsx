@@ -1291,59 +1291,128 @@ export function AdminPanel({ activeTab: propActiveTab = 'colaboradores' }: Admin
           ) : sectores.length === 0 ? (
             <div className="empty-state">No hay sectores creados</div>
           ) : (
-            <div className="table-wrapper">
-              <table className="admin-table">
-                <thead>
-                  <tr>
-                    <th>Nombre</th>
-                    <th>Capacidad Máx.</th>
-                    <th>Mín. Cobertura</th>
-                    <th>Acceso</th>
-                    <th>Participa</th>
-                    <th>Color</th>
-                    <th>Acciones</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {sectores.map((sector) => (
-                    <tr key={sector.id}>
-                      <td>{sector.nombre}</td>
-                      <td>{sector.capacidad_maxima}</td>
-                      <td>{sector.minimo_cobertura}</td>
-                      <td>{sector.acceso_rol === 'gestion' ? '✓ Gestión' : '👁 Lectura'}</td>
-                      <td>{sector.participa_almuerzo ? '✓ Sí' : '✗ No'}</td>
-                      <td>
-                        <div
-                          style={{
-                            display: 'inline-block',
-                            width: '20px',
-                            height: '20px',
-                            backgroundColor: sector.color,
-                            borderRadius: '3px',
-                            border: '1px solid #ccc',
-                          }}
-                        />
-                      </td>
-                      <td>
-                        <button
-                          className="btn btn-small btn-info"
-                          onClick={() => handleEditSector(sector)}
-                          disabled={editingSectorId === sector.id}
-                        >
-                          Editar
-                        </button>
-                        <button
-                          className="btn btn-small btn-danger"
-                          onClick={() => handleDeleteSector(sector.id)}
-                        >
-                          Eliminar
-                        </button>
-                      </td>
+            <>
+              {/* Desktop Table View */}
+              <div className="hidden md:block table-container">
+                <table className="admin-table">
+                  <thead>
+                    <tr>
+                      <th>Nombre</th>
+                      <th>Capacidad Máx.</th>
+                      <th>Mín. Cobertura</th>
+                      <th>Acceso</th>
+                      <th>Participa</th>
+                      <th>Color</th>
+                      <th>Acciones</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody>
+                    {sectores.map((sector) => (
+                      <tr key={sector.id}>
+                        <td>{sector.nombre}</td>
+                        <td>{sector.capacidad_maxima}</td>
+                        <td>{sector.minimo_cobertura}</td>
+                        <td>{sector.acceso_rol === 'gestion' ? '✓ Gestión' : '👁 Lectura'}</td>
+                        <td>{sector.participa_almuerzo ? '✓ Sí' : '✗ No'}</td>
+                        <td>
+                          <div
+                            style={{
+                              display: 'inline-block',
+                              width: '20px',
+                              height: '20px',
+                              backgroundColor: sector.color,
+                              borderRadius: '3px',
+                              border: '1px solid #ccc',
+                            }}
+                          />
+                        </td>
+                        <td>
+                          <button
+                            className="btn btn-small btn-info"
+                            onClick={() => handleEditSector(sector)}
+                            disabled={editingSectorId === sector.id}
+                          >
+                            Editar
+                          </button>
+                          <button
+                            className="btn btn-small btn-danger"
+                            onClick={() => handleDeleteSector(sector.id)}
+                          >
+                            Eliminar
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Mobile Card View */}
+              <div className="md:hidden space-y-3">
+                {sectores.map((sector) => (
+                  <div
+                    key={sector.id}
+                    className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition"
+                  >
+                    <div className="h-1" style={{ backgroundColor: sector.color }} />
+                    <div className="p-4">
+                      <div className="flex justify-between items-start mb-3">
+                        <div className="flex-1">
+                          <h4 className="font-semibold text-gray-900 flex items-center gap-2">
+                            <span
+                              className="inline-block w-3 h-3 rounded-sm border border-gray-300 flex-shrink-0"
+                              style={{ backgroundColor: sector.color }}
+                            />
+                            {sector.nombre}
+                          </h4>
+                        </div>
+                        <div className="flex gap-2">
+                          <button
+                            type="button"
+                            className="p-2 hover:bg-gray-100 rounded-md transition"
+                            onClick={() => handleEditSector(sector)}
+                            disabled={editingSectorId === sector.id}
+                            title="Editar"
+                          >
+                            ✏️
+                          </button>
+                          <button
+                            type="button"
+                            className="p-2 hover:bg-red-50 rounded-md transition"
+                            onClick={() => handleDeleteSector(sector.id)}
+                            title="Eliminar"
+                          >
+                            🗑
+                          </button>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3 text-sm">
+                        <div>
+                          <span className="text-gray-500">Capacidad Máx.:</span>
+                          <p className="font-medium text-gray-900">{sector.capacidad_maxima}</p>
+                        </div>
+                        <div>
+                          <span className="text-gray-500">Mín. Cobertura:</span>
+                          <p className="font-medium text-gray-900">{sector.minimo_cobertura}</p>
+                        </div>
+                        <div>
+                          <span className="text-gray-500">Acceso:</span>
+                          <p className="font-medium text-gray-900">
+                            {sector.acceso_rol === 'gestion' ? '✓ Gestión' : '👁 Lectura'}
+                          </p>
+                        </div>
+                        <div>
+                          <span className="text-gray-500">Participa:</span>
+                          <p className="font-medium text-gray-900">
+                            {sector.participa_almuerzo ? '✓ Sí' : '✗ No'}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
           )}
         </div>
       )}
@@ -1441,43 +1510,83 @@ export function AdminPanel({ activeTab: propActiveTab = 'colaboradores' }: Admin
           {franjasLoading ? (
             <div className="loading">Cargando franjas...</div>
           ) : (
-            <div className="table-container">
-              <table className="admin-table">
-                <thead>
-                  <tr>
-                    <th>Orden</th>
-                    <th>Inicio</th>
-                    <th>Fin</th>
-                    <th>Acciones</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {franjas.map((franja) => (
-                    <tr key={franja.id}>
-                      <td>{franja.orden}</td>
-                      <td>{franja.hora_inicio}</td>
-                      <td>{franja.hora_fin}</td>
-                      <td>
+            <>
+              {/* Desktop Table View */}
+              <div className="hidden md:block table-container">
+                <table className="admin-table">
+                  <thead>
+                    <tr>
+                      <th>Orden</th>
+                      <th>Inicio</th>
+                      <th>Fin</th>
+                      <th>Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {franjas.map((franja) => (
+                      <tr key={franja.id}>
+                        <td>{franja.orden}</td>
+                        <td>{franja.hora_inicio}</td>
+                        <td>{franja.hora_fin}</td>
+                        <td>
+                          <button
+                            type="button"
+                            className="btn-icon"
+                            onClick={() => handleEditFranja(franja)}
+                          >
+                            ✏
+                          </button>
+                          <button
+                            type="button"
+                            className="btn-icon"
+                            onClick={() => handleDeleteFranja(franja.id)}
+                          >
+                            🗑
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Mobile Card View */}
+              <div className="md:hidden space-y-3">
+                {franjas.map((franja) => (
+                  <div
+                    key={franja.id}
+                    className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition"
+                  >
+                    <div className="p-4 flex items-center justify-between">
+                      <div>
+                        <span className="text-sm text-gray-500">Orden {franja.orden}</span>
+                        <p className="font-semibold text-gray-900 text-lg">
+                          {franja.hora_inicio} – {franja.hora_fin}
+                        </p>
+                      </div>
+                      <div className="flex gap-2">
                         <button
                           type="button"
-                          className="btn-icon"
+                          className="p-2 hover:bg-gray-100 rounded-md transition"
                           onClick={() => handleEditFranja(franja)}
+                          title="Editar"
                         >
-                          ✏
+                          ✏️
                         </button>
                         <button
                           type="button"
-                          className="btn-icon"
+                          className="p-2 hover:bg-red-50 rounded-md transition"
                           onClick={() => handleDeleteFranja(franja.id)}
+                          title="Eliminar"
                         >
                           🗑
                         </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
           )}
         </div>
       )}
@@ -1529,60 +1638,139 @@ export function AdminPanel({ activeTab: propActiveTab = 'colaboradores' }: Admin
           ) : tareasEspeciales.length === 0 ? (
             <div className="empty-state">No hay tareas especiales creadas</div>
           ) : (
-            <div className="table-wrapper">
-              <table className="admin-table">
-                <thead>
-                  <tr>
-                    <th>Nombre</th>
-                    <th>Hora Inicio</th>
-                    <th>Hora Fin</th>
-                    <th>Días Aplicables</th>
-                    <th>Frecuencia</th>
-                    <th>Inhabilita Almuerzo</th>
-                    <th>Fija Almuerzo</th>
-                    <th>Franja Almuerzo</th>
-                    <th>Acciones</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {tareasEspeciales.map((tarea) => {
-                    const diasNombres = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
-                    const diasAplicables = diasNombres
-                      .map((d, idx) => (tarea.dia_semana_aplicable?.includes(idx) ? d : null))
-                      .filter(Boolean)
-                      .join(', ');
-                    const franjaAlmuerzo = franjas.find((f) => f.id === tarea.franja_almuerzo_id);
-                    return (
-                      <tr key={tarea.id}>
-                        <td>{tarea.nombre}</td>
-                        <td>{tarea.hora_inicio}</td>
-                        <td>{tarea.hora_fin}</td>
-                        <td>{diasAplicables || '–'}</td>
-                        <td>{tarea.frecuencia === 'quincenal' ? 'Quincenal' : 'Semanal'}</td>
-                        <td>{tarea.inhabilita_almuerzo ? 'Sí' : 'No'}</td>
-                        <td>{tarea.fija_almuerzo ? 'Sí' : 'No'}</td>
-                        <td>{franjaAlmuerzo ? `${franjaAlmuerzo.hora_inicio} - ${franjaAlmuerzo.hora_fin}` : '–'}</td>
-                        <td>
-                          <button
-                            className="btn btn-small btn-info"
-                            onClick={() => handleEditTarea(tarea)}
-                            disabled={editingTareaId === tarea.id}
-                          >
-                            Editar
-                          </button>
-                          <button
-                            className="btn btn-small btn-danger"
-                            onClick={() => handleDeleteTarea(tarea.id)}
-                          >
-                            Eliminar
-                          </button>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+            <>
+              {/* Desktop Table View */}
+              <div className="hidden md:block table-container">
+                <table className="admin-table">
+                  <thead>
+                    <tr>
+                      <th>Nombre</th>
+                      <th>Hora Inicio</th>
+                      <th>Hora Fin</th>
+                      <th>Días Aplicables</th>
+                      <th>Frecuencia</th>
+                      <th>Inhabilita Almuerzo</th>
+                      <th>Fija Almuerzo</th>
+                      <th>Franja Almuerzo</th>
+                      <th>Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {tareasEspeciales.map((tarea) => {
+                      const diasNombres = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
+                      const diasAplicables = diasNombres
+                        .map((d, idx) => (tarea.dia_semana_aplicable?.includes(idx) ? d : null))
+                        .filter(Boolean)
+                        .join(', ');
+                      const franjaAlmuerzo = franjas.find((f) => f.id === tarea.franja_almuerzo_id);
+                      return (
+                        <tr key={tarea.id}>
+                          <td>{tarea.nombre}</td>
+                          <td>{tarea.hora_inicio}</td>
+                          <td>{tarea.hora_fin}</td>
+                          <td>{diasAplicables || '–'}</td>
+                          <td>{tarea.frecuencia === 'quincenal' ? 'Quincenal' : 'Semanal'}</td>
+                          <td>{tarea.inhabilita_almuerzo ? 'Sí' : 'No'}</td>
+                          <td>{tarea.fija_almuerzo ? 'Sí' : 'No'}</td>
+                          <td>{franjaAlmuerzo ? `${franjaAlmuerzo.hora_inicio} - ${franjaAlmuerzo.hora_fin}` : '–'}</td>
+                          <td>
+                            <button
+                              className="btn btn-small btn-info"
+                              onClick={() => handleEditTarea(tarea)}
+                              disabled={editingTareaId === tarea.id}
+                            >
+                              Editar
+                            </button>
+                            <button
+                              className="btn btn-small btn-danger"
+                              onClick={() => handleDeleteTarea(tarea.id)}
+                            >
+                              Eliminar
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Mobile Card View */}
+              <div className="md:hidden space-y-3">
+                {tareasEspeciales.map((tarea) => {
+                  const diasNombres = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
+                  const diasAplicables = diasNombres
+                    .map((d, idx) => (tarea.dia_semana_aplicable?.includes(idx) ? d : null))
+                    .filter(Boolean)
+                    .join(', ');
+                  const franjaAlmuerzo = franjas.find((f) => f.id === tarea.franja_almuerzo_id);
+                  return (
+                    <div
+                      key={tarea.id}
+                      className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition"
+                    >
+                      <div className="p-4">
+                        <div className="flex justify-between items-start mb-3">
+                          <div className="flex-1">
+                            <h4 className="font-semibold text-gray-900">{tarea.nombre}</h4>
+                            <p className="text-sm text-gray-500">
+                              {tarea.hora_inicio} – {tarea.hora_fin}
+                            </p>
+                          </div>
+                          <div className="flex gap-2">
+                            <button
+                              type="button"
+                              className="p-2 hover:bg-gray-100 rounded-md transition"
+                              onClick={() => handleEditTarea(tarea)}
+                              disabled={editingTareaId === tarea.id}
+                              title="Editar"
+                            >
+                              ✏️
+                            </button>
+                            <button
+                              type="button"
+                              className="p-2 hover:bg-red-50 rounded-md transition"
+                              onClick={() => handleDeleteTarea(tarea.id)}
+                              title="Eliminar"
+                            >
+                              🗑
+                            </button>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-3 text-sm">
+                          <div>
+                            <span className="text-gray-500">Días:</span>
+                            <p className="font-medium text-gray-900">{diasAplicables || '–'}</p>
+                          </div>
+                          <div>
+                            <span className="text-gray-500">Frecuencia:</span>
+                            <p className="font-medium text-gray-900">
+                              {tarea.frecuencia === 'quincenal' ? 'Quincenal' : 'Semanal'}
+                            </p>
+                          </div>
+                          <div>
+                            <span className="text-gray-500">Inhabilita Almuerzo:</span>
+                            <p className="font-medium text-gray-900">{tarea.inhabilita_almuerzo ? 'Sí' : 'No'}</p>
+                          </div>
+                          <div>
+                            <span className="text-gray-500">Fija Almuerzo:</span>
+                            <p className="font-medium text-gray-900">{tarea.fija_almuerzo ? 'Sí' : 'No'}</p>
+                          </div>
+                        </div>
+                        {franjaAlmuerzo && (
+                          <div className="mt-3 pt-3 border-t border-gray-200 text-sm">
+                            <span className="text-gray-500">Franja Almuerzo:</span>{' '}
+                            <span className="font-medium text-gray-900">
+                              {franjaAlmuerzo.hora_inicio} - {franjaAlmuerzo.hora_fin}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </>
           )}
         </div>
       )}
@@ -1877,34 +2065,70 @@ export function AdminPanel({ activeTab: propActiveTab = 'colaboradores' }: Admin
                   );
                 })()}
               </div>
-              <table className="admin-table">
-                <thead>
-                  <tr>
-                    <th>Nombre</th>
-                    <th>Sector</th>
-                    <th>Franja Preferida</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {(() => {
-                    const activos = colaboradores.filter((c) => c.estado_atencion === 'activo');
-                    return activos.map((colab) => {
-                      const franjaPreferida = franjas.find((f) => f.id === colab.franja_preferida_id);
-                      return (
-                        <tr key={colab.id}>
-                          <td>{colab.nombre}</td>
-                          <td>{colab.sector_nombre || getSectorName(colab.sector_id)}</td>
-                          <td>
-                            {franjaPreferida
-                              ? `${franjaPreferida.hora_inicio.slice(0, 5)} – ${franjaPreferida.hora_fin.slice(0, 5)}`
-                              : 'Sin configurar'}
-                          </td>
-                        </tr>
-                      );
-                    });
-                  })()}
-                </tbody>
-              </table>
+              {/* Desktop Table View */}
+              <div className="hidden md:block table-container">
+                <table className="admin-table">
+                  <thead>
+                    <tr>
+                      <th>Nombre</th>
+                      <th>Sector</th>
+                      <th>Franja Preferida</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(() => {
+                      const activos = colaboradores.filter((c) => c.estado_atencion === 'activo');
+                      return activos.map((colab) => {
+                        const franjaPreferida = franjas.find((f) => f.id === colab.franja_preferida_id);
+                        return (
+                          <tr key={colab.id}>
+                            <td>{colab.nombre}</td>
+                            <td>{colab.sector_nombre || getSectorName(colab.sector_id)}</td>
+                            <td>
+                              {franjaPreferida
+                                ? `${franjaPreferida.hora_inicio.slice(0, 5)} – ${franjaPreferida.hora_fin.slice(0, 5)}`
+                                : 'Sin configurar'}
+                            </td>
+                          </tr>
+                        );
+                      });
+                    })()}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Mobile Card View */}
+              <div className="md:hidden space-y-3">
+                {(() => {
+                  const activos = colaboradores.filter((c) => c.estado_atencion === 'activo');
+                  return activos.map((colab) => {
+                    const franjaPreferida = franjas.find((f) => f.id === colab.franja_preferida_id);
+                    return (
+                      <div
+                        key={colab.id}
+                        className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition p-4"
+                      >
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <h4 className="font-semibold text-gray-900">{colab.nombre}</h4>
+                            <p className="text-sm text-gray-500">
+                              {colab.sector_nombre || getSectorName(colab.sector_id)}
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <span className="text-gray-500 text-sm">Franja preferida:</span>
+                            <p className="font-medium text-gray-900">
+                              {franjaPreferida
+                                ? `${franjaPreferida.hora_inicio.slice(0, 5)} – ${franjaPreferida.hora_fin.slice(0, 5)}`
+                                : 'Sin configurar'}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  });
+                })()}
+              </div>
             </>
           )}
         </div>

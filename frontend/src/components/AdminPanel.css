@@ -106,7 +106,8 @@
   margin: 0;
 }
 
-.table-container {
+.table-container,
+.table-wrapper {
   overflow-x: auto;
   border-radius: 4px;
   border: 1px solid #ddd;
@@ -878,7 +879,8 @@
     font-weight: 600;
   }
 
-  .table-container {
+  .table-container,
+  .table-wrapper {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     margin: 0 -1rem;
@@ -1073,6 +1075,8 @@
 }
 
 .configuracion-form input {
+  width: 100%;
+  box-sizing: border-box;
   padding: 0.75rem;
   border: 1px solid #ddd;
   border-radius: 4px;
