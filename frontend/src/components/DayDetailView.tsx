@@ -10,6 +10,7 @@ interface DayDetailViewProps {
   formatDate: (date: Date) => string
   renderTurnoPills: (date: Date, franjaId: number) => React.ReactNode
   renderVacacionesPills: (date: Date) => React.ReactNode
+  renderInhabilitadosPills: (date: Date) => React.ReactNode
   isAdmin?: boolean
   isGenerating?: boolean
   onDiaNoLaborableClick?: (date: Date) => void
@@ -24,6 +25,7 @@ export const DayDetailView: React.FC<DayDetailViewProps> = ({
   formatDate,
   renderTurnoPills,
   renderVacacionesPills,
+  renderInhabilitadosPills,
   isAdmin = false,
   isGenerating = false,
   onDiaNoLaborableClick,
@@ -65,6 +67,15 @@ export const DayDetailView: React.FC<DayDetailViewProps> = ({
       >
         <div className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Vacaciones</div>
         <div className="text-xs">{renderVacacionesPills(selectedDate)}</div>
+      </div>
+
+      {/* Inhabilitados por tarea card */}
+      <div
+        className="bg-white rounded-2xl p-3.5"
+        style={{ border: '1.5px solid rgba(0,0,0,.05)', boxShadow: '0 2px 8px rgba(0,0,0,.04)' }}
+      >
+        <div className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Inhabilitado por tarea</div>
+        <div className="text-xs">{renderInhabilitadosPills(selectedDate)}</div>
       </div>
 
       {/* Franjas */}

@@ -7,6 +7,7 @@ export interface AsignacionResponse {
   turno_almuerzo_id: number
   colaborador_id: number
   estado: string
+  tarea_especial_asignacion_id: number | null
   colaborador: Colaborador
   created_at: string
 }

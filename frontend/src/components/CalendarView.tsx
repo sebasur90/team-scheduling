@@ -4,6 +4,7 @@ import { franjasApi, FranjaHoraria } from '../api/franjas'
 import { diasNolaborablesApi } from '../api/diasNolaborables'
 import { ausenciasApi, Ausencia } from '../api/ausencias'
 import { sectoresApi, type Sector } from '../api/sectores'
+import { tareasEspecialesApi, TareaEspecialAsignacionDetalle } from '../api/tareasEspeciales'
 import { useAuthContext } from '../contexts/AuthContext'
 import { swapsApi, SwapResponse } from '../api/swaps'
 import { useUserNotifications } from '../hooks/useUserNotifications'
@@ -48,6 +49,7 @@ export const CalendarView: React.FC = () => {
   const [turnos, setTurnos] = useState<Map<string, TurnoAlmuerzoResponse>>(new Map())
   const [diasNoLaborables, setDiasNoLaborables] = useState<Set<string>>(new Set())
   const [vacaciones, setVacaciones] = useState<Map<string, Ausencia[]>>(new Map())
+  const [inhabilitadosPorTarea, setInhabilitadosPorTarea] = useState<Map<string, TareaEspecialAsignacionDetalle[]>>(new Map())
   const [colaboradores, setColaboradores] = useState<Map<number, Colaborador>>(new Map())
   const [sectores, setSectores] = useState<Map<number, Sector>>(new Map())
   const [isLoading, setIsLoading] = useState(true)
@@ -138,13 +140,35 @@ export const CalendarView: React.FC = () => {
         })
         setVacaciones(vacacionesMap)
 
-        const turnosMap = new Map<string, TurnoAlmuerzoResponse>()
         const weekDays = []
         for (let i = 0; i < 5; i++) {
           const date = new Date(selectedWeekMonday)
           date.setDate(date.getDate() + i)
           weekDays.push(date)
         }
+
+        // Load tareas especiales que inhabilitan el almuerzo, para la semana visible
+        try {
+          const cronogramaRes = await tareasEspecialesApi.getCronograma({
+            fecha_inicio: formatDate(weekDays[0]),
+            fecha_fin: formatDate(weekDays[weekDays.length - 1]),
+          })
+          const inhabilitadosMap = new Map<string, TareaEspecialAsignacionDetalle[]>()
+          cronogramaRes.data
+            .filter((a) => a.inhabilita_almuerzo)
+            .forEach((a) => {
+              if (!inhabilitadosMap.has(a.fecha)) {
+                inhabilitadosMap.set(a.fecha, [])
+              }
+              inhabilitadosMap.get(a.fecha)!.push(a)
+            })
+          setInhabilitadosPorTarea(inhabilitadosMap)
+        } catch (error) {
+          console.error('Error loading tareas especiales:', error)
+          setInhabilitadosPorTarea(new Map())
+        }
+
+        const turnosMap = new Map<string, TurnoAlmuerzoResponse>()
 
         await Promise.all(
           weekDays.map(async (date) => {
@@ -305,6 +329,11 @@ export const CalendarView: React.FC = () => {
     return vacaciones.get(dateStr) || []
   }
 
+  const getInhabilitadosEnDia = (date: Date): TareaEspecialAsignacionDetalle[] => {
+    const dateStr = formatDate(date)
+    return inhabilitadosPorTarea.get(dateStr) || []
+  }
+
   const renderTurnoPills = (date: Date, franjaId: number) => {
     const turno = turnos.get(`${formatDate(date)}-${franjaId}`)
     if (!turno) {
@@ -316,7 +345,7 @@ export const CalendarView: React.FC = () => {
 
     const dateStr = formatDate(date)
     const myInfoForDate = user ? getUserAsignacionForDate(dateStr) : null
-    const canInitiateSwap = user && user.rol !== 'viewer' && myInfoForDate !== null
+    const canInitiateSwap = user && user.rol !== 'viewer' && myInfoForDate !== null && !myInfoForDate.asig.tarea_especial_asignacion_id
 
     return (
       <div className="turno-pills">
@@ -324,14 +353,23 @@ export const CalendarView: React.FC = () => {
           const sector = sectores.get(a.colaborador.sector_id)
           const isCurrentUser = user && a.colaborador_id === user.id
           const isPendienteSwap = isCurrentUser && a.estado === 'pendiente_swap'
-          const isClickable = isCurrentUser ? isPendienteSwap : canInitiateSwap
+          const isFijadoPorTarea = !!a.tarea_especial_asignacion_id
+          const isClickable = !isFijadoPorTarea && (isCurrentUser ? isPendienteSwap : canInitiateSwap)
 
           return (
             <span
               key={idx}
-              className={`pill ${isCurrentUser ? 'current-user' : ''} ${isPendienteSwap ? 'pill-pending-swap' : ''} ${isClickable ? 'pill-clickable' : ''}`}
-              style={{ backgroundColor: sector?.color || '#999', color: 'white' }}
-              title={isPendienteSwap ? 'Intercambio pendiente — clic para ver estado' : isClickable ? `Intercambiar con ${a.colaborador.nombre}` : a.colaborador.nombre}
+              className={`pill ${isCurrentUser ? 'current-user' : ''} ${isPendienteSwap ? 'pill-pending-swap' : ''} ${isClickable ? 'pill-clickable' : ''} ${isFijadoPorTarea ? 'pill-fijo-tarea' : ''}`}
+              style={isFijadoPorTarea ? undefined : { backgroundColor: sector?.color || '#999', color: 'white' }}
+              title={
+                isFijadoPorTarea
+                  ? 'Horario fijado por tarea especial — no se puede intercambiar'
+                  : isPendienteSwap
+                  ? 'Intercambio pendiente — clic para ver estado'
+                  : isClickable
+                  ? `Intercambiar con ${a.colaborador.nombre}`
+                  : a.colaborador.nombre
+              }
               onClick={isClickable ? () => handlePillClick(date, a, turno) : undefined}
             >
               {a.colaborador.nombre.split(' ')[0]}
@@ -366,6 +404,29 @@ export const CalendarView: React.FC = () => {
     )
   }
 
+  const renderInhabilitadosPills = (date: Date) => {
+    const tareas = getInhabilitadosEnDia(date)
+    if (tareas.length === 0) {
+      return <span className="vacaciones-empty">—</span>
+    }
+    return (
+      <div className="vacaciones-pills">
+        {tareas.map((t, idx) => {
+          const isCurrentUser = user && t.colaborador_id === user.id
+          return (
+            <span
+              key={idx}
+              className={`pill pill-tarea-inhabilitada ${isCurrentUser ? 'current-user' : ''}`}
+              title={`${t.colaborador_nombre} — inhabilitado por ${t.tipo_nombre}`}
+            >
+              {t.colaborador_nombre.split(' ')[0]}
+            </span>
+          )
+        })}
+      </div>
+    )
+  }
+
   const isDiaNoLaborable = (date: Date): boolean => {
     return diasNoLaborables.has(formatDate(date))
   }
@@ -390,6 +451,7 @@ export const CalendarView: React.FC = () => {
     clickedTurno: TurnoAlmuerzoResponse
   ) => {
     if (!user || user.rol === 'viewer') return
+    if (clickedAsig.tarea_especial_asignacion_id) return
 
     if (clickedAsig.colaborador_id === user.id) {
       if (clickedAsig.estado === 'pendiente_swap') {
@@ -659,6 +721,7 @@ export const CalendarView: React.FC = () => {
               formatDate={formatDate}
               renderTurnoPills={renderTurnoPills}
               renderVacacionesPills={renderVacacionesPills}
+              renderInhabilitadosPills={renderInhabilitadosPills}
               isAdmin={user?.rol === 'admin'}
               isGenerating={isGenerating}
               onDiaNoLaborableClick={handleDiaNoLaborableClick}
@@ -715,6 +778,20 @@ export const CalendarView: React.FC = () => {
                 <td key={`vacation-${formatDate(date)}`} className="vacation-cell">
                   <div className="vacation-content">
                     {renderVacacionesPills(date)}
+                  </div>
+                </td>
+              ))}
+            </tr>
+
+            {/* Tarea-inhabilitada row */}
+            <tr className="tarea-inhabilitada-row">
+              <td className="franja-col tarea-inhabilitada-label">
+                <div className="franja-time">Inhabilitado por tarea</div>
+              </td>
+              {weekDays.map((date) => (
+                <td key={`tarea-inhabilitada-${formatDate(date)}`} className="tarea-inhabilitada-cell">
+                  <div className="vacation-content">
+                    {renderInhabilitadosPills(date)}
                   </div>
                 </td>
               ))}
@@ -905,6 +982,14 @@ export const CalendarView: React.FC = () => {
         <div className="legend-item">
           <div className="legend-box pill pill-vacation">Vac</div>
           <span>De vacaciones</span>
+        </div>
+        <div className="legend-item">
+          <div className="legend-box pill pill-tarea-inhabilitada">Ina</div>
+          <span>Inhabilitado por tarea</span>
+        </div>
+        <div className="legend-item">
+          <div className="legend-box pill pill-fijo-tarea">Fij</div>
+          <span>Almuerzo fijado por tarea</span>
         </div>
       </div>
     </div>

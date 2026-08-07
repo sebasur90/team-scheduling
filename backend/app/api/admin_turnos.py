@@ -75,7 +75,7 @@ def generar_turnos_semana(
 
         # Persist the day's assignments (success with or without warnings)
         try:
-            _persist_day_assignments(db, fecha, result.cronograma, result.puntajes_actualizados)
+            _persist_day_assignments(db, fecha, result.cronograma, result.puntajes_actualizados, result.fijaciones_tarea)
 
             # Track warnings if any
             if result.advertencias:
@@ -153,7 +153,7 @@ def generar_turnos_dia(
         else:
             # Persist the day's assignments (success with or without warnings)
             try:
-                _persist_day_assignments(db, fecha, result.cronograma, result.puntajes_actualizados)
+                _persist_day_assignments(db, fecha, result.cronograma, result.puntajes_actualizados, result.fijaciones_tarea)
 
                 # Track warnings if any
                 if result.advertencias:
@@ -237,6 +237,7 @@ def _persist_day_assignments(
     fecha: date,
     cronograma: Dict[int, List[int]],
     puntajes_actualizados: Dict[int, int],
+    fijaciones_tarea: Dict[int, int] = None,
 ) -> None:
     """
     Persist a day's assignments from the engine.
@@ -246,7 +247,10 @@ def _persist_day_assignments(
         fecha: Date to persist assignments for
         cronograma: Dict mapping franja_orden (int) -> [colaborador_ids]
         puntajes_actualizados: Dict mapping colaborador_id -> new puntaje
+        fijaciones_tarea: Dict mapping colaborador_id -> tarea_especial_asignacion_id
+            for people whose franja was forced by a fija_almuerzo special task
     """
+    fijaciones_tarea = fijaciones_tarea or {}
     # Get all franjas to map orden to franja_id and capacidad
     franjas = db.query(FranjaHoraria).all()
     franja_map = {f.orden - 1: f.id for f in franjas}  # Convert orden to 0-based index
@@ -277,7 +281,8 @@ def _persist_day_assignments(
             asignacion = AsignacionAlmuerzo(
                 turno_almuerzo_id=turno.id,
                 colaborador_id=colaborador_id,
-                estado='firme'
+                estado='firme',
+                tarea_especial_asignacion_id=fijaciones_tarea.get(colaborador_id),
             )
             db.add(asignacion)
 

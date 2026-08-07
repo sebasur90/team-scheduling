@@ -106,6 +106,12 @@ def crear_swap(
     if asig_origen.turno_almuerzo.fecha != asig_receptor.turno_almuerzo.fecha:
         raise HTTPException(status_code=400, detail="Solo se puede intercambiar entre franjas del mismo día")
 
+    if asig_origen.tarea_especial_asignacion_id or asig_receptor.tarea_especial_asignacion_id:
+        raise HTTPException(
+            status_code=409,
+            detail="No se puede intercambiar una asignación fijada por una tarea especial",
+        )
+
     # Verificar que ninguna tenga swap pendiente
     for asig in [asig_origen, asig_receptor]:
         swap_pendiente = db.query(SwapSolicitud).filter(

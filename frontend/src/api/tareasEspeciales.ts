@@ -91,6 +91,9 @@ export interface TareaEspecialAsignacionDetalle {
   colaborador_id: number
   tipo_nombre: string
   colaborador_nombre: string
+  inhabilita_almuerzo: boolean
+  fija_almuerzo: boolean
+  franja_almuerzo_id: number | null
 }
 
 export interface GenerarCronogramaRequest {

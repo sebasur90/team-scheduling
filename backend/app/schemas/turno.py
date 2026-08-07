@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from datetime import date, datetime
-from typing import List
+from typing import List, Optional
 from app.schemas.colaborador import ColaboradorResponse
 from app.schemas.franja import FranjaHorariaResponse
 
@@ -10,6 +10,7 @@ class AsignacionResponse(BaseModel):
     turno_almuerzo_id: int
     colaborador_id: int
     estado: str
+    tarea_especial_asignacion_id: Optional[int] = None
     colaborador: ColaboradorResponse
     created_at: datetime
 

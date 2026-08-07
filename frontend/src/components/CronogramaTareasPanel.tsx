@@ -2,7 +2,11 @@ import React, { useState, useEffect } from 'react'
 import { tareasEspecialesApi, TareaEspecialTipo, TareaEspecialAsignacionDetalle, GenerarCronogramaRequest } from '../api/tareasEspeciales'
 import { colaboradoresApi, Colaborador } from '../api/colaboradores'
 
-export const CronogramaTareasPanel: React.FC = () => {
+interface CronogramaTareasPanelProps {
+  readOnly?: boolean
+}
+
+export const CronogramaTareasPanel: React.FC<CronogramaTareasPanelProps> = ({ readOnly = false }) => {
   const [tipos, setTipos] = useState<TareaEspecialTipo[]>([])
   const [colaboradores, setColaboradores] = useState<Colaborador[]>([])
   const [cronograma, setCronograma] = useState<TareaEspecialAsignacionDetalle[]>([])
@@ -22,6 +26,13 @@ export const CronogramaTareasPanel: React.FC = () => {
     setFechaInicio(inicio.toISOString().split('T')[0])
     setFechaFin(fin.toISOString().split('T')[0])
   }, [])
+
+  useEffect(() => {
+    if (fechaInicio && fechaFin) {
+      loadCronograma()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fechaInicio, fechaFin])
 
   const loadData = async () => {
     try {
@@ -109,18 +120,20 @@ export const CronogramaTareasPanel: React.FC = () => {
     <div className="cronograma-panel">
       <div className="cronograma-header">
         <h2 className="cronograma-header__title">Cronograma de Tareas</h2>
-        <div className="cronograma-header__actions">
-          <button
-            onClick={() => setShowGenerador(!showGenerador)}
-            className="btn-generar"
-            disabled={isLoading}
-          >
-            {showGenerador ? 'Cerrar' : '+ Generar Cronograma'}
-          </button>
-        </div>
+        {!readOnly && (
+          <div className="cronograma-header__actions">
+            <button
+              onClick={() => setShowGenerador(!showGenerador)}
+              className="btn-generar"
+              disabled={isLoading}
+            >
+              {showGenerador ? 'Cerrar' : '+ Generar Cronograma'}
+            </button>
+          </div>
+        )}
       </div>
 
-      {showGenerador && (
+      {!readOnly && showGenerador && (
         <div className="cronograma-controls">
           <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '0.95rem', fontWeight: 600, color: '#333' }}>
             Generar Cronograma
@@ -217,26 +230,28 @@ export const CronogramaTareasPanel: React.FC = () => {
                             <div className="cronograma-item-card__person">
                               <span>{asignacion.colaborador_nombre}</span>
                             </div>
-                            <button
-                              onClick={() => {
-                                const nuevoId = prompt(`Cambiar a colaborador ID:`)
-                                if (nuevoId) {
-                                  handleSwapAsignacion(asignacion.id, parseInt(nuevoId))
-                                }
-                              }}
-                              style={{
-                                background: 'none',
-                                border: 'none',
-                                color: '#7c3aed',
-                                cursor: 'pointer',
-                                fontSize: '0.9rem',
-                                textDecoration: 'underline',
-                                padding: 0,
-                                textAlign: 'left',
-                              }}
-                            >
-                              ✎ Cambiar asignación
-                            </button>
+                            {!readOnly && (
+                              <button
+                                onClick={() => {
+                                  const nuevoId = prompt(`Cambiar a colaborador ID:`)
+                                  if (nuevoId) {
+                                    handleSwapAsignacion(asignacion.id, parseInt(nuevoId))
+                                  }
+                                }}
+                                style={{
+                                  background: 'none',
+                                  border: 'none',
+                                  color: '#7c3aed',
+                                  cursor: 'pointer',
+                                  fontSize: '0.9rem',
+                                  textDecoration: 'underline',
+                                  padding: 0,
+                                  textAlign: 'left',
+                                }}
+                              >
+                                ✎ Cambiar asignación
+                              </button>
+                            )}
                           </>
                         ) : (
                           <span style={{ color: '#999' }}>—</span>

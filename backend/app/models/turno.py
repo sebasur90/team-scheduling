@@ -24,9 +24,13 @@ class AsignacionAlmuerzo(BaseModel):
     turno_almuerzo_id = Column(Integer, ForeignKey("turno_almuerzo.id", ondelete="CASCADE"), nullable=False)
     colaborador_id = Column(Integer, ForeignKey("colaborador.id"), nullable=False)
     estado = Column(String(50), nullable=False, default="firme")  # 'firme' or 'pendiente_swap'
+    tarea_especial_asignacion_id = Column(
+        Integer, ForeignKey("tarea_especial_asignacion.id", ondelete="SET NULL"), nullable=True
+    )  # Set when this lunch slot was forced by a fija_almuerzo special task
 
     turno_almuerzo = relationship("TurnoAlmuerzo", back_populates="asignaciones")
     colaborador = relationship("Colaborador", back_populates="asignaciones")
+    tarea_especial_asignacion = relationship("TareaEspecialAsignacion")
     swaps_origen = relationship("SwapSolicitud", foreign_keys="SwapSolicitud.asignacion_origen_id", back_populates="asignacion_origen")
     swaps_receptor = relationship("SwapSolicitud", foreign_keys="SwapSolicitud.asignacion_receptor_id", back_populates="asignacion_receptor")
 

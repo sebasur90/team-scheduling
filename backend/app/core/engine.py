@@ -30,14 +30,21 @@ class AssignmentEngine:
             # Load all data
             context = self._phase_0_build_context()
 
+            # Assignments forced by fija_almuerzo special tasks (bypass preferences/rotation)
+            asignaciones_fijadas = self._build_fixed_assignments(context)
+
             # Phase 1: Resolve preferences
-            asignaciones_phase1 = self._phase_1_resolve_preferences(context)
+            asignaciones_phase1 = asignaciones_fijadas + self._phase_1_resolve_preferences(context)
 
             # Phase 2: Fill remaining people
             asignaciones_all = self._phase_2_fill_remaining(context, asignaciones_phase1)
 
             # Phase 3: Final validation
             cronograma, puntajes, advertencias = self._phase_3_validate_and_build(context, asignaciones_all)
+
+            fijaciones_tarea = {
+                cid: info["tarea_especial_asignacion_id"] for cid, info in context.fijados_por_tarea.items()
+            }
 
             return AssignmentResult(
                 success=True,
@@ -46,6 +53,7 @@ class AssignmentEngine:
                 puntajes_actualizados=puntajes,
                 excluidos_por_tarea=list(context.usuarios_con_tarea_excluyente),
                 advertencias=advertencias,
+                fijaciones_tarea=fijaciones_tarea,
             )
 
         except Exception as e:
@@ -87,6 +95,25 @@ class AssignmentEngine:
         # Set orientador_id for legacy (take first from excluyentes or None)
         orientador_id = next(iter(usuarios_con_tarea_excluyente), None)
 
+        # Find tareas that fija_almuerzo (force a specific franja, mutually exclusive with inhabilita_almuerzo)
+        franjas_by_id = {f.id: f.orden - 1 for f in self.db.query(FranjaHoraria).all()}
+        fijados_por_tarea = {}
+        tareas_fijas = (
+            self.db.query(TareaEspecialAsignacion, TareaEspecialTipo.franja_almuerzo_id)
+            .join(TareaEspecialTipo)
+            .filter(
+                TareaEspecialAsignacion.fecha == self.fecha,
+                TareaEspecialTipo.fija_almuerzo == True,
+            ).all()
+        )
+        for tarea, franja_id in tareas_fijas:
+            franja_orden = franjas_by_id.get(franja_id)
+            if franja_orden is not None:
+                fijados_por_tarea[tarea.colaborador_id] = {
+                    "franja_orden": franja_orden,
+                    "tarea_especial_asignacion_id": tarea.id,
+                }
+
         # Find municipalidad/gandulfo restrictions
         tareas_restringidas = {}
         for tarea in (
@@ -122,7 +149,12 @@ class AssignmentEngine:
         # Load preferences from colaborador.franja_preferida_id (general preference, not per-date)
         preferencias = {}
         for colab in colaboradores:
-            if colab.id not in ausentes_ids and colab.id not in usuarios_con_tarea_excluyente and colab.franja_preferida_id is not None:
+            if (
+                colab.id not in ausentes_ids
+                and colab.id not in usuarios_con_tarea_excluyente
+                and colab.id not in fijados_por_tarea
+                and colab.franja_preferida_id is not None
+            ):
                 preferencias[colab.id] = colab.franja_preferida_id - 1  # Store as 0-indexed
 
         return ContextData(
@@ -131,11 +163,26 @@ class AssignmentEngine:
             orientador_id=orientador_id,
             usuarios_con_tarea_excluyente=usuarios_con_tarea_excluyente,
             tareas_restringidas=tareas_restringidas,
+            fijados_por_tarea=fijados_por_tarea,
             pool_disponible=pool,
             preferencias=preferencias,
             minimos_cobertura=minimos_cobertura,
             sector_map=sector_map,
         )
+
+    def _build_fixed_assignments(self, context: ContextData) -> List[AsignacionResult]:
+        """
+        Assignments forced by a fija_almuerzo special task. These bypass preference
+        resolution and rotation entirely — the person is pinned to franja_almuerzo_id.
+        """
+        return [
+            AsignacionResult(
+                colaborador_id=colaborador_id,
+                franja_orden=info["franja_orden"],
+                estado_concesion="otorgado",
+            )
+            for colaborador_id, info in context.fijados_por_tarea.items()
+        ]
 
     def _phase_1_resolve_preferences(self, context: ContextData) -> List[AsignacionResult]:
         """

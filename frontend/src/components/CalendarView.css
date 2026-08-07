@@ -274,6 +274,36 @@
   font-weight: 600;
 }
 
+.pill-tarea-inhabilitada {
+  background: linear-gradient(135deg, #ef9a9a 0%, #e57373 100%);
+  color: white;
+  border: 1px solid rgba(198, 40, 40, 0.3);
+}
+
+.pill-tarea-inhabilitada.current-user {
+  border: 2.5px solid #000 !important;
+  font-weight: 600;
+}
+
+.pill-fijo-tarea {
+  background: linear-gradient(135deg, #4dd0e1 0%, #00acc1 100%);
+  color: white;
+  position: relative;
+  border: 1px solid rgba(0, 131, 143, 0.4);
+  cursor: default !important;
+}
+
+.pill-fijo-tarea::before {
+  content: '🔒';
+  font-size: 0.65rem;
+  margin-right: 2px;
+}
+
+.pill-fijo-tarea.current-user {
+  border: 2.5px solid #000 !important;
+  font-weight: 600;
+}
+
 /* Vacation row */
 .vacation-row {
   background: #fff8e1;
@@ -319,6 +349,32 @@
   flex-wrap: wrap;
   gap: 0.3rem;
   justify-content: center;
+}
+
+/* Tarea-inhabilitada row */
+.tarea-inhabilitada-row {
+  background: #fdecea;
+  border-top: 2px solid #e57373;
+  border-bottom: 2px solid #e57373;
+}
+
+.tarea-inhabilitada-row td {
+  border-bottom: 1px solid #f5b7b1;
+}
+
+.tarea-inhabilitada-row td.franja-col {
+  background: #fadbd8;
+  font-weight: 600;
+  color: #c62828;
+}
+
+.tarea-inhabilitada-label {
+  text-align: left !important;
+}
+
+.tarea-inhabilitada-cell {
+  text-align: center;
+  background: #fef2f1;
 }
 
 .calendar-grid tbody tr:hover td.turno-cell {

@@ -37,6 +37,14 @@ export const TareasEspecialesPanel: React.FC = () => {
     setEditingTareaId(tarea.id);
   };
 
+  const efectoAlmuerzoLabel = (tarea: any, franjaAlmuerzo?: FranjaHoraria) => {
+    if (tarea.inhabilita_almuerzo) return 'Inhabilita';
+    if (tarea.fija_almuerzo) {
+      return franjaAlmuerzo ? `Fija (${franjaAlmuerzo.hora_inicio} - ${franjaAlmuerzo.hora_fin})` : 'Fija';
+    }
+    return 'Ninguno';
+  };
+
   const handleDeleteTarea = async (tareaId: number) => {
     if (!window.confirm('¿Eliminar esta tarea especial?')) return;
 
@@ -64,6 +72,7 @@ export const TareasEspecialesPanel: React.FC = () => {
         <div style={{ backgroundColor: '#f5f5f5', padding: '20px', borderRadius: '8px', marginBottom: '24px' }}>
           <FormTareaEspecial
             sectores={sectores}
+            franjas={franjas}
             initialData={editingTareaId ? tareasEspeciales.find((t) => t.id === editingTareaId) : undefined}
             onSave={async (data) => {
               try {
@@ -106,9 +115,7 @@ export const TareasEspecialesPanel: React.FC = () => {
                   <th>Hora Fin</th>
                   <th>Días Aplicables</th>
                   <th>Frecuencia</th>
-                  <th>Inhabilita Almuerzo</th>
-                  <th>Fija Almuerzo</th>
-                  <th>Franja Almuerzo</th>
+                  <th>Efecto en Almuerzo</th>
                   <th>Acciones</th>
                 </tr>
               </thead>
@@ -127,9 +134,7 @@ export const TareasEspecialesPanel: React.FC = () => {
                       <td>{tarea.hora_fin}</td>
                       <td>{diasAplicables || '–'}</td>
                       <td>{tarea.frecuencia === 'quincenal' ? 'Quincenal' : 'Semanal'}</td>
-                      <td>{tarea.inhabilita_almuerzo ? 'Sí' : 'No'}</td>
-                      <td>{tarea.fija_almuerzo ? 'Sí' : 'No'}</td>
-                      <td>{franjaAlmuerzo ? `${franjaAlmuerzo.hora_inicio} - ${franjaAlmuerzo.hora_fin}` : '–'}</td>
+                      <td>{efectoAlmuerzoLabel(tarea, franjaAlmuerzo)}</td>
                       <td>
                         <button
                           className="btn btn-small btn-info"
@@ -206,22 +211,10 @@ export const TareasEspecialesPanel: React.FC = () => {
                         </p>
                       </div>
                       <div>
-                        <span className="text-gray-500">Inhabilita Almuerzo:</span>
-                        <p className="font-medium text-gray-900">{tarea.inhabilita_almuerzo ? 'Sí' : 'No'}</p>
-                      </div>
-                      <div>
-                        <span className="text-gray-500">Fija Almuerzo:</span>
-                        <p className="font-medium text-gray-900">{tarea.fija_almuerzo ? 'Sí' : 'No'}</p>
+                        <span className="text-gray-500">Efecto en Almuerzo:</span>
+                        <p className="font-medium text-gray-900">{efectoAlmuerzoLabel(tarea, franjaAlmuerzo)}</p>
                       </div>
                     </div>
-                    {franjaAlmuerzo && (
-                      <div className="mt-3 pt-3 border-t border-gray-200 text-sm">
-                        <span className="text-gray-500">Franja Almuerzo:</span>{' '}
-                        <span className="font-medium text-gray-900">
-                          {franjaAlmuerzo.hora_inicio} - {franjaAlmuerzo.hora_fin}
-                        </span>
-                      </div>
-                    )}
                   </div>
                 </div>
               );

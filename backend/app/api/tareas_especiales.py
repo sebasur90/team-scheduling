@@ -157,6 +157,19 @@ def update_tipo(
                 )
                 db.add(tarea_cuota)
 
+    if tipo.inhabilita_almuerzo and tipo.fija_almuerzo:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Una tarea no puede inhabilitar y fijar el almuerzo a la vez",
+        )
+    if tipo.fija_almuerzo and tipo.franja_almuerzo_id is None:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="franja_almuerzo_id es requerido cuando fija_almuerzo=True",
+        )
+
     db.commit()
     db.refresh(tipo)
     return TareaEspecialTipoResponse.model_validate(tipo)
@@ -203,9 +216,9 @@ def get_cronograma(
     fecha_inicio: date,
     fecha_fin: date,
     db: Session = Depends(get_db),
-    admin: Colaborador = Depends(get_admin_user),
+    _: Colaborador = Depends(get_current_user),
 ):
-    """Get task assignments for a date range (admin only)"""
+    """Get task assignments for a date range (lectura para cualquier rol autenticado)"""
     asignaciones = (
         db.query(
             TareaEspecialAsignacion.id,
@@ -214,6 +227,9 @@ def get_cronograma(
             TareaEspecialAsignacion.colaborador_id,
             TareaEspecialTipo.nombre.label('tipo_nombre'),
             Colaborador.nombre.label('colaborador_nombre'),
+            TareaEspecialTipo.inhabilita_almuerzo,
+            TareaEspecialTipo.fija_almuerzo,
+            TareaEspecialTipo.franja_almuerzo_id,
         )
         .join(TareaEspecialTipo, TareaEspecialAsignacion.tarea_especial_tipo_id == TareaEspecialTipo.id)
         .join(Colaborador, TareaEspecialAsignacion.colaborador_id == Colaborador.id)
@@ -276,6 +292,34 @@ def swap_asignacion(
         ).first()
         if asignacion_almuerzo_nueva:
             db.delete(asignacion_almuerzo_nueva)
+
+    # If task fixes lunch, relink the fixed lunch assignment to the new collaborator
+    elif asignacion.tipo.fija_almuerzo and asignacion.tipo.franja_almuerzo_id:
+        # Remove the previous holder's fixed lunch slot (they revert to normal rotation on next regeneration)
+        asignacion_almuerzo_previa = db.query(AsignacionAlmuerzo).filter(
+            AsignacionAlmuerzo.tarea_especial_asignacion_id == asignacion.id,
+        ).first()
+        if asignacion_almuerzo_previa:
+            db.delete(asignacion_almuerzo_previa)
+            db.flush()
+
+        # If turnos already exist for this date, create/relink the new holder's fixed lunch slot
+        turno_destino = db.query(TurnoAlmuerzo).filter_by(
+            fecha=asignacion.fecha, franja_horaria_id=asignacion.tipo.franja_almuerzo_id
+        ).first()
+        if turno_destino:
+            asignacion_almuerzo_nueva = db.query(AsignacionAlmuerzo).filter_by(
+                turno_almuerzo_id=turno_destino.id, colaborador_id=data.colaborador_id,
+            ).first()
+            if asignacion_almuerzo_nueva:
+                asignacion_almuerzo_nueva.tarea_especial_asignacion_id = asignacion.id
+            else:
+                db.add(AsignacionAlmuerzo(
+                    turno_almuerzo_id=turno_destino.id,
+                    colaborador_id=data.colaborador_id,
+                    estado='firme',
+                    tarea_especial_asignacion_id=asignacion.id,
+                ))
 
     # Create notifications
     canal = "fcm" if _should_send_push(db) else "in_app"

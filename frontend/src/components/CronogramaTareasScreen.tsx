@@ -2,6 +2,10 @@ import React from 'react';
 import { CronogramaTareasPanel } from './CronogramaTareasPanel';
 import './CronogramaTareasPanel.css';
 
-export const CronogramaTareasScreen: React.FC = () => {
-  return <CronogramaTareasPanel />;
+interface CronogramaTareasScreenProps {
+  readOnly?: boolean;
+}
+
+export const CronogramaTareasScreen: React.FC<CronogramaTareasScreenProps> = ({ readOnly = false }) => {
+  return <CronogramaTareasPanel readOnly={readOnly} />;
 };

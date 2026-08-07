@@ -46,6 +46,8 @@ class ContextData:
     usuarios_con_tarea_excluyente: Set[int] = field(default_factory=set)  # Excluded by special task
     # Special tasks with franja restrictions
     tareas_restringidas: Dict[int, List[int]] = field(default_factory=dict)  # colaborador_id -> allowed franjas
+    # Special tasks that fix a specific franja (mutually exclusive with usuarios_con_tarea_excluyente)
+    fijados_por_tarea: Dict[int, Dict] = field(default_factory=dict)  # colaborador_id -> {franja_orden, tarea_especial_asignacion_id}
     # Available pool
     pool_disponible: List[ColaboradorInfo] = field(default_factory=list)
     # Preferences loaded
@@ -75,3 +77,4 @@ class AssignmentResult:
     puntajes_actualizados: Dict[int, int] = field(default_factory=dict)  # colaborador_id -> new score
     excluidos_por_tarea: List[int] = field(default_factory=list)  # Excluded by special task
     advertencias: List[str] = field(default_factory=list)
+    fijaciones_tarea: Dict[int, int] = field(default_factory=dict)  # colaborador_id -> tarea_especial_asignacion_id

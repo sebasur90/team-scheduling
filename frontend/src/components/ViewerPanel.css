@@ -16,6 +16,29 @@
   box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
 }
 
+.viewer-tabs {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.viewer-tab-button {
+  flex: 1;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  border: 1.5px solid rgba(0, 0, 0, 0.08);
+  background: #f5f5fa;
+  color: #6b7280;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.viewer-tab-button.active {
+  background: #ede9fe;
+  color: #4f46e5;
+}
+
 .viewer-calendar-container {
   flex: 1;
   overflow: auto;
